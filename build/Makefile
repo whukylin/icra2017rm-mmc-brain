@@ -687,30 +687,6 @@ asp/src/stack.c.s:
 	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/asp/src/stack.c.s
 .PHONY : asp/src/stack.c.s
 
-kylinbot.o: kylinbot.cpp.o
-.PHONY : kylinbot.o
-
-# target to build an object file
-kylinbot.cpp.o:
-	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/kylinbot.cpp.o
-.PHONY : kylinbot.cpp.o
-
-kylinbot.i: kylinbot.cpp.i
-.PHONY : kylinbot.i
-
-# target to preprocess a source file
-kylinbot.cpp.i:
-	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/kylinbot.cpp.i
-.PHONY : kylinbot.cpp.i
-
-kylinbot.s: kylinbot.cpp.s
-.PHONY : kylinbot.s
-
-# target to generate assembly for a file
-kylinbot.cpp.s:
-	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/kylinbot.cpp.s
-.PHONY : kylinbot.cpp.s
-
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -888,9 +864,6 @@ help:
 	@echo "... asp/src/stack.o"
 	@echo "... asp/src/stack.i"
 	@echo "... asp/src/stack.s"
-	@echo "... kylinbot.o"
-	@echo "... kylinbot.i"
-	@echo "... kylinbot.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -5,7 +5,6 @@ CMakeFiles/kylin.dir/asp/src/ahrs.c.o: ../asp/inc/ahrs.h
 CMakeFiles/kylin.dir/asp/src/ahrs.c.o: ../asp/src/ahrs.c
 
 CMakeFiles/kylin.dir/asp/src/calib.c.o: ../asp/inc/calib.h
-CMakeFiles/kylin.dir/asp/src/calib.c.o: ../asp/inc/pid.h
 CMakeFiles/kylin.dir/asp/src/calib.c.o: ../asp/src/calib.c
 
 CMakeFiles/kylin.dir/asp/src/cbus.c.o: ../asp/inc/cbus.h
@@ -74,7 +73,6 @@ CMakeFiles/kylin.dir/asp/src/msg.c.o: ../asp/inc/dbus.h
 CMakeFiles/kylin.dir/asp/src/msg.c.o: ../asp/inc/fifo.h
 CMakeFiles/kylin.dir/asp/src/msg.c.o: ../asp/inc/hcp.h
 CMakeFiles/kylin.dir/asp/src/msg.c.o: ../asp/inc/msg.h
-CMakeFiles/kylin.dir/asp/src/msg.c.o: ../asp/inc/pid.h
 CMakeFiles/kylin.dir/asp/src/msg.c.o: ../asp/inc/rcp.h
 CMakeFiles/kylin.dir/asp/src/msg.c.o: ../asp/src/msg.c
 
@@ -93,34 +91,6 @@ CMakeFiles/kylin.dir/asp/src/rmp.c.o: ../asp/src/rmp.c
 
 CMakeFiles/kylin.dir/asp/src/stack.c.o: ../asp/inc/stack.h
 CMakeFiles/kylin.dir/asp/src/stack.c.o: ../asp/src/stack.c
-
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/ahrs.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/asp.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/calib.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/cbus.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/crc16.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/dbuf.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/dbus.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/ekf.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/fifo.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/fun.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/gdf.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/hcf.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/hcp.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/linkedlist.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/linkednode.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/maf.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/mecanum.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/msg.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/pid.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/rcf.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/rcp.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/rmp.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../asp/inc/stack.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../uart/linux/serial.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../kylinbot.cpp
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../kylinbot.h
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../mythread.hpp
 
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/ahrs.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/asp.h
@@ -147,7 +117,6 @@ CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/rmp.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/stack.h
 CMakeFiles/kylin.dir/main.cpp.o: ../uart/linux/serial.h
 CMakeFiles/kylin.dir/main.cpp.o: ../RMVideoCapture.hpp
-CMakeFiles/kylin.dir/main.cpp.o: ../kylinbot.h
 CMakeFiles/kylin.dir/main.cpp.o: ../main.cpp
 CMakeFiles/kylin.dir/main.cpp.o: ../main.h
 CMakeFiles/kylin.dir/main.cpp.o: ../mythread.hpp

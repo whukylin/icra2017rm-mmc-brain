@@ -42,7 +42,7 @@ extern "C" {
 #include "linkedlist.h"   // Linked List Data Structure and Algorithm
 #include "maf.h"       // Moving Average Filter
 #include "mecanum.h"   // Mecanum Power Transmission System
-#include "msg.h"
+#include "msg.h"   // Message
 #include "pid.h"   // PID Regulator
 #include "rcf.h"   // Remote Control Filter
 #include "rcp.h"   // Remote Control Protocol

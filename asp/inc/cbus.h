@@ -28,16 +28,30 @@ extern "C" {
 #include <stdint.h>
 #include <string.h>
 
-#define CBUS_CHASSIS_VELOCITY_RECIP 0.001f
+typedef struct
+{
+	int16_t x;
+	int16_t y;
+	int16_t z;
+}ChassisState_c; // Chassis state control typedef
+
+typedef struct
+{
+	int16_t e;
+	int16_t c;
+}GrabberState_c; // Grabber state control typedef
+
+#define CBUS_FLAG_BIT_INI (1u<<31) // Initialization flag bit
+#define CBUS_FLAG_BIT_MOD (1u<<30) // Control mode flag bit
+#define CBUS_VALUE_SCALE 1e3f
 #pragma pack(1)
 typedef struct
 {
-	int16_t vx; // Bot linear velocity in x-axis, unit: mm/s
-	int16_t vy; // Bot linear velocity in y-axis, unit: mm/s
-	int16_t vz; // Bot angular velocity in z-axis, unit: rad/s
-	int16_t pe; // Bot elevator position, unit: 0.001*rad
-	int16_t pc; // Bot claw position, unit: 0.001*rad
-	uint32_t fs; // Functional state control bits, 0: off, 1: on
+	uint32_t fs; // Flag bits
+	ChassisState_c cv; // Chassis velocity, unit: linear: mm/s, angular: 1e-3rad/s
+	ChassisState_c cp; // Chassis position, unit: linear: mm, angular: 1e-3rad
+	GrabberState_c gv; // Grabber velocity, unit: linear: mm/s, angular: 1e-3rad/s
+	GrabberState_c gp; // Grabber position, unit: linear: mm, angular: rad
 }CBUS_t;
 #pragma pack()
 

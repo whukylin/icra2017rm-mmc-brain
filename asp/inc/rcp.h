@@ -19,6 +19,8 @@
 
 #include <stdint.h>
 
+#define RCP_FRAME_LEN 6
+
 /* ----------------------- RC Channel Value Definition---------------------------- */
 #define CH_MIN              	 ((uint16_t)364   )
 #define CH_MID	           	 	 ((uint16_t)1024  )

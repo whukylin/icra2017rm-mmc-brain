@@ -29,7 +29,9 @@ void Maf_Init(Maf_t* maf, float* buf, uint32_t len)
 
 void Maf_Reset(Maf_t* maf)
 {
-	memset(maf->buf, 0, maf->len * sizeof(float));
+	for (maf->i = 0; maf->i < maf->len; maf->i++) {
+		maf->buf[maf->i] = 0;
+	}
 	maf->i = 0;
 	maf->avg = 0;
 }
@@ -40,6 +42,15 @@ float Maf_Proc(Maf_t* maf, float v)
 	maf->buf[maf->i++] = v;
 	if (maf->i >= maf->len) maf->i = 0;
 	return maf->avg;
+}
+
+void Maf_Preload(Maf_t* maf, float v)
+{
+	maf->avg = v;
+	for (maf->i = 0; maf->i < maf->len; maf->i++) {
+		maf->buf[maf->i] = v / maf->len;
+	}
+	maf->i = 0;
 }
 
 Maf_t* Maf_Create(uint32_t len)

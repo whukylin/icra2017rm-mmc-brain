@@ -32,8 +32,8 @@ void Mecanum_Config(Mecanum_t* mecanum, float lx, float ly, float r1, float r2)
 	mecanum->l = lx + ly;
 	mecanum->r = r1 + r2;
 
-	mecanum->cx = r1 / 4.0f;
-	mecanum->cy = r2 / 4.0f;
+	mecanum->cx = mecanum->r / 4.0f; // mecanum->cx = r1 / 4.0f;
+	mecanum->cy = mecanum->r / 4.0f; // mecanum->cy = r2 / 4.0f;
 	mecanum->cz = mecanum->r / 4.0f / mecanum->l;
 }
 

@@ -24,7 +24,6 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/kylin.dir/asp/src/ahrs.c.o"
   "CMakeFiles/kylin.dir/asp/src/hcf.c.o"
   "CMakeFiles/kylin.dir/uart/linux/serial.cpp.o"
-  "CMakeFiles/kylin.dir/kylinbot.cpp.o"
   "CMakeFiles/kylin.dir/main.cpp.o"
   "CMakeFiles/kylin.dir/serial.cpp.o"
   "CMakeFiles/kylin.dir/mythread.cpp.o"

@@ -40,6 +40,7 @@ typedef struct
 void Maf_Init(Maf_t* maf, float* buf, uint32_t len);
 void Maf_Reset(Maf_t* maf);
 float Maf_Proc(Maf_t* maf, float v);
+void Maf_Preload(Maf_t* maf, float v);
 
 Maf_t* Maf_Create(uint32_t len);
 void Maf_Destroy(Maf_t* maf);

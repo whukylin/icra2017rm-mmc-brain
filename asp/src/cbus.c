@@ -16,6 +16,10 @@
 
 #include "cbus.h"
 
+/**************************************************/
+/*             Kylinbot Control Bus               */
+/**************************************************/
+
 void CBUS_Init(CBUS_t* cbus)
 {
 	memset(cbus, 0, sizeof(CBUS_t));

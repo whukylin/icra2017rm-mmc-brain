@@ -6,12 +6,6 @@
 #define TIMEOUT 30
 #define FRAME_N 20000
 
-
-#define BUFFER_EXPOSURE_VALUE 150
-//#define DEFAULT_FRAME_WIDTH 1280
-//#define DEFAULT_FRAME_HEIGHT 720
-#define DEFAULT_FRAME_WIDTH 640
-#define DEFAULT_FRAME_HEIGHT 480
 #define _SHOW_PHOTO
 //#define _SHOW_OUTPUT
 //#define Camera_One
@@ -20,13 +14,12 @@ using namespace cv;
 
 using namespace std;
 
-
-
-int thresh = 50, N =1;
 const char* wndname = "Square Detection Demo";
 
- int grey_thresh=100;
-//int grey_thresh=50;
+int grey_thresh=100;
+int numframe=0;   //frame numbers
+int lost_numframe=0;
+double omission=0.0;
 
 double ry,rz,rx;
 double tx,ty,tz;
@@ -76,77 +69,24 @@ public:
 };
 
 
-
-
-void VRC_Proc(const VirtualRC_t* vrc)
-{
-	printf("*************************************VRC********************************************\n");
-	printf("ch0=%d,ch1=%d,ch2=%d,ch3=%d,s1=%d,s2=%d\n",
-		vrc->ch[0], vrc->ch[1], vrc->ch[2], vrc->ch[3], vrc->sw[0], vrc->sw[1]);
-	//printf("*************************************VRC********************************************\n");
-}
-
-void VHC_Proc(const VirtualHC_t* vhc)
-{
-	printf("*************************************VHC********************************************\n");
-	printf("k=%d,x=%d,y=%d,z=%d,l=%d,r=%d\n",
-		vhc->key.val, vhc->mouse.x, vhc->mouse.y, vhc->mouse.z,
-		vhc->mouse.b[0], vhc->mouse.b[1]);
-	//printf("*************************************VHC********************************************\n");
-}
-
-void VDBUS_Proc(const VirtualDBUS_t* vdbus)
-{
-	//printf("*************************************VDBUS********************************************\n");
-	printf("ch0=%d,ch1=%d,ch2=%d,ch3=%d,s1=%d,s2=%d,k=%d,x=%d,y=%d,z=%d,l=%d,r=%d\n",
-		vdbus->rcp.ch[0], vdbus->rcp.ch[1], vdbus->rcp.ch[2], vdbus->rcp.ch[3], vdbus->rcp.sw[0],
-		vdbus->rcp.sw[1], vdbus->hcp.key.val, vdbus->hcp.mouse.x, vdbus->hcp.mouse.y, vdbus->hcp.mouse.z,
-		vdbus->hcp.mouse.b[0], vdbus->hcp.mouse.b[1]);
-	//printf("*************************************VDBUS********************************************\n");
-}
-
-void VCBUS_Proc(const VirtualCBUS_t* vcbus)
-{
-}
-
-static void Dnl_ProcCalibMsg(const CalibMsg_t* calibMsg)
-{
-	//printf("*************************************CALIB********************************************\n");
-	//printf("calib_msg=%x\n", calibMsg->auto_cali_flag);
-	//printf("kp=%d,ki=%d,kd=%d,eh=%d,el=%d,ph=%d,pl=%d\n", calibMsg->pid.kp, calibMsg->pid.ki, calibMsg->pid.kd, calibMsg->pos.elevator_h, calibMsg->pos.elevator_l, calibMsg->pos.pwm_h, calibMsg->pos.pwm_l);
-	//printf("*************************************CALIB********************************************\n");
-}
-
-static void Dnl_ProcMotorMsg(const MotorMsg_t* motorMsg)
-{
-	//printf("*************************************MOTOR********************************************\n");
-	printf("id=%d,ecd_angle=%d,angle=%d,rate=%d,current=%d\n", motorMsg->id, motorMsg->ecd_angle, motorMsg->angle, motorMsg->rate, motorMsg->current);
-}
-
-static void Dnl_ProcOdomeMsg(const OdomeMsg_t* odomeMsg)
-{
-	//printf("*************************************ODOME********************************************\n");
-	printf("px=%d,py=%d,pz=%d,vx=%d,vy=%d,vz=%d\n", odomeMsg->px, odomeMsg->py, odomeMsg->pz, odomeMsg->vx, odomeMsg->vy, odomeMsg->vz);
-}
-
-static void Dnl_ProcStatuMsg(const StatuMsg_t* statuMsg)
-{
-	//printf("*************************************STATU********************************************\n");
-	printf("wgd=%d,ini=%d\n", statuMsg->wdg, statuMsg->ini);
-}
-
 static void Dnl_ProcZGyroMsg(const ZGyroMsg_t* zgyroMsg)
 {
 	//printf("*************************************ZGYRO********************************************\n");
-	printf("angle=%d,rate=%d\n", zgyroMsg->angle, zgyroMsg->rate);
+	printf("id=%d,angle=%d,rate=%d\n", zgyroMsg->frame_id, zgyroMsg->angle, zgyroMsg->rate);
 }
 
 static void Dnl_ProcKylinMsg(const KylinMsg_t* kylinMsg)
 {
         //printf("*************************************KYLIN********************************************\n");
-        printf("fs=%x,px=%d,py=%d,pz=%d,pe=%d,pc=%d,vx=%d,vy=%d,vz=%d,ve=%d,vc=%d\n", kylinMsg->fs,
-                kylinMsg->cp.x, kylinMsg->cp.y, kylinMsg->cp.z, kylinMsg->gp.e, kylinMsg->gp.c,
-                kylinMsg->cv.x, kylinMsg->cv.y, kylinMsg->cv.z, kylinMsg->gv.e, kylinMsg->gv.c);
+        printf("id=%d,fs=%x,px=%d,py=%d,pz=%d,pe=%d,pc=%d,vx=%d,vy=%d,vz=%d,ve=%d,vc=%d\n", kylinMsg->frame_id, kylinMsg->cbus.fs,
+                kylinMsg->cbus.cp.x, kylinMsg->cbus.cp.y, kylinMsg->cbus.cp.z, kylinMsg->cbus.gp.e, kylinMsg->cbus.gp.c,
+                kylinMsg->cbus.cv.x, kylinMsg->cbus.cv.y, kylinMsg->cbus.cv.z, kylinMsg->cbus.gv.e, kylinMsg->cbus.gv.c);
+}
+
+static void Dnl_ProcSr04sMsg(const Sr04sMsg_t* sr04sMsg)
+{
+        //printf("*************************************KYLIN********************************************\n");
+        printf("id=%d,fixed=%d,moble=%d\n", sr04sMsg->frame_id, sr04sMsg->fixed, sr04sMsg->moble);
 }
 
 uint8_t exit_flag = 0;
@@ -154,14 +94,9 @@ uint8_t exit_flag = 0;
 FIFO_t rx_fifo;
 uint8_t rx_buf[2][BUF_LEN];
 
-VirtualDBUS_t vdbus;
-VirtualCBUS_t vcbus;
-CalibMsg_t calibMsg;
-MotorMsg_t motorMsg;
 ZGyroMsg_t zgyroMsg;
-OdomeMsg_t odomeMsg;
-GraspMsg_t graspMsg;
 KylinMsg_t kylinMsg;
+Sr04sMsg_t sr04sMsg;
 
 void PullMsg()
 {
@@ -174,42 +109,17 @@ void PullMsg()
 	}
 	// Read input stream according to the fifo free space left
 	len = read_serial(rx_buf[1], len, TIMEOUT);
-	//printf("PULL LEN= %d\n", len);
 	// Push stream into fifo
 	FIFO_Push(&rx_fifo, rx_buf[1], len);
 	// Check if any message received
-	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_vrc, &vdbus.rcp)) {
-		//VRC_Proc(&vdbus.rcp);
+	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_kylin, &kylinMsg)) {
+		//Dnl_ProcKylinMsg(&kylinMsg);
 	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_vhc, &vdbus.hcp)) {
-		//VHC_Proc(&vdbus.hcp);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_vdbus, &vdbus)) {
-		//VDBUS_Proc(&vdbus);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_vcbus, &vcbus)) {
-		//VCBUS_Proc(&vcbus);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_calib, &calibMsg)) {
-		//Dnl_ProcCalibMsg(&calibMsg);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_motor, &motorMsg)) {
-		//Dnl_ProcMotorMsg(&motorMsg);
+	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_sr04s, &sr04sMsg)) {
+		Dnl_ProcSr04sMsg(&sr04sMsg);
 	}
 	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg)) {
 		//Dnl_ProcZGyroMsg(&zgyroMsg);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_odome, &odomeMsg)) {
-		//Dnl_ProcOdomeMsg(&odomeMsg);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_grasp, &graspMsg)) {
-		//Dnl_ProcGraspMsg(&graspMsg);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_kylin, &kylinMsg)) {
-		//printf("Before pop -> size: %d, used: %d, free: %d\n", FIFO_GetSize(&rx_fifo), FIFO_GetUsed(&rx_fifo), FIFO_GetFree(&rx_fifo));
-		//printf("Before pop: %d\n", FIFO_GetFree(&rx_fifo));
-		Dnl_ProcKylinMsg(&kylinMsg);
-		//printf("After pop: %d\n", FIFO_GetFree(&rx_fifo));
 	}
 	else {
 		//uint8_t b;
@@ -220,8 +130,7 @@ void PullMsg()
 void *KylinBotMsgPullerThreadFunc(void* param)
 {
     while (exit_flag == 0) {
-	      //PullMsg();
-	      //printf("H_");
+	      PullMsg();
 	      usleep(4000);
 	}
 	return NULL;
@@ -232,8 +141,6 @@ uint8_t tx_buf[2][BUF_LEN];
 KylinMsg_t txKylinMsg;
 void PushMsg()
 {
-	//txKylinMsg.fs = 1;
-	//txKylinMsg.cv.x = 2000;
 	uint32_t len = Msg_Push(&tx_fifo, tx_buf[1], & msg_head_kylin, &txKylinMsg);
 	FIFO_Pop(&tx_fifo, tx_buf[1], len);
 	write_serial(tx_buf[1], len, TIMEOUT);
@@ -312,8 +219,8 @@ void kylinbot_control()
     // Move forward
     printf("Move forward\n");
     memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
-    txKylinMsg.cp.y = 1000;
-    txKylinMsg.cv.y = 1000 * Tri_Proc(&tri); //* Rmp_Calc(&rmp);
+    txKylinMsg.cbus.cp.y = 1000;
+    txKylinMsg.cbus.cv.y = 1000 * Tri_Proc(&tri); //* Rmp_Calc(&rmp);
   }
   else if (cnt < 10e4) {
     if (dir != 2) {
@@ -324,8 +231,8 @@ void kylinbot_control()
     // Move right
     printf("Move right\n");
     memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
-    txKylinMsg.cp.x = 1000;
-    txKylinMsg.cv.x = 1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
+    txKylinMsg.cbus.cp.x = 1000;
+    txKylinMsg.cbus.cv.x = 1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
   }
   else if (cnt < 15e4) {
     if (dir != 3) {
@@ -336,8 +243,8 @@ void kylinbot_control()
     // Move backward
     printf("Move backward\n");
     memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
-    txKylinMsg.cp.y = -1000;
-    txKylinMsg.cv.y = -1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
+    txKylinMsg.cbus.cp.y = -1000;
+    txKylinMsg.cbus.cv.y = -1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
   }
   else if (cnt < 20e4) {
     if (dir != 4) {
@@ -348,8 +255,8 @@ void kylinbot_control()
     // Move left
     printf("Move left\n");
     memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
-    txKylinMsg.cp.x = -1000;
-    txKylinMsg.cv.x = -1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
+    txKylinMsg.cbus.cp.x = -1000;
+    txKylinMsg.cbus.cv.x = -1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
   }
   else {
     cnt = 0;
@@ -359,24 +266,6 @@ void kylinbot_control()
 }
 
 
-void set_camera_exposure(int val) {
-
-    int cam_fd;
-    if ((cam_fd = open("/dev/video0", O_RDWR)) == -1) {
-        cerr << "Camera open error" << endl;
-        exit(0);
-    }
-
-    struct v4l2_control control_s;
-    control_s.id = V4L2_CID_EXPOSURE_AUTO;
-    control_s.value = V4L2_EXPOSURE_MANUAL;
-    ioctl(cam_fd, VIDIOC_S_CTRL, &control_s);
-
-    control_s.id = V4L2_CID_EXPOSURE_ABSOLUTE;
-    control_s.value = val;
-    ioctl(cam_fd, VIDIOC_S_CTRL, &control_s);
-    close(cam_fd);
-}
 
 static double angle( Point pt1, Point pt2, Point pt0 )
 {
@@ -389,8 +278,6 @@ static double angle( Point pt1, Point pt2, Point pt0 )
 
 static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
 {
-    squares.clear();
-
     Mat pyr, timg, gray0(image.size(), CV_8U),Src_HSV(image.size(), CV_8U), gray;
 
     pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
@@ -426,8 +313,7 @@ static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squar
    */
 	cout<<"find squares src.chan="<<src.channels()<<endl;
 	cvtColor( src, gray0, CV_BGR2GRAY);
-        for( int l = 0; l < N; l++ )
-        {
+    
             Canny(gray0, gray, 50, 200, 5);
 	    
 #ifdef _SHOW_PHOTO
@@ -485,7 +371,7 @@ static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squar
 #endif
                         }
                         else
-                        {
+                        { 
                             if(abs(tl_x-approx[0].x)<10&&abs(tl_y-approx[0].y)<10&&abs(br_x-approx[2].x)<10&&abs(br_y-approx[2].y)<10)
                             continue;
                         else
@@ -543,7 +429,6 @@ static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squar
                     }
                 }
             }
-        }
     if(cand_1.size()>0)
     {
         
@@ -592,7 +477,65 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 #endif
     }
     cout<<"squares.size: "<<squares.size()<<endl;
-    if(squares.size()>0)
+	
+	//caculate the omission rate
+	numframe++;
+
+
+	if(squares.size()==0)
+		lost_numframe++;
+	if(numframe>=50)
+	{
+		omission=((double)lost_numframe)/(double)numframe;
+		numframe=0;
+		lost_numframe=0;
+	}
+#ifdef _SHOW_PHOTO
+        char str_y[20];
+        char str_z[20];
+        char str_x[20];
+        char str_tz[20];
+        char str_ty[20];
+        char str_tx[20];
+		char str_om[20];
+        sprintf(str_y,"%lf",ry);
+        sprintf(str_z,"%lf",rz);
+        sprintf(str_x,"%lf",rx);
+        sprintf(str_tz,"%lf",tz);
+        sprintf(str_ty,"%lf",ty);
+        sprintf(str_tx,"%lf",tx);
+		sprintf(str_om,"%lf",omission);
+        string pre_str_y="thetay: ";
+        string pre_str_z="thetaz: ";
+        string pre_str_x="thetax: ";
+        string pre_str_tz="tz: ";
+        string pre_str_ty="ty: ";
+        string pre_str_tx="tx: ";
+		string pre_str_om="omiss: ";
+        string full_y=pre_str_y+str_y;
+        string full_z=pre_str_z+str_z;
+        string full_x=pre_str_x+str_x;
+        string full_tz=pre_str_tz+str_tz;
+        string full_ty=pre_str_ty+str_ty;
+        string full_tx=pre_str_tx+str_tx;
+		string full_om=pre_str_om+str_om;
+        putText(image,full_y,Point(30,30),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,0,255),2);
+        putText(image,full_z,Point(30,70),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
+        putText(image,full_x,Point(30,100),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
+        putText(image,full_tz,Point(30,130),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,0,255),2);
+        putText(image,full_ty,Point(30,170),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
+        putText(image,full_tx,Point(30,200),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
+		putText(image,full_om,Point(30,240),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
+#endif
+ 
+#ifdef _SHOW_PHOTO
+    imshow(wndname, image);
+#endif
+}
+
+void LocationMarkes(const vector<vector<Point> >& squares)
+{
+	if(squares.size()>0)
     {
         Point tl,tr,br,bl;
         int max=squares[0][0].y;
@@ -610,46 +553,7 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         br=squares[id][2];
         bl=squares[id][3];
         Calcu_attitude(world_pnt_tl,world_pnt_tr,world_pnt_br,world_pnt_bl,tl,tr,br,bl);
-        //cout<<"final tl: "<<tl<<endl;
-        //cout<<"final tr: "<<tr<<endl;
-        //cout<<"final br: "<<br<<endl;
-        //cout<<"final bl: "<<bl<<endl;
-#ifdef _SHOW_PHOTO
-        char str_y[20];
-        char str_z[20];
-        char str_x[20];
-        char str_tz[20];
-        char str_ty[20];
-        char str_tx[20];
-        sprintf(str_y,"%lf",ry);
-        sprintf(str_z,"%lf",rz);
-        sprintf(str_x,"%lf",rx);
-        sprintf(str_tz,"%lf",tz);
-        sprintf(str_ty,"%lf",ty);
-        sprintf(str_tx,"%lf",tx);
-        string pre_str_y="thetay: ";
-        string pre_str_z="thetaz: ";
-        string pre_str_x="thetax: ";
-        string pre_str_tz="tz: ";
-        string pre_str_ty="ty: ";
-        string pre_str_tx="tx: ";
-        string full_y=pre_str_y+str_y;
-        string full_z=pre_str_z+str_z;
-        string full_x=pre_str_x+str_x;
-        string full_tz=pre_str_tz+str_tz;
-        string full_ty=pre_str_ty+str_ty;
-        string full_tx=pre_str_tx+str_tx;
-        putText(image,full_y,Point(30,30),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,0,255),2);
-        putText(image,full_z,Point(30,70),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
-        putText(image,full_x,Point(30,100),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
-        putText(image,full_tz,Point(30,130),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,0,255),2);
-        putText(image,full_ty,Point(30,170),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
-        putText(image,full_tx,Point(30,200),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
-#endif
     }
-#ifdef _SHOW_PHOTO
-    imshow(wndname, image);
-#endif
 }
 
 
@@ -810,24 +714,6 @@ void on_saturationTracker(int,void*)
 }
 int main(int argc, char** argv)
 {
- /* VideoCapture capture;
-  capture.open(0);
-  if (!capture.isOpened())
-  {
-    cout << " failed to open!" << endl;
-    return 1;   
-  }
-  capture.set(CV_CAP_PROP_FRAME_WIDTH, DEFAULT_FRAME_WIDTH);
-  capture.set(CV_CAP_PROP_FRAME_HEIGHT, DEFAULT_FRAME_HEIGHT);
-  set_camera_exposure(BUFFER_EXPOSURE_VALUE);
-  Mat frame;
-  capture.read(frame);
-  capture.read(frame);
-  capture.read(frame);
-  #ifdef _SHOW_PHOTO
-  namedWindow( wndname, 1 );
-  #endif 
-  */
    
   #ifdef _SHOW_PHOTO
     namedWindow( wndname, 1 );
@@ -899,6 +785,7 @@ int main(int argc, char** argv)
     
     Mat src=frame.clone();
     findSquares(src,frame, squares);
+	LocationMarkes(squares);
     drawSquares(frame, squares);
     /*****************************/
     /*******send the object position to ARM*********/
@@ -945,14 +832,14 @@ int main(int argc, char** argv)
     txKylinMsg.gv.e = 1000;
     */
     
-    txKylinMsg.cp.x = tx;
-    txKylinMsg.cv.x = 1000;
-    txKylinMsg.cp.y = tz;
-    txKylinMsg.cv.y = 1000;
-    txKylinMsg.cp.z = ry;
-    txKylinMsg.cv.z = 1000;
-    txKylinMsg.gp.e = ty;
-    txKylinMsg.gv.e = 0;
+    txKylinMsg.cbus.cp.x = tx;
+    txKylinMsg.cbus.cv.x = 500;
+    txKylinMsg.cbus.cp.y = tz;
+    txKylinMsg.cbus.cv.y = 500;
+    txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+    txKylinMsg.cbus.cv.z = 500;
+    txKylinMsg.cbus.gp.e = ty;
+    txKylinMsg.cbus.gv.e = 0;
     
     if (abs(tx) < 100 && abs(ty) < 100 && abs(tz) < 100) {
       //txKylinMsg.gp.c = 2199;
@@ -968,25 +855,8 @@ int main(int argc, char** argv)
   }
   
   disconnect_serial();
-  
-  //while (getchar() == '\0');
   return 0;
 }
 
-int main__(int argc, char** argv)
-{
-  int flag = Kylinbot_Connect();
-  if (flag == -1) {
-    return -1;
-  }
-  
-  while (flag != -1) {
-    usleep(10000);
-  }
-  
-  Kylinbot_Disconnect();
-  
-  return 0;
-}
 
 

@@ -6,7 +6,6 @@ CMakeFiles/kylin.dir/asp/src/ahrs.c.o
  /home/ubuntu/workspace/jwwangchn/kylin/asp/src/ahrs.c
 CMakeFiles/kylin.dir/asp/src/calib.c.o
  ../asp/inc/calib.h
- ../asp/inc/pid.h
  /home/ubuntu/workspace/jwwangchn/kylin/asp/src/calib.c
 CMakeFiles/kylin.dir/asp/src/cbus.c.o
  ../asp/inc/cbus.h
@@ -75,7 +74,6 @@ CMakeFiles/kylin.dir/asp/src/msg.c.o
  ../asp/inc/fifo.h
  ../asp/inc/hcp.h
  ../asp/inc/msg.h
- ../asp/inc/pid.h
  ../asp/inc/rcp.h
  /home/ubuntu/workspace/jwwangchn/kylin/asp/src/msg.c
 CMakeFiles/kylin.dir/asp/src/pid.c.o
@@ -94,34 +92,6 @@ CMakeFiles/kylin.dir/asp/src/rmp.c.o
 CMakeFiles/kylin.dir/asp/src/stack.c.o
  ../asp/inc/stack.h
  /home/ubuntu/workspace/jwwangchn/kylin/asp/src/stack.c
-CMakeFiles/kylin.dir/kylinbot.cpp.o
- ../asp/inc/ahrs.h
- ../asp/inc/asp.h
- ../asp/inc/calib.h
- ../asp/inc/cbus.h
- ../asp/inc/crc16.h
- ../asp/inc/dbuf.h
- ../asp/inc/dbus.h
- ../asp/inc/ekf.h
- ../asp/inc/fifo.h
- ../asp/inc/fun.h
- ../asp/inc/gdf.h
- ../asp/inc/hcf.h
- ../asp/inc/hcp.h
- ../asp/inc/linkedlist.h
- ../asp/inc/linkednode.h
- ../asp/inc/maf.h
- ../asp/inc/mecanum.h
- ../asp/inc/msg.h
- ../asp/inc/pid.h
- ../asp/inc/rcf.h
- ../asp/inc/rcp.h
- ../asp/inc/rmp.h
- ../asp/inc/stack.h
- ../uart/linux/serial.h
- /home/ubuntu/workspace/jwwangchn/kylin/kylinbot.cpp
- /home/ubuntu/workspace/jwwangchn/kylin/kylinbot.h
- /home/ubuntu/workspace/jwwangchn/kylin/mythread.hpp
 CMakeFiles/kylin.dir/main.cpp.o
  ../asp/inc/ahrs.h
  ../asp/inc/asp.h
@@ -148,7 +118,6 @@ CMakeFiles/kylin.dir/main.cpp.o
  ../asp/inc/stack.h
  ../uart/linux/serial.h
  /home/ubuntu/workspace/jwwangchn/kylin/RMVideoCapture.hpp
- /home/ubuntu/workspace/jwwangchn/kylin/kylinbot.h
  /home/ubuntu/workspace/jwwangchn/kylin/main.cpp
  /home/ubuntu/workspace/jwwangchn/kylin/main.h
  /home/ubuntu/workspace/jwwangchn/kylin/mythread.hpp

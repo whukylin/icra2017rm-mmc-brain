@@ -624,32 +624,9 @@ CMakeFiles/kylin.dir/uart/linux/serial.cpp.o.provides: CMakeFiles/kylin.dir/uart
 
 CMakeFiles/kylin.dir/uart/linux/serial.cpp.o.provides.build: CMakeFiles/kylin.dir/uart/linux/serial.cpp.o
 
-CMakeFiles/kylin.dir/kylinbot.cpp.o: CMakeFiles/kylin.dir/flags.make
-CMakeFiles/kylin.dir/kylinbot.cpp.o: ../kylinbot.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles $(CMAKE_PROGRESS_26)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/kylinbot.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/kylinbot.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin/kylinbot.cpp
-
-CMakeFiles/kylin.dir/kylinbot.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/kylinbot.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin/kylinbot.cpp > CMakeFiles/kylin.dir/kylinbot.cpp.i
-
-CMakeFiles/kylin.dir/kylinbot.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/kylinbot.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin/kylinbot.cpp -o CMakeFiles/kylin.dir/kylinbot.cpp.s
-
-CMakeFiles/kylin.dir/kylinbot.cpp.o.requires:
-.PHONY : CMakeFiles/kylin.dir/kylinbot.cpp.o.requires
-
-CMakeFiles/kylin.dir/kylinbot.cpp.o.provides: CMakeFiles/kylin.dir/kylinbot.cpp.o.requires
-	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/kylinbot.cpp.o.provides.build
-.PHONY : CMakeFiles/kylin.dir/kylinbot.cpp.o.provides
-
-CMakeFiles/kylin.dir/kylinbot.cpp.o.provides.build: CMakeFiles/kylin.dir/kylinbot.cpp.o
-
 CMakeFiles/kylin.dir/main.cpp.o: CMakeFiles/kylin.dir/flags.make
 CMakeFiles/kylin.dir/main.cpp.o: ../main.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles $(CMAKE_PROGRESS_27)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles $(CMAKE_PROGRESS_26)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/main.cpp.o"
 	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/main.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin/main.cpp
 
@@ -672,7 +649,7 @@ CMakeFiles/kylin.dir/main.cpp.o.provides.build: CMakeFiles/kylin.dir/main.cpp.o
 
 CMakeFiles/kylin.dir/serial.cpp.o: CMakeFiles/kylin.dir/flags.make
 CMakeFiles/kylin.dir/serial.cpp.o: ../serial.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles $(CMAKE_PROGRESS_28)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles $(CMAKE_PROGRESS_27)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/serial.cpp.o"
 	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/serial.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin/serial.cpp
 
@@ -695,7 +672,7 @@ CMakeFiles/kylin.dir/serial.cpp.o.provides.build: CMakeFiles/kylin.dir/serial.cp
 
 CMakeFiles/kylin.dir/mythread.cpp.o: CMakeFiles/kylin.dir/flags.make
 CMakeFiles/kylin.dir/mythread.cpp.o: ../mythread.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles $(CMAKE_PROGRESS_29)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles $(CMAKE_PROGRESS_28)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/mythread.cpp.o"
 	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/mythread.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin/mythread.cpp
 
@@ -743,7 +720,6 @@ kylin_OBJECTS = \
 "CMakeFiles/kylin.dir/asp/src/ahrs.c.o" \
 "CMakeFiles/kylin.dir/asp/src/hcf.c.o" \
 "CMakeFiles/kylin.dir/uart/linux/serial.cpp.o" \
-"CMakeFiles/kylin.dir/kylinbot.cpp.o" \
 "CMakeFiles/kylin.dir/main.cpp.o" \
 "CMakeFiles/kylin.dir/serial.cpp.o" \
 "CMakeFiles/kylin.dir/mythread.cpp.o"
@@ -776,7 +752,6 @@ kylin: CMakeFiles/kylin.dir/asp/src/hcp.c.o
 kylin: CMakeFiles/kylin.dir/asp/src/ahrs.c.o
 kylin: CMakeFiles/kylin.dir/asp/src/hcf.c.o
 kylin: CMakeFiles/kylin.dir/uart/linux/serial.cpp.o
-kylin: CMakeFiles/kylin.dir/kylinbot.cpp.o
 kylin: CMakeFiles/kylin.dir/main.cpp.o
 kylin: CMakeFiles/kylin.dir/serial.cpp.o
 kylin: CMakeFiles/kylin.dir/mythread.cpp.o
@@ -843,7 +818,6 @@ CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/asp/src/hcp.c.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/asp/src/ahrs.c.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/asp/src/hcf.c.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/uart/linux/serial.cpp.o.requires
-CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/kylinbot.cpp.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/main.cpp.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/serial.cpp.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/mythread.cpp.o.requires

@@ -57,15 +57,29 @@ typedef union MsgHead_t
 	}attr; // Message head attributes
 }MsgHead_t; // Message head union typedef
 
-typedef Rcp_t VirtualRC_t;
-typedef Hcp_t VirtualHC_t;
-typedef DBUS_t VirtualDBUS_t;
-typedef CBUS_t VirtualCBUS_t;
+typedef struct
+{
+	uint32_t frame_id;
+	uint8_t buf[RCP_FRAME_LEN];
+}VirtualRC_t;
+
+typedef struct
+{
+	uint32_t frame_id;
+	uint8_t buf[HCP_FRAME_LEN];
+}VirtualHC_t;
+
+typedef struct
+{
+	uint32_t frame_id;
+	uint8_t buf[DBUS_FRAME_LEN];
+}VirtualDBUS_t;
 
 #define ZGYRO_ANGLE_RECIP 1e-2f // To scale zgyro angle to deg
 #define ZGYRO_RATE_RECIP 1e-5f // To scale zgyro rate to deg/s
 typedef struct
 {
+	uint32_t frame_id;
 	int32_t angle; // = (deg*100)
 	int16_t rate; // = delta(angle)/1ms
 }ZGyroMsg_t;
@@ -77,11 +91,11 @@ typedef struct
 #define MOTOR5_ID 4
 #define MOTOR6_ID 5
 #define MOTOR_ECD_ANGLE_MAX 8191
-#define MOTOR_ECD_ANGLE_MAX 8191
 #define MOTOR_ESC_CURRENT_MAX 13000
 typedef struct
 {
 	uint8_t id; // 0~5
+	uint32_t frame_id;
 	uint16_t ecd_angle; // Encoder angle, range from 0~8191
 	int32_t angle; // Continuous angle, infinite
 	int16_t rate; // Rate in ecd_diff/1ms
@@ -91,6 +105,7 @@ typedef struct
 #define IMU9X_MSG_VALUE_SCALE 1.0f
 typedef struct
 {
+	uint32_t frame_id;
 	int16_t ax;
 	int16_t ay;
 	int16_t az;
@@ -105,19 +120,23 @@ typedef struct
 #define ODOME_MSG_VALUE_SCALE 1e3f
 typedef struct
 {
+	uint32_t frame_id;
 	int32_t px; // Bot position (linear) in x-axis, unit: mm
 	int32_t py; // Bot position (linear) in y-axis, unit: mm
-	int32_t pz; // Bot position (angular) in z-axis, unit: mm
-	int16_t vx; // Bot velocity (linear) in x-axis, unit: mm
-	int16_t vy; // Bot velocity (linear) in y-axis, unit: mm
-	int16_t vz; // Bot velocity (angular) in z-axis, unit: mm
+	int32_t pz; // Bot position (angular) in z-axis, unit: 1e-3rad
+	int16_t vx; // Bot velocity (linear) in x-axis, unit: mm/s
+	int16_t vy; // Bot velocity (linear) in y-axis, unit: mm/s
+	int16_t vz; // Bot velocity (angular) in z-axis, unit: 1e-3rad/s
 }OdomeMsg_t;
 
 #define GRASP_MSG_VALUE_SCALE 1e3f
 typedef struct
 {
+	uint32_t frame_id;
 	int16_t pe; // Elevator position
+	int16_t ve; // Elevator velocity
 	int16_t pc; // Claw position
+	int16_t vc; // Claw velocity
 }GraspMsg_t;
 
 #define CALIB_FLAG_BIT_IMU (1u<<0)
@@ -125,70 +144,38 @@ typedef struct
 #define CALIB_FLAG_BIT_POS (1u<<2)
 typedef struct
 {
+	uint32_t frame_id;
 	uint32_t auto_cali_flag; // Auto calibration control bits
 }CalibMsg_t;
 
-#define WDG_ERR_BIT_RCV         (1u<<0)
-#define WDG_ERR_BIT_TTY         (1u<<1)
-#define WDG_ERR_BIT_BTM         (1u<<2)
-#define WDG_ERR_BIT_DBI         (1u<<3)
-#define WDG_ERR_BIT_IMU         (1u<<4)
-#define WDG_ERR_BIT_VRC         (1u<<5)
-#define WDG_ERR_BIT_VHC         (1u<<6)
-#define WDG_ERR_BIT_VDBUS       (1u<<7)
-#define WDG_ERR_BIT_VCBUS       (1u<<8)
-#define WDG_ERR_BIT_CALIB       (1u<<9)
-#define WDG_ERR_BIT_ZGYRO       (1u<<10)
-#define WDG_ERR_BIT_MOTOR1      (1u<<11)
-#define WDG_ERR_BIT_MOTOR2      (1u<<12)
-#define WDG_ERR_BIT_MOTOR3      (1u<<13)
-#define WDG_ERR_BIT_MOTOR4      (1u<<14)
-#define WDG_ERR_BIT_MOTOR5      (1u<<15)
-#define WDG_ERR_BIT_MOTOR6      (1u<<16)
-
-#define INI_FLAG_BIT_ZGYRO      (1u<<0)
-#define INI_FLAG_BIT_MOTOR1     (1u<<1)
-#define INI_FLAG_BIT_MOTOR2     (1u<<2)
-#define INI_FLAG_BIT_MOTOR3     (1u<<3)
-#define INI_FLAG_BIT_MOTOR4     (1u<<4)
-#define INI_FLAG_BIT_MOTOR5     (1u<<5)
-#define INI_FLAG_BIT_MOTOR6     (1u<<6)
-
 typedef struct
 {
+	uint32_t frame_id;
 	uint32_t wdg; // Watchdog
 	uint32_t ini; // Initialization status
 }StatuMsg_t;
 
 typedef struct
 {
+	uint32_t frame_id;
 	uint32_t msg_type;
 }SubscMsg_t;
 
-#define AXIS3_MSG_VALUE_SCALE 1e3f
 typedef struct
 {
-	int16_t x;
-	int16_t y;
-	int16_t z;
-}Axis3Msg_t;
+	uint32_t frame_id;
+	uint16_t fixed;
+	uint16_t moble;
+}Sr04sMsg_t;
 
-#define AXIS2_MSG_VALUE_SCALE 1e3f
+#define KYLIN_MSG_VALUE_SCALE CBUS_VALUE_SCALE
+#define MYLIN_MSG_FLAG_BIT_INI (1u<<31u)
+#define MYLIN_MSG_FLAG_BIT_MOD (1u<<30u)
 typedef struct
 {
-	int16_t e;
-	int16_t c;
-}Axis2Msg_t;
-
-#define KYLIN_MSG_VALUE_SCALE AXIS3_MSG_VALUE_SCALE
-typedef struct
-{
-	uint32_t fs; // Functional state flag bits
-	Axis3Msg_t cv; // Chassis velocity, unit: linear: mm/s, angular: 1e-3rad/s
-	Axis3Msg_t cp; // Chassis position, unit: linear: mm, angular: 1e-3rad
-	Axis2Msg_t gv; // Grabber velocity, unit: linear: mm/s, angular: 1e-3rad/s
-	Axis2Msg_t gp; // Grabber position, unit: linear: mm, angular: rad
-}KylinMsg_t; // Length unit: mm, time unit: s
+	uint32_t frame_id;
+	CBUS_t cbus;
+}KylinMsg_t;
 
 #define WRAP_U8(V) ((uint8_t)V)
 #define WRAP_U16(V) ((uint16_t)V)
@@ -197,7 +184,7 @@ typedef struct
 #define MSG_ID_VRC WRAP_U8(0x01)
 #define MSG_ID_VHC WRAP_U8(0x02)
 #define MSG_ID_VDBUS WRAP_U8(0x03)
-#define MSG_ID_VCBUS WRAP_U8(0x04)
+#define MSG_ID_CBUS WRAP_U8(0x04)
 #define MSG_ID_ZGYRO WRAP_U8(0x05)
 #define MSG_ID_IMU9X WRAP_U8(0x06)
 #define MSG_ID_MOTOR WRAP_U8(0x07)
@@ -213,11 +200,12 @@ typedef struct
 #define MSG_ID_VEL_CALIB WRAP_U8(0x11)
 #define MSG_ID_MEC_CALIB WRAP_U8(0x12)
 #define MSG_ID_POS_CALIB WRAP_U8(0x13)
+#define MSG_ID_SR04S WRAP_U8(0x14)
 
 #define MSG_LEN_VRC sizeof(VirtualRC_t)
 #define MSG_LEN_VHC sizeof(VirtualHC_t)
 #define MSG_LEN_VDBUS sizeof(VirtualDBUS_t)
-#define MSG_LEN_VCBUS sizeof(VirtualCBUS_t)
+#define MSG_LEN_CBUS sizeof(CBUS_t)
 #define MSG_LEN_ZGYRO sizeof(ZGyroMsg_t)
 #define MSG_LEN_IMU9X sizeof(IMU9XMsg_t)
 #define MSG_LEN_MOTOR sizeof(MotorMsg_t)
@@ -233,11 +221,12 @@ typedef struct
 #define MSG_LEN_VEL_CALIB sizeof(VelCalib_t)
 #define MSG_LEN_MEC_CALIB sizeof(MecCalib_t)
 #define MSG_LEN_POS_CALIB sizeof(PosCalib_t)
+#define MSG_LEN_SR04S sizeof(Sr04sMsg_t)
 	
 #define MSG_TOKEN_VRC WRAP_U16(0x1234)
 #define MSG_TOKEN_VHC WRAP_U16(0x2345)
 #define MSG_TOKEN_VDBUS WRAP_U16(0x3456)
-#define MSG_TOKEN_VCBUS WRAP_U16(0x4567)
+#define MSG_TOKEN_CBUS WRAP_U16(0x4567)
 #define MSG_TOKEN_ZGYRO WRAP_U16(0x5678)
 #define MSG_TOKEN_IMU9X WRAP_U16(0x6789)
 #define MSG_TOKEN_MOTOR WRAP_U16(0x789a)
@@ -253,6 +242,7 @@ typedef struct
 #define MSG_TOKEN_VEL_CALIB WRAP_U16(0xba98)
 #define MSG_TOKEN_MEC_CALIB WRAP_U16(0xa987)
 #define MSG_TOKEN_POS_CALIB WRAP_U16(0x9876)
+#define MSG_TOKEN_SR04S WRAP_U16(0x8765)
 
 #define MSG_HEAD_VALUE(ID,LEN,TOKEN) ((WRAP_U32(TOKEN)<<16) | (WRAP_U32(LEN)<<8) | WRAP_U32(ID))
 #define MSG_HEAD_VALUE_OF(NAME) MSG_HEAD_VALUE(MSG_ID_##NAME,MSG_LEN_##NAME,MSG_TOKEN_##NAME)
@@ -260,7 +250,7 @@ typedef struct
 #define MSG_HEAD_VALUE_VRC MSG_HEAD_VALUE_OF(VRC)
 #define MSG_HEAD_VALUE_VHC MSG_HEAD_VALUE_OF(VHC)
 #define MSG_HEAD_VALUE_VDBUS MSG_HEAD_VALUE_OF(VDBUS)
-#define MSG_HEAD_VALUE_VCBUS MSG_HEAD_VALUE_OF(VCBUS)
+#define MSG_HEAD_VALUE_CBUS MSG_HEAD_VALUE_OF(CBUS)
 #define MSG_HEAD_VALUE_ZGYRO MSG_HEAD_VALUE_OF(ZGYRO)
 #define MSG_HEAD_VALUE_IMU9X MSG_HEAD_VALUE_OF(IMU9X)
 #define MSG_HEAD_VALUE_MOTOR MSG_HEAD_VALUE_OF(MOTOR)
@@ -276,11 +266,12 @@ typedef struct
 #define MSG_HEAD_VALUE_VEL_CALIB MSG_HEAD_VALUE_OF(VEL_CALIB)
 #define MSG_HEAD_VALUE_MEC_CALIB MSG_HEAD_VALUE_OF(MEC_CALIB)
 #define MSG_HEAD_VALUE_POS_CALIB MSG_HEAD_VALUE_OF(POS_CALIB)
+#define MSG_HEAD_VALUE_SR04S MSG_HEAD_VALUE_OF(SR04S)
 
 #define MSG_HEAD_VRC { MSG_HEAD_VALUE_VRC }
 #define MSG_HEAD_VHC { MSG_HEAD_VALUE_VHC }
 #define MSG_HEAD_VDBUS { MSG_HEAD_VALUE_VDBUS }
-#define MSG_HEAD_VCBUS { MSG_HEAD_VALUE_VCBUS }
+#define MSG_HEAD_CBUS { MSG_HEAD_VALUE_CBUS }
 #define MSG_HEAD_ZGYRO { MSG_HEAD_VALUE_ZGYRO }
 #define MSG_HEAD_IMU9X { MSG_HEAD_VALUE_IMU9X }
 #define MSG_HEAD_MOTOR { MSG_HEAD_VALUE_MOTOR }
@@ -296,11 +287,12 @@ typedef struct
 #define MSG_HEAD_VEL_CALIB { MSG_HEAD_VALUE_VEL_CALIB }
 #define MSG_HEAD_MEC_CALIB { MSG_HEAD_VALUE_MEC_CALIB }
 #define MSG_HEAD_POS_CALIB { MSG_HEAD_VALUE_POS_CALIB }
+#define MSG_HEAD_SR04S { MSG_HEAD_VALUE_SR04S }
 
 #define MSG_TYPE_IDX_VRC 0u
 #define MSG_TYPE_IDX_VHC 1u
 #define MSG_TYPE_IDX_VDBUS 2u
-#define MSG_TYPE_IDX_VCBUS 3u
+#define MSG_TYPE_IDX_CBUS 3u
 #define MSG_TYPE_IDX_ZGYRO 4u
 #define MSG_TYPE_IDX_IMU9X 5u
 #define MSG_TYPE_IDX_MOTOR 6u
@@ -316,13 +308,14 @@ typedef struct
 #define MSG_TYPE_IDX_VEL_CALIB 16u
 #define MSG_TYPE_IDX_MEC_CALIB 17u
 #define MSG_TYPE_IDX_POS_CALIB 18u
+#define MSG_TYPE_IDX_SR04S 19u
 
 typedef enum
 {
 	MSG_TYPE_VRC = 1u << MSG_TYPE_IDX_VRC,
 	MSG_TYPE_VHC = 1u << MSG_TYPE_IDX_VHC,
 	MSG_TYPE_VDBUS = 1u << MSG_TYPE_IDX_VDBUS,
-	MSG_TYPE_VCBUS = 1u << MSG_TYPE_IDX_VCBUS,
+	MSG_TYPE_CBUS = 1u << MSG_TYPE_IDX_CBUS,
 	MSG_TYPE_ZGYRO = 1u << MSG_TYPE_IDX_ZGYRO,
 	MSG_TYPE_IMU9X = 1u << MSG_TYPE_IDX_IMU9X,
 	MSG_TYPE_MOTOR = 1u << MSG_TYPE_IDX_MOTOR,
@@ -338,6 +331,7 @@ typedef enum
 	MSG_TYPE_VEL_CALIB = 1u << MSG_TYPE_IDX_VEL_CALIB,
 	MSG_TYPE_MEC_CALIB = 1u << MSG_TYPE_IDX_MEC_CALIB,
 	MSG_TYPE_POS_CALIB = 1u << MSG_TYPE_IDX_POS_CALIB,
+	MSG_TYPE_SR04S = 1u << MSG_TYPE_IDX_SR04S,
 }MsgType_t;
 
 #pragma pack()
@@ -388,6 +382,7 @@ extern const MsgHead_t msg_head_mag_calib;
 extern const MsgHead_t msg_head_vel_calib;
 extern const MsgHead_t msg_head_mec_calib;
 extern const MsgHead_t msg_head_pos_calib;
+extern const MsgHead_t msg_head_sr04s;
 
 #ifdef __cplusplus
 }

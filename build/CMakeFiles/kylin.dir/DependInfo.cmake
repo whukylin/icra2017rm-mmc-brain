@@ -32,7 +32,6 @@ SET(CMAKE_DEPENDS_CHECK_C
   )
 SET(CMAKE_C_COMPILER_ID "GNU")
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/ubuntu/workspace/jwwangchn/kylin/kylinbot.cpp" "/home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles/kylin.dir/kylinbot.cpp.o"
   "/home/ubuntu/workspace/jwwangchn/kylin/main.cpp" "/home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles/kylin.dir/main.cpp.o"
   "/home/ubuntu/workspace/jwwangchn/kylin/mythread.cpp" "/home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles/kylin.dir/mythread.cpp.o"
   "/home/ubuntu/workspace/jwwangchn/kylin/serial.cpp" "/home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles/kylin.dir/serial.cpp.o"

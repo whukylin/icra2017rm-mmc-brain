@@ -27,25 +27,23 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "pid.h"
-
 #pragma pack(1)
 	
 #define PID_CALIB_TYPE_CHASSIS_VELOCITY 0x01
 #define PID_CALIB_TYPE_GRABBER_VELOCITY 0x02
 #define PID_CALIB_TYPE_GRABBER_POSITION 0x03
-#define PID_CALIB_VALUE_SCALE 0.1f
+#define PID_CALIB_VALUE_SCALE 10.0f
 typedef struct
 {
 	uint8_t type;
 	uint16_t kp;
 	uint16_t ki;
 	uint16_t kd;
-	uint16_t it;
-	uint16_t Emax;
-	uint16_t Pmax;
-	uint16_t Imax;
-	uint16_t Dmax;
+	uint16_t it; // Integral threshold, compute integral when error < it
+	uint16_t Emax; // Error max
+	uint16_t Pmax; // Component P output max
+	uint16_t Imax; // Component I output max
+	uint16_t Dmax; // Component D output max
 	uint16_t Omax;
 }PIDCalib_t; // PID Calibration
 
@@ -54,11 +52,11 @@ typedef struct
 	float kp;
 	float ki;
 	float kd;
-	float it;
-	float Emax;
-	float Pmax;
-	float Imax;
-	float Dmax;
+	float it; // Integral threshold, compute integral when error < it
+	float Emax; // Error max
+	float Pmax; // Component P output max
+	float Imax; // Component I output max
+	float Dmax; // Component D output max
 	float Omax;
 }PIDParam_t; // PID Parameters
 
@@ -98,26 +96,37 @@ typedef struct
 	float mz_offset;
 }MagParam_t; // Mag offset Parameters
 
-#define VEL_CALIB_VALUE_SCALE 1e-3f
+#define VEL_CALIB_VALUE_SCALE 1e3f
 typedef struct
 {
-	uint16_t x; // mm/s
-	uint16_t y; // mm/s
-	uint16_t z; // 1e-3rad/s
-	uint16_t e; // mm/s
-	uint16_t c; // 1e-3rad/s
+	uint16_t x; // Chasis velocity x max, mm/s
+	uint16_t y; // Chasis velocity y max, mm/s
+	uint16_t z; // Chasis velocity z max, 1e-3rad/s
+	uint16_t e; // Elevator velocity max, mm/s
+	uint16_t c; // Claw velocity max, 1e-3rad/s
 }VelCalib_t; // Velocity Calibration
 
 typedef struct
 {
-	float x; // m/s
-	float y; // m/s
-	float z; // rad/s
-	float e; // m/s
-	float c; // rad/s
+	float x; // Chasis velocity x max, m/s
+	float y; // Chasis velocity y max, m/s
+	float z; // Chasis velocity z max, rad/s
+	float e; // Elevator velocity max, m/s
+	float c; // Claw velocity max, rad/s
 }VelParam_t; // Velocity Parameters
 
-#define MEC_CALIB_VALUE_SCALE 1e-3f
+/*******************************************/
+/*     Coordinate Transforming System      */
+/* Mecanum Wheel Power Transmission System */
+/*******************************************/
+/*              2        1                 */
+/*                  |y                     */
+/*                  |___x                  */
+/*               z                         */
+/*              3        4                 */
+/*                                         */
+/*******************************************/
+#define MEC_CALIB_VALUE_SCALE 1e3f
 typedef struct
 {
 	uint16_t lx; // mm
@@ -134,21 +143,21 @@ typedef struct
 	float r2; // m
 }MecParam_t; // Mecanum Wheel Parameters
 
-#define POS_CALIB_VALUE_SCALE 1e-3f
+#define POS_CALIB_VALUE_SCALE 1e3f
 typedef struct
 {
-	int16_t el; // unit: mm
-	int16_t eh; // unit: mm
-	int16_t cl; // unit: 1e-3*rad
-	int16_t ch; // unit: 1e-3*rad
+	int16_t el; // Elevator position high, unit: mm
+	int16_t eh; // Elevator position low, unit: mm
+	int16_t cl; // Claw position low, unit: 1e-3*rad
+	int16_t ch; // Calw position high, unit: 1e-3*rad
 }PosCalib_t; // Position Calibration
 
 typedef struct
 {
-	float el; // unit: m
-	float eh; // unit: m
-	float cl; // unit: rad
-	float ch; // unit: rad
+	float el; // Elevator position high, unit: m
+	float eh; // Elevator position low, unit: m
+	float cl; // Claw position low, unit: rad
+	float ch; // Calw position high, unit: rad
 }PosParam_t; // Position Parameters
 
 typedef struct
@@ -156,10 +165,10 @@ typedef struct
 	PIDCalib_t cvl; // Chasis velocity loop calibration
 	PIDCalib_t gvl; // Gimbal velocity loop calibration
 	PIDCalib_t gpl; // Chasis position loop calibration
-	IMUCalib_t imu; // IMU calibration
-	MagCalib_t mag; // Mag calibration
+	IMUCalib_t imu; // IMU offset calibration
+	MagCalib_t mag; // Mag offset calibration
 	MecCalib_t mec; // Mecanum wheel calibration
-	PosCalib_t pos; // Position calibration
+	PosCalib_t pos; // Position limit calibration
 }Calib_t; // Calibration
 
 typedef struct
@@ -175,7 +184,18 @@ typedef struct
 
 #pragma pack()
 
-void Calib_PID(PID_t* pid, const PIDCalib_t* cal);
+void Calib_GetPID(PIDCalib_t* PIDCalib, const PIDParam_t* PIDParam);
+void Calib_SetPID(PIDParam_t* PIDParam, const PIDCalib_t* PIDCalib);
+void Calib_GetIMU(IMUCalib_t* IMUCalib, const IMUParam_t* IMUParam);
+void Calib_SetIMU(IMUParam_t* IMUParam, const IMUCalib_t* IMUCalib);
+void Calib_GetMag(MagCalib_t* MagCalib, const MagParam_t* MagParam);
+void Calib_SetMag(MagParam_t* MagParam, const MagCalib_t* MagCalib);
+void Calib_GetVel(VelCalib_t* VelCalib, const VelParam_t* VelParam);
+void Calib_SetVel(VelParam_t* VelParam, const VelCalib_t* VelCalib);
+void Calib_GetMec(MecCalib_t* MecCalib, const MecParam_t* MecParam);
+void Calib_SetMec(MecParam_t* MecParam, const MecCalib_t* MecCalib);
+void Calib_GetPos(PosCalib_t* PosCalib, const PosParam_t* PosParam);
+void Calib_SetPos(PosParam_t* PosParam, const PosCalib_t* PosCalib);
 
 #ifdef __cplusplus
 }
