@@ -177,6 +177,42 @@ typedef struct
 	CBUS_t cbus;
 }KylinMsg_t;
 
+typedef struct
+{
+	uint32_t frame_id;
+	PIDCalib_t data;
+}PIDCalibMsg_t;
+
+typedef struct
+{
+	uint32_t frame_id;
+	IMUCalib_t data;
+}IMUCalibMsg_t;
+
+typedef struct
+{
+	uint32_t frame_id;
+	MagCalib_t data;
+}MagCalibMsg_t;
+
+typedef struct
+{
+	uint32_t frame_id;
+	VelCalib_t data;
+}VelCalibMsg_t;
+
+typedef struct
+{
+	uint32_t frame_id;
+	MecCalib_t data;
+}MecCalibMsg_t;
+
+typedef struct
+{
+	uint32_t frame_id;
+	PosCalib_t data;
+}PosCalibMsg_t;
+
 #define WRAP_U8(V) ((uint8_t)V)
 #define WRAP_U16(V) ((uint16_t)V)
 #define WRAP_U32(V) ((uint32_t)V)
@@ -215,12 +251,12 @@ typedef struct
 #define MSG_LEN_SUBSC sizeof(SubscMsg_t)
 #define MSG_LEN_CALIB sizeof(CalibMsg_t)
 #define MSG_LEN_KYLIN sizeof(KylinMsg_t)
-#define MSG_LEN_PID_CALIB sizeof(PIDCalib_t)
-#define MSG_LEN_IMU_CALIB sizeof(IMUCalib_t)
-#define MSG_LEN_MAG_CALIB sizeof(MagCalib_t)
-#define MSG_LEN_VEL_CALIB sizeof(VelCalib_t)
-#define MSG_LEN_MEC_CALIB sizeof(MecCalib_t)
-#define MSG_LEN_POS_CALIB sizeof(PosCalib_t)
+#define MSG_LEN_PID_CALIB sizeof(PIDCalibMsg_t)
+#define MSG_LEN_IMU_CALIB sizeof(IMUCalibMsg_t)
+#define MSG_LEN_MAG_CALIB sizeof(MagCalibMsg_t)
+#define MSG_LEN_VEL_CALIB sizeof(VelCalibMsg_t)
+#define MSG_LEN_MEC_CALIB sizeof(MecCalibMsg_t)
+#define MSG_LEN_POS_CALIB sizeof(PosCalibMsg_t)
 #define MSG_LEN_SR04S sizeof(Sr04sMsg_t)
 	
 #define MSG_TOKEN_VRC WRAP_U16(0x1234)

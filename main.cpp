@@ -89,6 +89,12 @@ static void Dnl_ProcSr04sMsg(const Sr04sMsg_t* sr04sMsg)
         printf("id=%d,fixed=%d,moble=%d\n", sr04sMsg->frame_id, sr04sMsg->fixed, sr04sMsg->moble);
 }
 
+static void Dnl_ProcPosCalibMsg(const PosCalibMsg_t* posCalibMsg)
+{
+        //printf("*************************************KYLIN********************************************\n");
+        printf("id=%d,el=%d,eh=%d,cl=%d,ch=%d\n", posCalibMsg->frame_id, posCalibMsg->data.el, posCalibMsg->data.eh, posCalibMsg->data.cl, posCalibMsg->data.ch);
+}
+
 uint8_t exit_flag = 0;
 
 FIFO_t rx_fifo;
@@ -97,6 +103,7 @@ uint8_t rx_buf[2][BUF_LEN];
 ZGyroMsg_t zgyroMsg;
 KylinMsg_t kylinMsg;
 Sr04sMsg_t sr04sMsg;
+PosCalibMsg_t posCalibMsg;
 
 void PullMsg()
 {
@@ -113,17 +120,16 @@ void PullMsg()
 	FIFO_Push(&rx_fifo, rx_buf[1], len);
 	// Check if any message received
 	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_kylin, &kylinMsg)) {
-		//Dnl_ProcKylinMsg(&kylinMsg);
+		Dnl_ProcKylinMsg(&kylinMsg);
 	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_sr04s, &sr04sMsg)) {
-		Dnl_ProcSr04sMsg(&sr04sMsg);
+	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_sr04s, &sr04sMsg)) {
+		//Dnl_ProcSr04sMsg(&sr04sMsg);
 	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg)) {
+	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg)) {
 		//Dnl_ProcZGyroMsg(&zgyroMsg);
 	}
-	else {
-		//uint8_t b;
-		//len = FIFO_Pop(&rx_fifo, &b, 1);
+	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_pos_calib, &posCalibMsg)) {
+		//Dnl_ProcPosCalibMsg(&posCalibMsg);
 	}
 }
 
@@ -131,7 +137,7 @@ void *KylinBotMsgPullerThreadFunc(void* param)
 {
     while (exit_flag == 0) {
 	      PullMsg();
-	      usleep(4000);
+	      usleep(1000);
 	}
 	return NULL;
 }
@@ -311,7 +317,7 @@ static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squar
     //merge(channels,Src_HSV);
     //cvtColor(Src_HSV,timg, CV_HSV2BGR);
    */
-	cout<<"find squares src.chan="<<src.channels()<<endl;
+	//cout<<"find squares src.chan="<<src.channels()<<endl;
 	cvtColor( src, gray0, CV_BGR2GRAY);
     
             Canny(gray0, gray, 50, 200, 5);
@@ -435,30 +441,44 @@ static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squar
         Rect roi(cand_1[0],cand_1[2]);
 		
        Mat ROI_image(src,roi); //src(roi).copyTo(ROI_image);
-        int rect_1_true=Color_judge(ROI_image,(cand_1[2].x-cand_1[0].x)*(cand_1[2].y-cand_1[0].y));
-	cout<<"rect1 true: "<<rect_1_true<<endl;
+       if(ROI_image.rows != 0 && ROI_image.cols != 0)
+	   {
+	   
+		   int rect_1_true=Color_judge(ROI_image,(cand_1[2].x-cand_1[0].x)*(cand_1[2].y-cand_1[0].y));
+			//cout<<"rect1 true: "<<rect_1_true<<endl;
         if(rect_1_true)
             squares.push_back(cand_1);
+		}
+	   
+        
         if(cand_2.size()>0)
         {
             //Mat ROI_image_2;
             Rect roi_2(cand_2[0],cand_2[2]);
-			 Mat ROI_image_2(src,roi_2);;
+			 Mat ROI_image_2(src,roi_2);
             //src(roi_2).copyTo(ROI_image_2);
-            int rect_2_true=Color_judge(ROI_image_2,(cand_2[2].x-cand_2[0].x)*(cand_2[2].y-cand_2[0].y));
-	    cout<<"rect2 true: "<<rect_2_true<<endl;
+			 if(ROI_image_2.rows != 0 && ROI_image_2.cols != 0)
+			 {
+				 int rect_2_true=Color_judge(ROI_image_2,(cand_2[2].x-cand_2[0].x)*(cand_2[2].y-cand_2[0].y));
+				cout<<"rect2 true: "<<rect_2_true<<endl;
             if(rect_2_true)
                 squares.push_back(cand_2);
+			 }
+            
             if(cand_3.size()>0)
             {
                 
                 Rect roi_3(cand_3[0],cand_3[2]);
 				Mat ROI_image_3(src,roi_3);
                // src(roi_3).copyTo(ROI_image_3);
-                int rect_3_true=Color_judge(ROI_image_3,(cand_3[2].x-cand_3[0].x)*(cand_3[2].y-cand_3[0].y));
-		cout<<"rect3 true: "<<rect_3_true<<endl;
+				if(ROI_image_3.rows != 0 && ROI_image_3.cols != 0)
+				{
+					int rect_3_true=Color_judge(ROI_image_3,(cand_3[2].x-cand_3[0].x)*(cand_3[2].y-cand_3[0].y));
+					cout<<"rect3 true: "<<rect_3_true<<endl;
                 if(rect_3_true)
                     squares.push_back(cand_3);
+				}
+                
                 if(out.size()>0)
                     cout<<"too much rect ! "<<endl;
             }
@@ -476,7 +496,7 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 
 #endif
     }
-    cout<<"squares.size: "<<squares.size()<<endl;
+    //cout<<"squares.size: "<<squares.size()<<endl;
 	
 	//caculate the omission rate
 	numframe++;
@@ -606,13 +626,17 @@ int Color_judge(Mat &src,int area)
 {
   //judge from the center point: BGR
   Mat dst;
-  cout<<"color judges 1 src.chan="<<src.channels()<<endl;
+  if(src.rows == 0 && src.cols == 0)
+  {
+	  return 0;
+  }
+  //cout<<"color judges 1 src.chan="<<src.channels()<<endl;
   cvtColor( src, dst, CV_BGR2HSV);
   //src = dst;
   
   int x=src.cols/2;
   int y=src.rows/2;
-  cout<<"RGB of Center ("<<y<<","<<x<<")="<<(int)dst.at<Vec3b>(y,x)[0]<<" "<<(int)dst.at<Vec3b>(y,x)[1]<<" "<<(int)dst.at<Vec3b>(y,x)[2]<<endl;
+  //cout<<"RGB of Center ("<<y<<","<<x<<")="<<(int)dst.at<Vec3b>(y,x)[0]<<" "<<(int)dst.at<Vec3b>(y,x)[1]<<" "<<(int)dst.at<Vec3b>(y,x)[2]<<endl;
   if((int)dst.at<Vec3b>(y,x)[0]>80&&(int)dst.at<Vec3b>(y,x)[0]<120) //src.at<Vec3b>(y,x)[2]<50&&src.at<Vec3b>(y,x)[1]>50&&src.at<Vec3b>(y,x)[1]<200&&src.at<Vec3b>(y,x)[0]>100)
   {
     Mat grey;
@@ -629,8 +653,8 @@ int Color_judge(Mat &src,int area)
     {
       sum+=hist.at<float>(i);
     }
-    cout<<"sum: "<<sum<<endl;
-    cout<<"portion: "<<sum/area<<endl;
+    //cout<<"sum: "<<sum<<endl;
+    //cout<<"portion: "<<sum/area<<endl;
     if(sum/area>0.7&&sum/area<0.95) 
       return 1;
     else return 0;
@@ -794,7 +818,7 @@ int main(int argc, char** argv)
     int c = waitKey(1);
 
     t = ((double)getTickCount() - t)/getTickFrequency();
-    cout<<"time: "<<t<<" second"<<endl;
+    //cout<<"time: "<<t<<" second"<<endl;
 
     if((char)c == 'q')
       break;
@@ -835,7 +859,7 @@ int main(int argc, char** argv)
     txKylinMsg.cbus.cp.x = tx;
     txKylinMsg.cbus.cv.x = 500;
     txKylinMsg.cbus.cp.y = tz;
-    txKylinMsg.cbus.cv.y = 500;
+    txKylinMsg.cbus.cv.y = 800;
     txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
     txKylinMsg.cbus.cv.z = 500;
     txKylinMsg.cbus.gp.e = ty;
