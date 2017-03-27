@@ -14,7 +14,7 @@
 #define DEFAULT_FRAME_HEIGHT 480
 #define _SHOW_PHOTO
 //#define _SHOW_OUTPUT
-
+//#define Camera_One
 
 using namespace cv;
 
@@ -36,10 +36,21 @@ Mat cameraMatrix=(Mat_<double>(3,3)<<569.2681,0,288.1437,0,569.4591,263.6782,0,0
 //for 640x480.
 Mat distCoeffs=(Mat_<double>(1,4)<<0.0344,-0.0085,-0.0032,-0.0028);
 */
+#ifdef Camera_One
 //for 800*600
+//camera 1
 Mat cameraMatrix=(Mat_<double>(3,3)<<942.6637,0,342.8562,0,943.0159,320.2033,0,0,1);
 
 Mat distCoeffs=(Mat_<double>(1,4)<<-0.2248,11.8088,-0.0071,0.0045);
+
+#else
+
+//camera 2
+Mat cameraMatrix=(Mat_<double>(3,3)<<1079.2096,0,342.5224,0,1075.3261,353.0309,0,0,1);
+
+Mat distCoeffs=(Mat_<double>(1,4)<<-0.4513,0.1492,-0.0030,0.0043);
+#endif
+
 Point3f world_pnt_tl(-65,-85,0);   //unit: mm
 Point3f world_pnt_tr(65,-85,0);
 Point3f world_pnt_br(65,85,0);
@@ -391,11 +402,12 @@ static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squar
     vector<vector<Point>> rect_2;
     vector<vector<Point>> rect_3;
     vector<vector<Point>> out;
-    vector<Mat> channels;
-    //cvtColor( timg, Src_HSV, CV_BGR2HSV);
-    //split(Src_HSV,channels);
+    //vector<Mat> channels;
+    /*
+	cvtColor( timg, Src_HSV, CV_BGR2HSV);
+    split(Src_HSV,channels);
 
-  /*  
+   
     Mat H=channels.at(0);
     cout<<"H="<<(int)H.at<uchar>(50,50)<<endl;
     Mat S=channels.at(1);
@@ -408,17 +420,18 @@ static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squar
     
     channels.at(1)=S*150/V;
     channels.at(2)=V0;
-    cout<<"V0="<<V0.size()<<endl;*/
+    cout<<"V0="<<V0.size()<<endl;
     //merge(channels,Src_HSV);
     //cvtColor(Src_HSV,timg, CV_HSV2BGR);
-
+   */
+	cout<<"find squares src.chan="<<src.channels()<<endl;
 	cvtColor( src, gray0, CV_BGR2GRAY);
         for( int l = 0; l < N; l++ )
         {
-            Canny(gray0, gray, 40, 200, 3);
+            Canny(gray0, gray, 50, 200, 5);
 	    
 #ifdef _SHOW_PHOTO
-	    imshow("Canny", gray0);
+	    imshow("Canny", gray);
 #endif
 
 	    //dilate(gray, gray, Mat(), Point(-1,-1));
@@ -533,27 +546,30 @@ static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squar
         }
     if(cand_1.size()>0)
     {
-        Mat ROI_image;
+        
         Rect roi(cand_1[0],cand_1[2]);
-        src(roi).copyTo(ROI_image);
+		
+       Mat ROI_image(src,roi); //src(roi).copyTo(ROI_image);
         int rect_1_true=Color_judge(ROI_image,(cand_1[2].x-cand_1[0].x)*(cand_1[2].y-cand_1[0].y));
 	cout<<"rect1 true: "<<rect_1_true<<endl;
         if(rect_1_true)
             squares.push_back(cand_1);
         if(cand_2.size()>0)
         {
-            Mat ROI_image_2;
+            //Mat ROI_image_2;
             Rect roi_2(cand_2[0],cand_2[2]);
-            src(roi_2).copyTo(ROI_image_2);
+			 Mat ROI_image_2(src,roi_2);;
+            //src(roi_2).copyTo(ROI_image_2);
             int rect_2_true=Color_judge(ROI_image_2,(cand_2[2].x-cand_2[0].x)*(cand_2[2].y-cand_2[0].y));
 	    cout<<"rect2 true: "<<rect_2_true<<endl;
             if(rect_2_true)
                 squares.push_back(cand_2);
             if(cand_3.size()>0)
             {
-                Mat ROI_image_3;
+                
                 Rect roi_3(cand_3[0],cand_3[2]);
-                src(roi_3).copyTo(ROI_image_3);
+				Mat ROI_image_3(src,roi_3);
+               // src(roi_3).copyTo(ROI_image_3);
                 int rect_3_true=Color_judge(ROI_image_3,(cand_3[2].x-cand_3[0].x)*(cand_3[2].y-cand_3[0].y));
 		cout<<"rect3 true: "<<rect_3_true<<endl;
                 if(rect_3_true)
@@ -685,10 +701,15 @@ void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_
 int Color_judge(Mat &src,int area)
 {
   //judge from the center point: BGR
+  Mat dst;
+  cout<<"color judges 1 src.chan="<<src.channels()<<endl;
+  cvtColor( src, dst, CV_BGR2HSV);
+  //src = dst;
+  
   int x=src.cols/2;
   int y=src.rows/2;
-  cout<<"RGB of Center ("<<y<<","<<x<<")="<<(int)src.at<Vec3b>(y,x)[0]<<" "<<(int)src.at<Vec3b>(y,x)[1]<<" "<<(int)src.at<Vec3b>(y,x)[2]<<endl;
-  if((int)src.at<Vec3b>(y,x)[0]>100) //src.at<Vec3b>(y,x)[2]<50&&src.at<Vec3b>(y,x)[1]>50&&src.at<Vec3b>(y,x)[1]<200&&src.at<Vec3b>(y,x)[0]>100)
+  cout<<"RGB of Center ("<<y<<","<<x<<")="<<(int)dst.at<Vec3b>(y,x)[0]<<" "<<(int)dst.at<Vec3b>(y,x)[1]<<" "<<(int)dst.at<Vec3b>(y,x)[2]<<endl;
+  if((int)dst.at<Vec3b>(y,x)[0]>80&&(int)dst.at<Vec3b>(y,x)[0]<120) //src.at<Vec3b>(y,x)[2]<50&&src.at<Vec3b>(y,x)[1]>50&&src.at<Vec3b>(y,x)[1]<200&&src.at<Vec3b>(y,x)[0]>100)
   {
     Mat grey;
     cvtColor(src,grey,CV_BGR2GRAY);
@@ -706,7 +727,7 @@ int Color_judge(Mat &src,int area)
     }
     cout<<"sum: "<<sum<<endl;
     cout<<"portion: "<<sum/area<<endl;
-    if(sum/area>0.7&&sum/area<0.92) 
+    if(sum/area>0.7&&sum/area<0.95) 
       return 1;
     else return 0;
   }
@@ -868,7 +889,7 @@ int main(int argc, char** argv)
   //KylinBotMsgPullerThreadFunc(NULL);
   while ((!exit_flag))//&&(capture.read(frame))) 
   {
-
+    squares.clear();
     double t = (double)getTickCount();
     
     capture >> frame;
@@ -931,7 +952,7 @@ int main(int argc, char** argv)
     txKylinMsg.cp.z = ry;
     txKylinMsg.cv.z = 1000;
     txKylinMsg.gp.e = ty;
-    txKylinMsg.gv.e = 1000;
+    txKylinMsg.gv.e = 0;
     
     if (abs(tx) < 100 && abs(ty) < 100 && abs(tz) < 100) {
       //txKylinMsg.gp.c = 2199;
