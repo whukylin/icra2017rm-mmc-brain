@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\asp">
+      <UniqueIdentifier>{eb318e1c-35cb-43ac-a07b-4c8094857ee6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\usr">
+      <UniqueIdentifier>{96b5164b-c8c9-46df-8de2-119a10f8d19d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\asp">
+      <UniqueIdentifier>{9752769c-17ca-45d2-958f-f2448ceb7207}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\usr">
+      <UniqueIdentifier>{625c5f0d-bda7-4884-9824-acab5a4f27bc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="asp\inc\ahrs.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\asp.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\cbus.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\crc16.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\dbus.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\ekf.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\est.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\fifo.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\gdf.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\hcp.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\maf.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\mecanum.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\msg.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\pid.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\rcp.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\rmp.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="asp\inc\stack.h">
+      <Filter>头文件\asp</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>头文件\usr</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="asp\src\ahrs.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\cbus.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\crc16.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\dbus.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\ekf.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\est.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\fifo.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\gdf.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\hcp.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\maf.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\mecanum.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\msg.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\pid.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\rcp.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\rmp.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="asp\src\stack.c">
+      <Filter>源文件\asp</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件\usr</Filter>
+    </ClCompile>
+    <ClCompile Include="serial.cpp">
+      <Filter>源文件\usr</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
