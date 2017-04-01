@@ -19,7 +19,7 @@ int brightness_ = 10;
 int whiteness_ = 86;
 int saturation_ = 60;
 
-uint8_t exit_flag = 0;
+bool exit_flag = false;
 
 FIFO_t rx_fifo;
 uint8_t rx_buf[2][BUF_LEN];
@@ -224,6 +224,77 @@ void kylinbot_control()
 }
 
 
+void *KylinBotMarkDetecThreadFunc(void* param)
+{
+  Mat frame;
+  vector<vector<Point> > squares;
+  int lostFlag = 0;
+  //KylinBotMsgPullerThreadFunc(NULL);
+  while ((!exit_flag))//&&(capture.read(frame))) 
+  {
+    squares.clear();
+    double t = (double)getTickCount();
+    
+    capture >> frame;
+    //cout<<"IN"<<endl;
+    if (frame.empty())
+      continue;
+    
+    Mat src=frame.clone();
+    findSquares(src,frame, squares);
+    LocationMarkes(squares);
+    drawSquares(frame, squares);
+    int c = waitKey(1);
+
+    t = ((double)getTickCount() - t)/getTickFrequency();
+
+    if((char)c == 'q')
+      exit_flag=true;
+
+    
+    if(squares.size() > 0)
+    {
+      lostFlag = 0;
+    }
+
+    if (squares.size() == 0) 
+    {
+      lostFlag++;
+      if(lostFlag >= 3)
+      {
+	lostFlag = 0;
+	tx = 0;
+	ty = 0;
+	tz = 0;
+	rx = 0;
+	ry = 0;
+	rz = 0;
+      }
+     
+    }
+    
+    txKylinMsg.cbus.cp.x = tx;
+    txKylinMsg.cbus.cv.x = 500;
+    txKylinMsg.cbus.cp.y = tz;
+    txKylinMsg.cbus.cv.y = 800;
+    txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+    txKylinMsg.cbus.cv.z = 500;
+    txKylinMsg.cbus.gp.e = ty;
+    txKylinMsg.cbus.gv.e = 0;
+    
+    if (abs(tx) < 100 && abs(ty) < 100 && abs(tz) < 100) {
+      //txKylinMsg.gp.c = 2199;
+      //txKylinMsg.gv.c = 4000;
+    } else {
+      //txKylinMsg.gp.c = 314;
+      //txKylinMsg.gv.c = 4000;
+    }
+    
+    usleep(10000);
+    //kylinbot_control();
+    //PullMsg();
+  }
+}
 
 void on_expTracker(int,void *)
 {
@@ -276,18 +347,13 @@ int main(int argc, char** argv)
      return 1;
     }
     
-       Mat frame;
-  vector<vector<Point> > squares;
   init();
+  int workState = 0;
   uint32_t cnt = 0;
   Rmp_Config(&rmp, 50000);
   Maf_Init(&maf, maf_buf, MAF_BUF_LEN);
   Tri_Init(&tri, 2.5e4);
-  //if (argc < 2) {
-  //  printf("Please input device name\n");
-  //  return 0;
-  //}
-  //char* device = argv[1];
+
   const char* device = "/dev/ttyTHS2";
   if (connect_serial(device,115200) == -1)
   {
@@ -297,90 +363,27 @@ int main(int argc, char** argv)
   
   MyThread kylibotMsgPullerTread;
   MyThread kylibotMsgPusherTread;
+  MyThread kylibotMarkDetectionTread;
   
   kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
   kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
-  int lostFlag = 0;
-  //KylinBotMsgPullerThreadFunc(NULL);
+  kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc,NULL);
+
   while ((!exit_flag))//&&(capture.read(frame))) 
   {
-    squares.clear();
-    double t = (double)getTickCount();
-    
-    capture >> frame;
-    //cout<<"IN"<<endl;
-    if (frame.empty())
-      continue;
-    
-    Mat src=frame.clone();
-    findSquares(src,frame, squares);
-    LocationMarkes(squares);
-    drawSquares(frame, squares);
-    /*****************************/
-    /*******send the object position to ARM*********/
-    /***********************************************/
-    //imshow(wndname, frame);
-    int c = waitKey(1);
-
-    t = ((double)getTickCount() - t)/getTickFrequency();
-    //cout<<"time: "<<t<<" second"<<endl;
-
-    if((char)c == 'q')
-      break;
-    
-    if(squares.size() > 0)
+    switch(workState)
     {
-      lostFlag = 0;
+      case 0:  //TODO:
+	break;
+      case 1:  //TODO
+	break;
+      case 2:
+	break;
+      default:
+	break;
+
     }
     
-    
-    if (squares.size() == 0) 
-    {
-      lostFlag++;
-      if(lostFlag >= 3)
-      {
-	lostFlag = 0;
-	tx = 0;
-	ty = 0;
-	tz = 0;
-	rx = 0;
-	ry = 0;
-	rz = 0;
-      }
-     
-    }
-    
-    /*
-    txKylinMsg.cp.x = tx + kylinMsg.cp.x;
-    txKylinMsg.cv.x = 1000;
-    txKylinMsg.cp.y = tz + kylinMsg.cp.y;
-    txKylinMsg.cv.y = 1000;
-    txKylinMsg.cp.z = ry + kylinMsg.cp.z;
-    txKylinMsg.cv.z = 1000;
-    txKylinMsg.gp.e = ty + kylinMsg.gp.e;
-    txKylinMsg.gv.e = 1000;
-    */
-    
-    txKylinMsg.cbus.cp.x = tx;
-    txKylinMsg.cbus.cv.x = 500;
-    txKylinMsg.cbus.cp.y = tz;
-    txKylinMsg.cbus.cv.y = 800;
-    txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-    txKylinMsg.cbus.cv.z = 500;
-    txKylinMsg.cbus.gp.e = ty;
-    txKylinMsg.cbus.gv.e = 0;
-    
-    if (abs(tx) < 100 && abs(ty) < 100 && abs(tz) < 100) {
-      //txKylinMsg.gp.c = 2199;
-      //txKylinMsg.gv.c = 4000;
-    } else {
-      //txKylinMsg.gp.c = 314;
-      //txKylinMsg.gv.c = 4000;
-    }
-    
-    usleep(10000);
-    //kylinbot_control();
-    //PullMsg();
   }
   
   disconnect_serial();
