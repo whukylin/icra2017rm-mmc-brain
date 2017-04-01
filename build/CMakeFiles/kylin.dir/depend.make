@@ -92,6 +92,9 @@ CMakeFiles/kylin.dir/asp/src/rmp.c.o: ../asp/src/rmp.c
 CMakeFiles/kylin.dir/asp/src/stack.c.o: ../asp/inc/stack.h
 CMakeFiles/kylin.dir/asp/src/stack.c.o: ../asp/src/stack.c
 
+CMakeFiles/kylin.dir/Markdetection.cpp.o: ../Markdetection.cpp
+CMakeFiles/kylin.dir/Markdetection.cpp.o: ../Markdetection.h
+
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/ahrs.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/asp.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/calib.h
@@ -116,6 +119,7 @@ CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/rcp.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/rmp.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/stack.h
 CMakeFiles/kylin.dir/main.cpp.o: ../uart/linux/serial.h
+CMakeFiles/kylin.dir/main.cpp.o: ../Markdetection.h
 CMakeFiles/kylin.dir/main.cpp.o: ../RMVideoCapture.hpp
 CMakeFiles/kylin.dir/main.cpp.o: ../main.cpp
 CMakeFiles/kylin.dir/main.cpp.o: ../main.h

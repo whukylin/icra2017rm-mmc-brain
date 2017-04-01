@@ -39,10 +39,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ubuntu/workspace/jwwangchn/kylin
+CMAKE_SOURCE_DIR = /home/yang/workspace/kylin
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ubuntu/workspace/jwwangchn/kylin/build
+CMAKE_BINARY_DIR = /home/yang/workspace/kylin/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -69,9 +69,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yang/workspace/kylin/build/CMakeFiles /home/yang/workspace/kylin/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/workspace/jwwangchn/kylin/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yang/workspace/kylin/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -110,6 +110,30 @@ kylin: cmake_check_build_system
 kylin/fast:
 	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/build
 .PHONY : kylin/fast
+
+Markdetection.o: Markdetection.cpp.o
+.PHONY : Markdetection.o
+
+# target to build an object file
+Markdetection.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Markdetection.cpp.o
+.PHONY : Markdetection.cpp.o
+
+Markdetection.i: Markdetection.cpp.i
+.PHONY : Markdetection.i
+
+# target to preprocess a source file
+Markdetection.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Markdetection.cpp.i
+.PHONY : Markdetection.cpp.i
+
+Markdetection.s: Markdetection.cpp.s
+.PHONY : Markdetection.s
+
+# target to generate assembly for a file
+Markdetection.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Markdetection.cpp.s
+.PHONY : Markdetection.cpp.s
 
 asp/src/ahrs.o: asp/src/ahrs.c.o
 .PHONY : asp/src/ahrs.o
@@ -792,6 +816,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... kylin"
 	@echo "... rebuild_cache"
+	@echo "... Markdetection.o"
+	@echo "... Markdetection.i"
+	@echo "... Markdetection.s"
 	@echo "... asp/src/ahrs.o"
 	@echo "... asp/src/ahrs.i"
 	@echo "... asp/src/ahrs.s"

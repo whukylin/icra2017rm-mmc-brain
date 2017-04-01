@@ -3,11 +3,11 @@
 
 # compile C with /usr/bin/cc
 # compile CXX with /usr/bin/c++
-C_FLAGS = -I/usr/include/opencv -I/home/ubuntu/workspace/jwwangchn/kylin/asp/inc -I/home/ubuntu/workspace/jwwangchn/kylin/uart/linux    -std=c++0x -O3
+C_FLAGS = -I/usr/include/opencv -I/home/yang/workspace/kylin/asp/inc -I/home/yang/workspace/kylin/uart/linux    -std=c++0x -O3
 
 C_DEFINES = 
 
-CXX_FLAGS =  -std=c++11 -I/usr/include/opencv -I/home/ubuntu/workspace/jwwangchn/kylin/asp/inc -I/home/ubuntu/workspace/jwwangchn/kylin/uart/linux    -std=c++0x -O3
+CXX_FLAGS =  -std=c++11 -I/usr/include/opencv -I/home/yang/workspace/kylin/asp/inc -I/home/yang/workspace/kylin/uart/linux    -std=c++0x -O3
 
 CXX_DEFINES = 
 

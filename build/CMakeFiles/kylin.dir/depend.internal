@@ -3,16 +3,16 @@
 
 CMakeFiles/kylin.dir/asp/src/ahrs.c.o
  ../asp/inc/ahrs.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/ahrs.c
+ /home/yang/workspace/kylin/asp/src/ahrs.c
 CMakeFiles/kylin.dir/asp/src/calib.c.o
  ../asp/inc/calib.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/calib.c
+ /home/yang/workspace/kylin/asp/src/calib.c
 CMakeFiles/kylin.dir/asp/src/cbus.c.o
  ../asp/inc/cbus.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/cbus.c
+ /home/yang/workspace/kylin/asp/src/cbus.c
 CMakeFiles/kylin.dir/asp/src/crc16.c.o
  ../asp/inc/crc16.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/crc16.c
+ /home/yang/workspace/kylin/asp/src/crc16.c
 CMakeFiles/kylin.dir/asp/src/dbuf.c.o
  ../asp/inc/dbuf.h
  ../asp/inc/dbus.h
@@ -20,52 +20,52 @@ CMakeFiles/kylin.dir/asp/src/dbuf.c.o
  ../asp/inc/hcp.h
  ../asp/inc/rcf.h
  ../asp/inc/rcp.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/dbuf.c
+ /home/yang/workspace/kylin/asp/src/dbuf.c
 CMakeFiles/kylin.dir/asp/src/dbus.c.o
  ../asp/inc/dbus.h
  ../asp/inc/hcp.h
  ../asp/inc/rcp.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/dbus.c
+ /home/yang/workspace/kylin/asp/src/dbus.c
 CMakeFiles/kylin.dir/asp/src/ekf.c.o
  ../asp/inc/ekf.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/ekf.c
+ /home/yang/workspace/kylin/asp/src/ekf.c
 CMakeFiles/kylin.dir/asp/src/est.c.o
  ../asp/inc/ekf.h
  ../asp/inc/est.h
  ../asp/inc/gdf.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/est.c
+ /home/yang/workspace/kylin/asp/src/est.c
 CMakeFiles/kylin.dir/asp/src/fifo.c.o
  ../asp/inc/fifo.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/fifo.c
+ /home/yang/workspace/kylin/asp/src/fifo.c
 CMakeFiles/kylin.dir/asp/src/fun.c.o
  ../asp/inc/fun.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/fun.c
+ /home/yang/workspace/kylin/asp/src/fun.c
 CMakeFiles/kylin.dir/asp/src/gdf.c.o
  ../asp/inc/gdf.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/gdf.c
+ /home/yang/workspace/kylin/asp/src/gdf.c
 CMakeFiles/kylin.dir/asp/src/hcf.c.o
  ../asp/inc/hcf.h
  ../asp/inc/hcp.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/hcf.c
+ /home/yang/workspace/kylin/asp/src/hcf.c
 CMakeFiles/kylin.dir/asp/src/hcp.c.o
  ../asp/inc/hcp.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/hcp.c
+ /home/yang/workspace/kylin/asp/src/hcp.c
 CMakeFiles/kylin.dir/asp/src/linkedlist.c.o
  ../asp/inc/linkedlist.h
  ../asp/inc/linkednode.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/linkedlist.c
+ /home/yang/workspace/kylin/asp/src/linkedlist.c
 CMakeFiles/kylin.dir/asp/src/linkednode.c.o
  ../asp/inc/linkednode.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/linkednode.c
+ /home/yang/workspace/kylin/asp/src/linkednode.c
 CMakeFiles/kylin.dir/asp/src/maf.c.o
  ../asp/inc/maf.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/maf.c
+ /home/yang/workspace/kylin/asp/src/maf.c
 CMakeFiles/kylin.dir/asp/src/mec.c.o
  ../asp/inc/mec.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/mec.c
+ /home/yang/workspace/kylin/asp/src/mec.c
 CMakeFiles/kylin.dir/asp/src/mecanum.c.o
  ../asp/inc/mecanum.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/mecanum.c
+ /home/yang/workspace/kylin/asp/src/mecanum.c
 CMakeFiles/kylin.dir/asp/src/msg.c.o
  ../asp/inc/calib.h
  ../asp/inc/cbus.h
@@ -75,23 +75,26 @@ CMakeFiles/kylin.dir/asp/src/msg.c.o
  ../asp/inc/hcp.h
  ../asp/inc/msg.h
  ../asp/inc/rcp.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/msg.c
+ /home/yang/workspace/kylin/asp/src/msg.c
 CMakeFiles/kylin.dir/asp/src/pid.c.o
  ../asp/inc/pid.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/pid.c
+ /home/yang/workspace/kylin/asp/src/pid.c
 CMakeFiles/kylin.dir/asp/src/rcf.c.o
  ../asp/inc/rcf.h
  ../asp/inc/rcp.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/rcf.c
+ /home/yang/workspace/kylin/asp/src/rcf.c
 CMakeFiles/kylin.dir/asp/src/rcp.c.o
  ../asp/inc/rcp.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/rcp.c
+ /home/yang/workspace/kylin/asp/src/rcp.c
 CMakeFiles/kylin.dir/asp/src/rmp.c.o
  ../asp/inc/rmp.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/rmp.c
+ /home/yang/workspace/kylin/asp/src/rmp.c
 CMakeFiles/kylin.dir/asp/src/stack.c.o
  ../asp/inc/stack.h
- /home/ubuntu/workspace/jwwangchn/kylin/asp/src/stack.c
+ /home/yang/workspace/kylin/asp/src/stack.c
+CMakeFiles/kylin.dir/Markdetection.cpp.o
+ /home/yang/workspace/kylin/Markdetection.cpp
+ /home/yang/workspace/kylin/Markdetection.h
 CMakeFiles/kylin.dir/main.cpp.o
  ../asp/inc/ahrs.h
  ../asp/inc/asp.h
@@ -117,15 +120,16 @@ CMakeFiles/kylin.dir/main.cpp.o
  ../asp/inc/rmp.h
  ../asp/inc/stack.h
  ../uart/linux/serial.h
- /home/ubuntu/workspace/jwwangchn/kylin/RMVideoCapture.hpp
- /home/ubuntu/workspace/jwwangchn/kylin/main.cpp
- /home/ubuntu/workspace/jwwangchn/kylin/main.h
- /home/ubuntu/workspace/jwwangchn/kylin/mythread.hpp
+ /home/yang/workspace/kylin/Markdetection.h
+ /home/yang/workspace/kylin/RMVideoCapture.hpp
+ /home/yang/workspace/kylin/main.cpp
+ /home/yang/workspace/kylin/main.h
+ /home/yang/workspace/kylin/mythread.hpp
 CMakeFiles/kylin.dir/mythread.cpp.o
- /home/ubuntu/workspace/jwwangchn/kylin/mythread.cpp
- /home/ubuntu/workspace/jwwangchn/kylin/mythread.hpp
+ /home/yang/workspace/kylin/mythread.cpp
+ /home/yang/workspace/kylin/mythread.hpp
 CMakeFiles/kylin.dir/serial.cpp.o
- /home/ubuntu/workspace/jwwangchn/kylin/serial.cpp
+ /home/yang/workspace/kylin/serial.cpp
 CMakeFiles/kylin.dir/uart/linux/serial.cpp.o
- /home/ubuntu/workspace/jwwangchn/kylin/uart/linux/serial.cpp
- /home/ubuntu/workspace/jwwangchn/kylin/uart/linux/serial.h
+ /home/yang/workspace/kylin/uart/linux/serial.cpp
+ /home/yang/workspace/kylin/uart/linux/serial.h

@@ -7,7 +7,7 @@ Current Build Directory Index=0
 ProjectRootRelative=./
 
 [CMake][CMake Build Directory 0]
-Build Directory Path=file:///home/ubuntu/workspace/jwwangchn/kylin/build
+Build Directory Path=file:///home/yang/workspace/kylin/build
 Build Type=
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=

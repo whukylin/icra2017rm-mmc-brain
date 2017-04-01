@@ -194,9 +194,13 @@ string.h
 
 ../uart/linux/serial.h
 
-/home/ubuntu/workspace/jwwangchn/kylin/RMVideoCapture.hpp
+/home/yang/workspace/kylin/Markdetection.h
+opencv2/opencv.hpp
+/home/yang/workspace/kylin/opencv2/opencv.hpp
+
+/home/yang/workspace/kylin/RMVideoCapture.hpp
 linux/videodev2.h
-/home/ubuntu/workspace/jwwangchn/kylin/linux/videodev2.h
+/home/yang/workspace/kylin/linux/videodev2.h
 stdio.h
 -
 unistd.h
@@ -208,29 +212,31 @@ sys/ioctl.h
 sys/mman.h
 -
 opencv2/opencv.hpp
-/home/ubuntu/workspace/jwwangchn/kylin/opencv2/opencv.hpp
+/home/yang/workspace/kylin/opencv2/opencv.hpp
 iostream
 -
 
-/home/ubuntu/workspace/jwwangchn/kylin/main.cpp
+/home/yang/workspace/kylin/main.cpp
 main.h
-/home/ubuntu/workspace/jwwangchn/kylin/main.h
+/home/yang/workspace/kylin/main.h
 RMVideoCapture.hpp
-/home/ubuntu/workspace/jwwangchn/kylin/RMVideoCapture.hpp
+/home/yang/workspace/kylin/RMVideoCapture.hpp
+Markdetection.h
+/home/yang/workspace/kylin/Markdetection.h
 
-/home/ubuntu/workspace/jwwangchn/kylin/main.h
+/home/yang/workspace/kylin/main.h
 asp.h
-/home/ubuntu/workspace/jwwangchn/kylin/asp.h
+/home/yang/workspace/kylin/asp.h
 serial.h
-/home/ubuntu/workspace/jwwangchn/kylin/serial.h
+/home/yang/workspace/kylin/serial.h
 mythread.hpp
-/home/ubuntu/workspace/jwwangchn/kylin/mythread.hpp
+/home/yang/workspace/kylin/mythread.hpp
 unistd.h
 -
 stdio.h
 -
 opencv2/opencv.hpp
-/home/ubuntu/workspace/jwwangchn/kylin/opencv2/opencv.hpp
+/home/yang/workspace/kylin/opencv2/opencv.hpp
 iostream
 -
 math.h
@@ -254,7 +260,7 @@ sys/ioctl.h
 linux/videodev2.h
 -
 
-/home/ubuntu/workspace/jwwangchn/kylin/mythread.hpp
+/home/yang/workspace/kylin/mythread.hpp
 pthread.h
 -
 
