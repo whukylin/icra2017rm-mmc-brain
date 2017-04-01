@@ -40,6 +40,12 @@ Mat cameraMatrix=(Mat_<double>(3,3)<<1079.2096,0,342.5224,0,1075.3261,353.0309,0
 Mat distCoeffs=(Mat_<double>(1,4)<<-0.4513,0.1492,-0.0030,0.0043);
 #endif
 
+const int ARROW_AREA_MIN=3000;//variable
+const int ARROW_AREA_MAX=700*500;
+Mat pro_after;
+int cx=343;   //To change to calibration parameter.
+int cy=320;   //the same with cameraMatrix.cx,cy
+
 Point3f world_pnt_tl(-65,-85,0);   //unit: mm
 Point3f world_pnt_tr(65,-85,0);
 Point3f world_pnt_br(65,85,0);
@@ -458,4 +464,71 @@ void Sort_rect(vector<Point>& approx)
 #ifdef _SHOW_OUTPUT
     cout<<"sorted approx: "<<approx<<endl;
 #endif
+}
+/************************************************************/
+/**********************detect the blue area******************/
+/**********************Input:image with blue arrow inside *****/
+/*********************Output: the center(x,y) ofthe blue area*********/
+int Color_detect(Mat frame, int &diff_x, int &diff_y)
+{
+    vector<Mat> HSVSplit;
+    //Returns a rectangular structuring element of the specified size and shape for morphological operations.
+    Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
+    vector<vector<Point> > contours;
+    Mat HSVImage;
+    Mat out;
+    Mat HGreen;
+    Mat SGreen;
+    Rect r;
+    Rect max_tmp;
+
+    cvtColor(frame, HSVImage, CV_BGR2HSV);
+    split(HSVImage,HSVSplit);
+    //Hgreen=HSVSplit[0]>lower&&HSVSplit[0]<up , mask, threshold can be fine tuned.
+    inRange(HSVSplit[0], Scalar(80), Scalar(120), HGreen);
+    threshold(HSVSplit[1], SGreen, 80, 255, THRESH_BINARY);    //S channal intensity
+    //bitwise conjunction
+    cv::bitwise_and(HGreen, SGreen, out);
+    morphologyEx(out, out, MORPH_OPEN, element);//open operator,remove isolated noise points.
+    morphologyEx(out, out, MORPH_CLOSE, element);//close operator,get connected domain.BMC
+    Mat solid;
+    solid=out.clone();
+    findContours(out,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+    if( contours.size() == 0 )
+    {
+        cout<<"no contour..."<<endl;
+        return 0;
+    }
+    Mat result(out.size(),CV_8U,Scalar(0));
+    drawContours(result,contours,-1,Scalar(255),2);
+    max_tmp=boundingRect(Mat(contours[0]));
+    for(int i=1; i<contours.size(); i++)    
+    {
+        r = boundingRect(Mat(contours[i]));
+        max_tmp=(r.area()>max_tmp.area())?r:max_tmp;
+    }
+    if(max_tmp.area()<ARROW_AREA_MIN||max_tmp.area()>ARROW_AREA_MAX)
+        return 0;
+    Mat pro;
+    solid(max_tmp).copyTo(pro);
+    pro_after=pro.clone();
+    rectangle(result, max_tmp, Scalar(255), 2);
+    cout<<"area "<<max_tmp.area()<<endl;
+#ifdef _SHOW_PHOTO
+    imshow("result",result);
+#endif
+   // if('q'==(char)waitKey(7)) exit(0);
+    
+    //caculate the center of green area
+    Moments mt;
+    mt=moments(pro_after,true);
+    Point center;
+	
+    center.x=mt.m10/mt.m00+max_tmp.tl().x;
+    center.y=mt.m01/mt.m00+max_tmp.tl().y;
+    diff_x=center.x-cx;
+    diff_y=center.y-cy;
+    cout<<"diff x: "<<diff_x<<endl;
+    cout<<"diff y: "<<diff_y<<endl;
+    return 1;
 }

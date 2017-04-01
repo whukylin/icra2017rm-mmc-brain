@@ -29,3 +29,4 @@ void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_
 int Color_judge(Mat &src,int area);
 void Sort_rect(vector<Point>& approx);
 double angle( Point pt1, Point pt2, Point pt0 );
+int Color_detect(Mat frame, int &diff_x, int &diff_y);

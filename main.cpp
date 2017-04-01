@@ -19,8 +19,8 @@ int brightness_ = 10;
 int whiteness_ = 86;
 int saturation_ = 60;
 
-bool exit_flag = false;
-
+int8_t exit_flag = 0;
+int8_t detection_mode=1;
 FIFO_t rx_fifo;
 uint8_t rx_buf[2][BUF_LEN];
 
@@ -230,7 +230,7 @@ void *KylinBotMarkDetecThreadFunc(void* param)
   vector<vector<Point> > squares;
   int lostFlag = 0;
   //KylinBotMsgPullerThreadFunc(NULL);
-  while ((!exit_flag))//&&(capture.read(frame))) 
+  while (exit_flag==0)//&&(capture.read(frame))) 
   {
     squares.clear();
     double t = (double)getTickCount();
@@ -240,59 +240,72 @@ void *KylinBotMarkDetecThreadFunc(void* param)
     if (frame.empty())
       continue;
     
-    Mat src=frame.clone();
-    findSquares(src,frame, squares);
-    LocationMarkes(squares);
-    drawSquares(frame, squares);
+    int lostCount = 0;
+	int dif_x=0, dif_y=0;
+        Mat src=frame.clone();
+	switch(detection_mode)
+	{
+	  case 0:   //do nothing
+	    //TODO:
+	    break;
+	  case 1:   //detect squares
+	    findSquares(src,frame, squares);
+	    LocationMarkes(squares);
+	    drawSquares(frame, squares); 
+	    if(squares.size() > 0)
+	    {
+	      lostCount = 0;
+	    }
+	    if (squares.size() == 0)
+	    {
+	      lostCount++;
+	      if(lostCount >= 3)
+	      {
+		lostCount = 0;
+		tx = 0;
+		ty = 0;
+		tz = 0;
+		rx = 0;
+		ry = 0;
+		rz = 0;
+	      } 
+	    }
+	        txKylinMsg.cbus.cp.x = tx;
+		txKylinMsg.cbus.cv.x = 500;
+		txKylinMsg.cbus.cp.y = tz;
+		txKylinMsg.cbus.cv.y = 800;
+		txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+		txKylinMsg.cbus.cv.z = 500;
+		txKylinMsg.cbus.gp.e = ty;
+		txKylinMsg.cbus.gv.e = 0;
+		if (abs(tx) < 100 && abs(ty) < 100 && abs(tz) < 100) {
+		      //txKylinMsg.gp.c = 2199;
+			  //txKylinMsg.gv.c = 4000;
+		} else {
+		//txKylinMsg.gp.c = 314;
+		//txKylinMsg.gv.c = 4000;
+		}
+	    break;
+	  case 2:   //detect green area
+
+	    Color_detect(src,dif_x, dif_y);
+	    txKylinMsg.cbus.cp.x = 10*dif_x;
+	    txKylinMsg.cbus.cp.y = 0;
+	    txKylinMsg.cbus.cp.z = 0; 
+	    break;
+	  case 3:  //follow line
+	    //TODO:
+	    break;
+	  default:
+	    break;
+	}
+   
     int c = waitKey(1);
 
-    t = ((double)getTickCount() - t)/getTickFrequency();
-
     if((char)c == 'q')
-      exit_flag=true;
+      break;
+    
 
-    
-    if(squares.size() > 0)
-    {
-      lostFlag = 0;
-    }
-
-    if (squares.size() == 0) 
-    {
-      lostFlag++;
-      if(lostFlag >= 3)
-      {
-	lostFlag = 0;
-	tx = 0;
-	ty = 0;
-	tz = 0;
-	rx = 0;
-	ry = 0;
-	rz = 0;
-      }
-     
-    }
-    
-    txKylinMsg.cbus.cp.x = tx;
-    txKylinMsg.cbus.cv.x = 500;
-    txKylinMsg.cbus.cp.y = tz;
-    txKylinMsg.cbus.cv.y = 800;
-    txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-    txKylinMsg.cbus.cv.z = 500;
-    txKylinMsg.cbus.gp.e = ty;
-    txKylinMsg.cbus.gv.e = 0;
-    
-    if (abs(tx) < 100 && abs(ty) < 100 && abs(tz) < 100) {
-      //txKylinMsg.gp.c = 2199;
-      //txKylinMsg.gv.c = 4000;
-    } else {
-      //txKylinMsg.gp.c = 314;
-      //txKylinMsg.gv.c = 4000;
-    }
-    
-    usleep(10000);
-    //kylinbot_control();
-    //PullMsg();
   }
 }
 
@@ -368,16 +381,19 @@ int main(int argc, char** argv)
   kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
   kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
   kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc,NULL);
-
+  workState=2;
   while ((!exit_flag))//&&(capture.read(frame))) 
   {
     switch(workState)
     {
       case 0:  //TODO:
+	detection_mode=0;
 	break;
       case 1:  //TODO
+	detection_mode=1;
 	break;
       case 2:
+	detection_mode=2;
 	break;
       default:
 	break;
