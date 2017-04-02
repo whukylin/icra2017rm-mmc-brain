@@ -7,7 +7,7 @@ Current Build Directory Index=0
 ProjectRootRelative=./
 
 [CMake][CMake Build Directory 0]
-Build Directory Path=file:///home/yang/workspace/kylin/build
+Build Directory Path=file:///home/ling/Documents/jwwangchn/ICRA/kylin/build
 Build Type=
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=
@@ -20,20 +20,20 @@ Launch Configurations=Launch Configuration 0
 [Launch][Launch Configuration 0]
 Configured Launch Modes=execute
 Configured Launchers=nativeAppLauncher
-Name=New Application Launcher
+Name=kylin
 Type=Native Application
 
 [Launch][Launch Configuration 0][Data]
 Arguments=
-Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
-Dependency Action=Nothing
+Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x02\x00\x00\x00\n\x00k\x00y\x00l\x00i\x00n\x00\x00\x00\n\x00k\x00y\x00l\x00i\x00n)
+Dependency Action=Build
 EnvironmentGroup=default
-Executable=file:///home/ubuntu/workspace/jwwangchn/kylin/build/kylin
+Executable=file:///home/ling/Documents/jwwangchn/ICRA/kylin/
 External Terminal=konsole --noclose --workdir %workdir -e %exe
 Project Target=kylin,kylin
 Use External Terminal=false
 Working Directory=
-isExecutable=true
+isExecutable=false
 
 [Project]
 VersionControlSupport=kdevgit

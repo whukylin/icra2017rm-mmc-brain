@@ -1,1 +1,6 @@
 build/
+
+*.kdev4
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
