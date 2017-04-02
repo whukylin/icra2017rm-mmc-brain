@@ -5,7 +5,7 @@
 #define BUF_LEN 256
 #define TIMEOUT 30
 #define FRAME_N 20000
-#define PI 3.1415926
+
 using namespace cv;
 using namespace std;
 
@@ -376,7 +376,6 @@ void on_saturationTracker(int, void *)
 }
 void setcamera()
 {
-
 #ifdef _SHOW_PHOTO
     namedWindow(wndname, 1);
 #endif
@@ -423,83 +422,20 @@ int main(int argc, char **argv)
     MyThread kylibotMsgPullerTread;
     MyThread kylibotMsgPusherTread;
     MyThread kylibotMarkDetectionTread;
-    detection_mode = 1;
 
     kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
     kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
     kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
-    int i = 0;
-    while ((!exit_flag)) //&&(capture.read(frame)))
-    {
+    // txKylinMsg.cbus.cp.x = tx;     //小车左右
+    // txKylinMsg.cbus.cv.x = 500;
+    // txKylinMsg.cbus.cp.y = tz;     //小车前后
+    // txKylinMsg.cbus.cv.y = 800;
+    // txKylinMsg.cbus.cp.z = ry;     //小车旋转
+    // txKylinMsg.cbus.cv.z = 500;
+    // txKylinMsg.cbus.gp.e = ty;     //抓子高度
+    // txKylinMsg.cbus.gv.e = 0;
 
-        switch (workState)
-        {
-        case 0: //TODO:
-
-            detection_mode = 1;
-            i++;
-            if (i > 50)
-            {
-                //cout<<"workState="<<workState<<endl;
-                workState = 1;
-            }
-            if (useUltrasonic)
-                detection_mode = 2;
-            break;
-        case 1: //TODO
-
-            detection_mode = 1;
-            i++;
-            if (i > 100)
-            {
-                //cout<<"workState="<<workState<<endl;
-                workState = 2;
-            }
-            break;
-        case 2:
-            detection_mode = 2;
-            i++;
-            if (i > 150)
-            {
-                //cout<<"workState="<<workState<<endl;
-                workState = 0;
-                i = 0;
-            }
-            break;
-        default:
-            break;
-        }
-    }
-
-    disconnect_serial();
-    return 0;
-}
-
-const char *device = "/dev/ttyTHS2";
-if (connect_serial(device, 115200) == -1)
-{
-    //printf("serial open error!\n");
-    //return -1;
-}
-
-MyThread kylibotMsgPullerTread;
-MyThread kylibotMsgPusherTread;
-MyThread kylibotMarkDetectionTread;
-
-kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
-kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
-kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
-workState = 2;
-// txKylinMsg.cbus.cp.x = tx;     //小车左右
-// txKylinMsg.cbus.cv.x = 500;
-// txKylinMsg.cbus.cp.y = tz;     //小车前后
-// txKylinMsg.cbus.cv.y = 800;
-// txKylinMsg.cbus.cp.z = ry;     //小车旋转
-// txKylinMsg.cbus.cv.z = 500;
-// txKylinMsg.cbus.gp.e = ty;     //抓子高度
-// txKylinMsg.cbus.gv.e = 0;
-
-/*Flag变量汇总:
+    /*Flag变量汇总:
     finishAbsoluteMoveFlag      完成绝对位置移动
     finishDetectBoxFlag         完成检测盒子(小车到了检测不到盒子的位置)
     finishDetectCentroidFlag    完成质心检测
@@ -507,207 +443,206 @@ workState = 2;
     finishGraspFlag             抓子是否合拢
     finishSlidFlag              滑台是否达到指定高度
     */
-
-while ((!exit_flag)) //&&(capture.read(frame)))
-{
-    switch (workState)
+    while ((!exit_flag)) //&&(capture.read(frame)))
     {
-    case 0:
-        //关闭视觉检测，小车在原点旋转90度，启动视觉检测（本阶段视觉关）仅仅只是//小车旋转
-        detectionMode = 0;         //关闭视觉
-        txKylinMsg.fs |= 1u << 31; //切换到绝对位置控制模式
-        txKylinMsg.cbus.cp.x = 0;
-        txKylinMsg.cbus.cv.x = 0;
-        txKylinMsg.cbus.cp.y = 0;
-        txKylinMsg.cbus.cv.y = 0;
-        txKylinMsg.cbus.cp.z = 1000 * PI / 2; //旋转90度
-        txKylinMsg.cbus.cv.z = 500;
-        txKylinMsg.cbus.gp.e = 0;
-        txKylinMsg.cbus.gv.e = 0;
-        txKylinMsg.gp.c = 314; //抓子张开
-
-        if (finishAbsoluteMoveFlag == true)
+        switch (workState)
         {
-            workState = 1; //完成移动，进入下一阶段
-            finishAbsoluteMoveFlag = false;
-        }
-
-        break;
-    case 1:
-        //利用视觉引导小车移动
-        if (finishDetectBoxFlag == false)
-        {
-            detectionMode = 1;            //打开视觉,检测矩形
-            txKylinMsg.fs &= ~(1u << 31); //切换到相对位置控制模式
-
-            txKylinMsg.cbus.cp.x = tx;
-            txKylinMsg.cbus.cv.x = 1000;
-            txKylinMsg.cbus.cp.y = tz;
-            txKylinMsg.cbus.cv.y = 1000;
-            txKylinMsg.cbus.cp.z = 0;
-            txKylinMsg.cbus.cv.z = 0;
-            txKylinMsg.cbus.gp.e = 0;
-            txKylinMsg.cbus.gv.e = 0;
-            txKylinMsg.gp.c = 314; //抓子张开
-        }
-        //盒子到了检测不到的位置, 开启质心检测
-        if (finishDetectBoxFlag == true && finishDetectCentroidFlag == false)
-        {
-            detectionMode = 2;            //打开视觉,检测质心
-            txKylinMsg.fs &= ~(1u << 31); //切换到相对位置控制模式
-            txKylinMsg.cbus.cp.x = tx;
-            txKylinMsg.cbus.cv.x = 1000;
-            txKylinMsg.cbus.cp.y = 0;
-            txKylinMsg.cbus.cv.y = 0;
-            txKylinMsg.cbus.cp.z = 0;
-            txKylinMsg.cbus.cv.z = 0;
-            txKylinMsg.cbus.gp.e = 0;
-            txKylinMsg.cbus.gv.e = 0;
-            txKylinMsg.gp.c = 314; //抓子张开
-        }
-        //完成了质心检测,开始使用 moble 超声波进行引导
-        if (finishDetectCentroidFlag == true && finishMobleUltrasonicFlag == false)
-        {
-            detectionMode = 0;            //关闭视觉
-            txKylinMsg.fs &= ~(1u << 31); //切换到相对位置控制模式
-            txKylinMsg.cbus.cp.x = 0;
-            txKylinMsg.cbus.cv.x = 0;
-            txKylinMsg.cbus.cp.y = sr04sMsg.mobile;
-            txKylinMsg.cbus.cv.y = 500;
-            txKylinMsg.cbus.cp.z = 0;
-            txKylinMsg.cbus.cv.z = 0;
-            txKylinMsg.cbus.gp.e = 0;
-            txKylinMsg.cbus.gv.e = 0;
-            txKylinMsg.gp.c = 314; //抓子张开
-        }
-        //完成了超声波测距,小车到达极限距离,开始合拢抓子
-        if (finishMobleUltrasonicFlag == true && finishGraspFlag == false)
-        {
-            detectionMode = 0; //关闭视觉
+        case 0:
+            //关闭视觉检测，小车在原点旋转90度，启动视觉检测（本阶段视觉关）仅仅只是//小车旋转
+            detection_mode = 0;         //关闭视觉
+            txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 0;
             txKylinMsg.cbus.cp.y = 0;
             txKylinMsg.cbus.cv.y = 0;
-            txKylinMsg.cbus.cp.z = 0;
-            txKylinMsg.cbus.cv.z = 0;
+            txKylinMsg.cbus.cp.z = 1000 * PI / 2; //旋转90度
+            txKylinMsg.cbus.cv.z = 500;
             txKylinMsg.cbus.gp.e = 0;
             txKylinMsg.cbus.gv.e = 0;
-            txKylinMsg.gp.c = 2199; //抓子合拢
-        }
-        //抓子合拢, 开始抬高滑台
-        if (finishGraspFlag == true && finishSlidFlag == false)
-        {
-            detectionMode = 0; //关闭视觉
-            txKylinMsg.cbus.cp.x = 0;
-            txKylinMsg.cbus.cv.x = 0;
-            txKylinMsg.cbus.cp.y = 0;
-            txKylinMsg.cbus.cv.y = 0;
-            txKylinMsg.cbus.cp.z = 0;
-            txKylinMsg.cbus.cv.z = 0;
-            txKylinMsg.cbus.gp.e = 300 - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
-            txKylinMsg.cbus.gv.e = 400;
-            txKylinMsg.gp.c = 2199; //抓子合拢
-        }
-        //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
-        if (finishSlidFlag == true)
-        {
-            workState = 2; //切换到下一阶段
-        }
+            txKylinMsg.cbus.gp.c = 314; //抓子张开
 
-        break;
-    case 2:
-        //小车回到原点, 车头朝向前方
-        detectionMode = 0;         //关闭视觉
-        txKylinMsg.fs |= 1u << 31; //切换到绝对位置控制模式
-        txKylinMsg.cbus.cp.x = 0;
-        txKylinMsg.cbus.cv.x = 1000;
-        txKylinMsg.cbus.cp.y = 0;
-        txKylinMsg.cbus.cv.y = 1000;
-        txKylinMsg.cbus.cp.z = 0;
-        txKylinMsg.cbus.cv.z = 1000;
-        txKylinMsg.cbus.gp.e = 300;
-        txKylinMsg.cbus.gv.e = 400;
-        txKylinMsg.gp.c = 2199;
-        if (finishAbsoluteMoveFlag == true) //完成绝对位置控制模式
-        {
-            workState = 3; //切换到下一阶段
-            finishAbsoluteMoveFlag == false;
-        }
-        break;
-    case 3:
-        //小车从原点达到基地区第一堆盒子的位置, 第一堆盒子的坐标 (0,3485)
-        detectionMode = 0;         //关闭视觉
-        txKylinMsg.fs |= 1u << 31; //切换到绝对位置控制模式
-        txKylinMsg.cbus.cp.x = 0;
-        txKylinMsg.cbus.cv.x = 1000;
-        txKylinMsg.cbus.cp.y = 3485;
-        txKylinMsg.cbus.cv.y = 1000;
-        txKylinMsg.cbus.cp.z = 0;
-        txKylinMsg.cbus.cv.z = 0;
-        txKylinMsg.cbus.gp.e = 300;
-        txKylinMsg.cbus.gv.e = 400;
-        txKylinMsg.gp.c = 2199;
-        if (finishAbsoluteMoveFlag == true) //完成绝对位置控制模式
-        {
-            //到达指定位置，放下盒子
-            if (finishSlidFlag == false)
+            if (finishAbsoluteMoveFlag == true)
             {
-                txKylinMsg.fs |= 1u << 31; //切换到绝对位置控制模式
-                txKylinMsg.cbus.cp.x = 0;
+                workState = 1; //完成移动，进入下一阶段
+                finishAbsoluteMoveFlag = false;
+            }
+
+            break;
+        case 1:
+            //利用视觉引导小车移动
+            if (finishDetectBoxFlag == false)
+            {
+                detection_mode = 1;            //打开视觉,检测矩形
+                txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
+
+                txKylinMsg.cbus.cp.x = tx;
                 txKylinMsg.cbus.cv.x = 1000;
-                txKylinMsg.cbus.cp.y = 3485;
+                txKylinMsg.cbus.cp.y = tz;
                 txKylinMsg.cbus.cv.y = 1000;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
                 txKylinMsg.cbus.gp.e = 0;
-                txKylinMsg.cbus.gv.e = 400;
-                txKylinMsg.gp.c = 2199;
+                txKylinMsg.cbus.gv.e = 0;
+                txKylinMsg.cbus.gp.c = 314; //抓子张开
             }
-            //松开抓子
-            if (finishSlidFlag == true && finishGraspFlag == false)
+            //盒子到了检测不到的位置, 开启质心检测
+            if (finishDetectBoxFlag == true && finishDetectCentroidFlag == false)
             {
-                txKylinMsg.fs |= 1u << 31; //切换到绝对位置控制模式
-                txKylinMsg.cbus.cp.x = 0;
+                detection_mode = 2;            //打开视觉,检测质心
+                txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
+                txKylinMsg.cbus.cp.x = tx;
                 txKylinMsg.cbus.cv.x = 1000;
-                txKylinMsg.cbus.cp.y = 3485;
-                txKylinMsg.cbus.cv.y = 1000;
+                txKylinMsg.cbus.cp.y = 0;
+                txKylinMsg.cbus.cv.y = 0;
                 txKylinMsg.cbus.cp.z = 0;
-                txKylinMsg.cbus.cv.z = 1000;
+                txKylinMsg.cbus.cv.z = 0;
                 txKylinMsg.cbus.gp.e = 0;
                 txKylinMsg.cbus.gv.e = 0;
-                txKylinMsg.gp.c = 314;
+                txKylinMsg.cbus.gp.c = 314; //抓子张开
             }
-            if (finishGraspFlag == true)
+            //完成了质心检测,开始使用 moble 超声波进行引导
+            if (finishDetectCentroidFlag == true && finishMobleUltrasonicFlag == false)
             {
-                workState = 4;                   //进入下一阶段
+                detection_mode = 0;            //关闭视觉
+                txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
+                txKylinMsg.cbus.cp.x = 0;
+                txKylinMsg.cbus.cv.x = 0;
+                txKylinMsg.cbus.cp.y = sr04sMsg.moble;
+                txKylinMsg.cbus.cv.y = 500;
+                txKylinMsg.cbus.cp.z = 0;
+                txKylinMsg.cbus.cv.z = 0;
+                txKylinMsg.cbus.gp.e = 0;
+                txKylinMsg.cbus.gv.e = 0;
+                txKylinMsg.cbus.gp.c = 314; //抓子张开
+            }
+            //完成了超声波测距,小车到达极限距离,开始合拢抓子
+            if (finishMobleUltrasonicFlag == true && finishGraspFlag == false)
+            {
+                detection_mode = 0; //关闭视觉
+                txKylinMsg.cbus.cp.x = 0;
+                txKylinMsg.cbus.cv.x = 0;
+                txKylinMsg.cbus.cp.y = 0;
+                txKylinMsg.cbus.cv.y = 0;
+                txKylinMsg.cbus.cp.z = 0;
+                txKylinMsg.cbus.cv.z = 0;
+                txKylinMsg.cbus.gp.e = 0;
+                txKylinMsg.cbus.gv.e = 0;
+                txKylinMsg.cbus.gp.c = 2199; //抓子合拢
+            }
+            //抓子合拢, 开始抬高滑台
+            if (finishGraspFlag == true && finishSlidFlag == false)
+            {
+                detection_mode = 0; //关闭视觉
+                txKylinMsg.cbus.cp.x = 0;
+                txKylinMsg.cbus.cv.x = 0;
+                txKylinMsg.cbus.cp.y = 0;
+                txKylinMsg.cbus.cv.y = 0;
+                txKylinMsg.cbus.cp.z = 0;
+                txKylinMsg.cbus.cv.z = 0;
+                txKylinMsg.cbus.gp.e = 300 - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
+                txKylinMsg.cbus.gv.e = 400;
+                txKylinMsg.cbus.gp.c = 2199; //抓子合拢
+            }
+            //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
+            if (finishSlidFlag == true)
+            {
+                workState = 2; //切换到下一阶段
+            }
+
+            break;
+        case 2:
+            //小车回到原点, 车头朝向前方
+            detection_mode = 0;         //关闭视觉
+            txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+            txKylinMsg.cbus.cp.x = 0;
+            txKylinMsg.cbus.cv.x = 1000;
+            txKylinMsg.cbus.cp.y = 0;
+            txKylinMsg.cbus.cv.y = 1000;
+            txKylinMsg.cbus.cp.z = 0;
+            txKylinMsg.cbus.cv.z = 1000;
+            txKylinMsg.cbus.gp.e = 300;
+            txKylinMsg.cbus.gv.e = 400;
+            txKylinMsg.cbus.gp.c = 2199;
+            if (finishAbsoluteMoveFlag == true) //完成绝对位置控制模式
+            {
+                workState = 3; //切换到下一阶段
+                finishAbsoluteMoveFlag == false;
+            }
+            break;
+        case 3:
+            //小车从原点达到基地区第一堆盒子的位置, 第一堆盒子的坐标 (0,3485)
+            detection_mode = 0;         //关闭视觉
+            txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+            txKylinMsg.cbus.cp.x = 0;
+            txKylinMsg.cbus.cv.x = 1000;
+            txKylinMsg.cbus.cp.y = 3485;
+            txKylinMsg.cbus.cv.y = 1000;
+            txKylinMsg.cbus.cp.z = 0;
+            txKylinMsg.cbus.cv.z = 0;
+            txKylinMsg.cbus.gp.e = 300;
+            txKylinMsg.cbus.gv.e = 400;
+            txKylinMsg.cbus.gp.c = 2199;
+            if (finishAbsoluteMoveFlag == true) //完成绝对位置控制模式
+            {
+                //到达指定位置，放下盒子
+                if (finishSlidFlag == false)
+                {
+                    txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+                    txKylinMsg.cbus.cp.x = 0;
+                    txKylinMsg.cbus.cv.x = 1000;
+                    txKylinMsg.cbus.cp.y = 3485;
+                    txKylinMsg.cbus.cv.y = 1000;
+                    txKylinMsg.cbus.cp.z = 0;
+                    txKylinMsg.cbus.cv.z = 0;
+                    txKylinMsg.cbus.gp.e = 0;
+                    txKylinMsg.cbus.gv.e = 400;
+                    txKylinMsg.cbus.gp.c = 2199;
+                }
+                //松开抓子
+                if (finishSlidFlag == true && finishGraspFlag == false)
+                {
+                    txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+                    txKylinMsg.cbus.cp.x = 0;
+                    txKylinMsg.cbus.cv.x = 1000;
+                    txKylinMsg.cbus.cp.y = 3485;
+                    txKylinMsg.cbus.cv.y = 1000;
+                    txKylinMsg.cbus.cp.z = 0;
+                    txKylinMsg.cbus.cv.z = 1000;
+                    txKylinMsg.cbus.gp.e = 0;
+                    txKylinMsg.cbus.gv.e = 0;
+                    txKylinMsg.cbus.gp.c = 314;
+                }
+                if (finishGraspFlag == true)
+                {
+                    workState = 4;                   //进入下一阶段
+                    finishAbsoluteMoveFlag == false; //完成本阶段的绝对位置控制
+                }
+            }
+            break;
+        case 4:
+            //回原点
+            detection_mode = 0;         //关闭视觉
+            txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+            txKylinMsg.cbus.cp.x = 0;
+            txKylinMsg.cbus.cv.x = 1000;
+            txKylinMsg.cbus.cp.y = 0;
+            txKylinMsg.cbus.cv.y = 1000;
+            txKylinMsg.cbus.cp.z = 0;
+            txKylinMsg.cbus.cv.z = 1000;
+            txKylinMsg.cbus.gp.e = 0;
+            txKylinMsg.cbus.gv.e = 0;
+            txKylinMsg.cbus.gp.c = 314;
+            if (finishAbsoluteMoveFlag == true)
+            {
+                workState = 0;                   //进入下一阶段
                 finishAbsoluteMoveFlag == false; //完成本阶段的绝对位置控制
             }
+            break;
+        default:
+            break;
         }
-        break;
-    case 4:
-        //回原点
-        detectionMode = 0;         //关闭视觉
-        txKylinMsg.fs |= 1u << 31; //切换到绝对位置控制模式
-        txKylinMsg.cbus.cp.x = 0;
-        txKylinMsg.cbus.cv.x = 1000;
-        txKylinMsg.cbus.cp.y = 0;
-        txKylinMsg.cbus.cv.y = 1000;
-        txKylinMsg.cbus.cp.z = 0;
-        txKylinMsg.cbus.cv.z = 1000;
-        txKylinMsg.cbus.gp.e = 0;
-        txKylinMsg.cbus.gv.e = 0;
-        txKylinMsg.gp.c = 314;
-        if (finishAbsoluteMoveFlag == true)
-        {
-            workState = 0;                   //进入下一阶段
-            finishAbsoluteMoveFlag == false; //完成本阶段的绝对位置控制
-        }
-        break;
-    default:
-        break;
     }
+    disconnect_serial();
+    return 0;
 }
 
-disconnect_serial();
-return 0;
-}
