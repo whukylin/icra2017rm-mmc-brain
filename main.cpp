@@ -20,7 +20,8 @@ int whiteness_ = 86;
 int saturation_ = 60;
 
 int8_t exit_flag = 0;
-int8_t detection_mode=1;
+volatile int8_t detection_mode=0;
+bool useUltrasonic = false;
 FIFO_t rx_fifo;
 uint8_t rx_buf[2][BUF_LEN];
 
@@ -35,87 +36,87 @@ KylinMsg_t txKylinMsg;
 
 static void Dnl_ProcZGyroMsg(const ZGyroMsg_t* zgyroMsg)
 {
-	//printf("*************************************ZGYRO********************************************\n");
-	printf("id=%d,angle=%d,rate=%d\n", zgyroMsg->frame_id, zgyroMsg->angle, zgyroMsg->rate);
+  //printf("*************************************ZGYRO********************************************\n");
+  printf("id=%d,angle=%d,rate=%d\n", zgyroMsg->frame_id, zgyroMsg->angle, zgyroMsg->rate);
 }
 
 static void Dnl_ProcKylinMsg(const KylinMsg_t* kylinMsg)
 {
-        //printf("*************************************KYLIN********************************************\n");
-        printf("id=%d,fs=%x,px=%d,py=%d,pz=%d,pe=%d,pc=%d,vx=%d,vy=%d,vz=%d,ve=%d,vc=%d\n", kylinMsg->frame_id, kylinMsg->cbus.fs,
-                kylinMsg->cbus.cp.x, kylinMsg->cbus.cp.y, kylinMsg->cbus.cp.z, kylinMsg->cbus.gp.e, kylinMsg->cbus.gp.c,
-                kylinMsg->cbus.cv.x, kylinMsg->cbus.cv.y, kylinMsg->cbus.cv.z, kylinMsg->cbus.gv.e, kylinMsg->cbus.gv.c);
+  //printf("*************************************KYLIN********************************************\n");
+  printf("id=%d,fs=%x,px=%d,py=%d,pz=%d,pe=%d,pc=%d,vx=%d,vy=%d,vz=%d,ve=%d,vc=%d\n", kylinMsg->frame_id, kylinMsg->cbus.fs,
+	 kylinMsg->cbus.cp.x, kylinMsg->cbus.cp.y, kylinMsg->cbus.cp.z, kylinMsg->cbus.gp.e, kylinMsg->cbus.gp.c,
+	 kylinMsg->cbus.cv.x, kylinMsg->cbus.cv.y, kylinMsg->cbus.cv.z, kylinMsg->cbus.gv.e, kylinMsg->cbus.gv.c);
 }
 
 static void Dnl_ProcSr04sMsg(const Sr04sMsg_t* sr04sMsg)
 {
-        //printf("*************************************KYLIN********************************************\n");
-        printf("id=%d,fixed=%d,moble=%d\n", sr04sMsg->frame_id, sr04sMsg->fixed, sr04sMsg->moble);
+  //printf("*************************************KYLIN********************************************\n");
+  printf("id=%d,fixed=%d,moble=%d\n", sr04sMsg->frame_id, sr04sMsg->fixed, sr04sMsg->moble);
 }
 
 static void Dnl_ProcPosCalibMsg(const PosCalibMsg_t* posCalibMsg)
 {
-        //printf("*************************************KYLIN********************************************\n");
-        printf("id=%d,el=%d,eh=%d,cl=%d,ch=%d\n", posCalibMsg->frame_id, posCalibMsg->data.el, posCalibMsg->data.eh, posCalibMsg->data.cl, posCalibMsg->data.ch);
+  //printf("*************************************KYLIN********************************************\n");
+  printf("id=%d,el=%d,eh=%d,cl=%d,ch=%d\n", posCalibMsg->frame_id, posCalibMsg->data.el, posCalibMsg->data.eh, posCalibMsg->data.cl, posCalibMsg->data.ch);
 }
 
 void PullMsg()
 {
-	// Get fifo free space
-	int len = FIFO_GetFree(&rx_fifo);
-	// If fifo free space insufficient, pop one element out
-	if (!len) {
-		uint8_t b;
-		len = FIFO_Pop(&rx_fifo, &b, 1);
-	}
-	// Read input stream according to the fifo free space left
-	len = read_serial(rx_buf[1], len, TIMEOUT);
-	// Push stream into fifo
-	FIFO_Push(&rx_fifo, rx_buf[1], len);
-	// Check if any message received
-	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_kylin, &kylinMsg)) {
-		Dnl_ProcKylinMsg(&kylinMsg);
-	}
-	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_sr04s, &sr04sMsg)) {
-		//Dnl_ProcSr04sMsg(&sr04sMsg);
-	}
-	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg)) {
-		//Dnl_ProcZGyroMsg(&zgyroMsg);
-	}
-	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_pos_calib, &posCalibMsg)) {
-		//Dnl_ProcPosCalibMsg(&posCalibMsg);
-	}
+  // Get fifo free space
+  int len = FIFO_GetFree(&rx_fifo);
+  // If fifo free space insufficient, pop one element out
+  if (!len) {
+    uint8_t b;
+    len = FIFO_Pop(&rx_fifo, &b, 1);
+  }
+  // Read input stream according to the fifo free space left
+  len = read_serial(rx_buf[1], len, TIMEOUT);
+  // Push stream into fifo
+  FIFO_Push(&rx_fifo, rx_buf[1], len);
+  // Check if any message received
+  if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_kylin, &kylinMsg)) {
+    Dnl_ProcKylinMsg(&kylinMsg);
+  }
+  if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_sr04s, &sr04sMsg)) {
+    //Dnl_ProcSr04sMsg(&sr04sMsg);
+  }
+  if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg)) {
+    //Dnl_ProcZGyroMsg(&zgyroMsg);
+  }
+  if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_pos_calib, &posCalibMsg)) {
+    //Dnl_ProcPosCalibMsg(&posCalibMsg);
+  }
 }
 
 void *KylinBotMsgPullerThreadFunc(void* param)
 {
-    while (exit_flag == 0) {
-	      PullMsg();
-	      usleep(1000);
-	}
-	return NULL;
+  while (exit_flag == 0) {
+    PullMsg();
+    usleep(1000);
+  }
+  return NULL;
 }
 
 
 void PushMsg()
 {
-	uint32_t len = Msg_Push(&tx_fifo, tx_buf[1], & msg_head_kylin, &txKylinMsg);
-	FIFO_Pop(&tx_fifo, tx_buf[1], len);
-	write_serial(tx_buf[1], len, TIMEOUT);
+  uint32_t len = Msg_Push(&tx_fifo, tx_buf[1], & msg_head_kylin, &txKylinMsg);
+  FIFO_Pop(&tx_fifo, tx_buf[1], len);
+  write_serial(tx_buf[1], len, TIMEOUT);
 }
 
 void *KylinBotMsgPusherThreadFunc(void* param)
 {
   while (exit_flag == 0) {
-		PushMsg();
-		usleep(4000);
-	}
+    PushMsg();
+    usleep(4000);
+  }
 }
 
 void init()
 {
-	FIFO_Init(&rx_fifo, rx_buf[0], BUF_LEN);
-	FIFO_Init(&tx_fifo, tx_buf[0], BUF_LEN);
+  FIFO_Init(&rx_fifo, rx_buf[0], BUF_LEN);
+  FIFO_Init(&tx_fifo, tx_buf[0], BUF_LEN);
 }
 
 typedef struct
@@ -135,17 +136,17 @@ void Tri_Init(Tri_t* tri, uint32_t scl)
 float Tri_Proc(Tri_t* tri)
 {
   if (tri->dir == 0) {
-     if (tri->cnt < tri->scl) {
-       tri->cnt++;
-     }
-     else {
-       tri->dir = 1;
-     }
+    if (tri->cnt < tri->scl) {
+      tri->cnt++;
+    }
+    else {
+      tri->dir = 1;
+    }
   }
   else if (tri->dir == 1) {
-     if (tri->cnt > 0) {
-       tri->cnt--;
-     }
+    if (tri->cnt > 0) {
+      tri->cnt--;
+    }
   }
   return (float)tri->cnt / (float)tri->scl;
 }
@@ -241,71 +242,77 @@ void *KylinBotMarkDetecThreadFunc(void* param)
       continue;
     
     int lostCount = 0;
-	int dif_x=0, dif_y=0;
-        Mat src=frame.clone();
-	switch(detection_mode)
+    int dif_x=0, dif_y=0;
+    Mat src=frame.clone();
+    switch(detection_mode)
+    {
+      case 0:   //do nothing
+	//TODO:
+	cout<<"detection_mode="<<(int)detection_mode<<endl;
+	break;
+      case 1:   //detect squares
+	cout<<"detection_mode="<<(int)detection_mode<<endl;
+	findSquares(src,frame, squares);
+	LocationMarkes(squares);
+	drawSquares(frame, squares); 
+	if(squares.size() > 0)
 	{
-	  case 0:   //do nothing
-	    //TODO:
-	    break;
-	  case 1:   //detect squares
-	    findSquares(src,frame, squares);
-	    LocationMarkes(squares);
-	    drawSquares(frame, squares); 
-	    if(squares.size() > 0)
-	    {
-	      lostCount = 0;
-	    }
-	    if (squares.size() == 0)
-	    {
-	      lostCount++;
-	      if(lostCount >= 3)
-	      {
-		lostCount = 0;
-		tx = 0;
-		ty = 0;
-		tz = 0;
-		rx = 0;
-		ry = 0;
-		rz = 0;
-	      } 
-	    }
-	        txKylinMsg.cbus.cp.x = tx;
-		txKylinMsg.cbus.cv.x = 500;
-		txKylinMsg.cbus.cp.y = tz;
-		txKylinMsg.cbus.cv.y = 800;
-		txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-		txKylinMsg.cbus.cv.z = 500;
-		txKylinMsg.cbus.gp.e = ty;
-		txKylinMsg.cbus.gv.e = 0;
-		if (abs(tx) < 100 && abs(ty) < 100 && abs(tz) < 100) {
-		      //txKylinMsg.gp.c = 2199;
-			  //txKylinMsg.gv.c = 4000;
-		} else {
-		//txKylinMsg.gp.c = 314;
-		//txKylinMsg.gv.c = 4000;
-		}
-	    break;
-	  case 2:   //detect green area
-
-	    Color_detect(src,dif_x, dif_y);
-	    txKylinMsg.cbus.cp.x = 10*dif_x;
-	    txKylinMsg.cbus.cp.y = 0;
-	    txKylinMsg.cbus.cp.z = 0; 
-	    break;
-	  case 3:  //follow line
-	    //TODO:
-	    break;
-	  default:
-	    break;
+	  lostCount = 0;
+	  
+	  txKylinMsg.cbus.cp.x = tx;
+	  txKylinMsg.cbus.cv.x = 500;
+	  txKylinMsg.cbus.cp.y = tz;
+	  txKylinMsg.cbus.cv.y = 800;
+	  txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+	  txKylinMsg.cbus.cv.z = 500;
+	  txKylinMsg.cbus.gp.e = ty;
+	  txKylinMsg.cbus.gv.e = 0;
 	}
-   
+	else if (squares.size() == 0)
+	{
+	  lostCount++;
+	  if(lostCount >= 3)
+	  {
+	    lostCount = 0;
+	    txKylinMsg.cbus.cp.x = 0;
+	    txKylinMsg.cbus.cp.y = 0;
+	    txKylinMsg.cbus.cp.z = 0;
+	    //rx = 0;
+	    //ry = 0;
+	    //rz = 0;
+	  } 
+	}	    
+	
+	if (abs(tz) < 30 ) {   //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
+	  useUltrasonic=true;
+	} else {
+	  useUltrasonic=false;
+	}
+	
+	break;
+      case 2:   //detect green area
+	cout<<"detection_mode="<<(int)detection_mode<<endl;
+	Color_detect(src,dif_x, dif_y);
+	txKylinMsg.cbus.cp.x = 10*dif_x;
+	txKylinMsg.cbus.cp.y = 0;
+	txKylinMsg.cbus.cp.z = 0; 
+	if(dif_x<10&&sr04sMsg.moble>50)   //number of pixels
+	  txKylinMsg.cbus.cp.y = sr04sMsg.moble;
+	
+	break;
+      case 3:  //follow line
+	//TODO:
+	break;
+      default:
+	break;
+    }
+    
     int c = waitKey(1);
-
+    
     if((char)c == 'q')
       break;
     
-
+    
   }
 }
 
@@ -319,7 +326,7 @@ void on_gainTracker(int,void *)
 }
 void on_brightnessTracker(int,void*)
 {
-   capture.setpara(gain,brightness_,whiteness_,saturation_);//cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+  capture.setpara(gain,brightness_,whiteness_,saturation_);//cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
 }
 void on_whitenessTracker(int,void*)
 {
@@ -331,42 +338,42 @@ void on_saturationTracker(int,void*)
 }
 void setcamera()
 {
-#ifdef _SHOW_PHOTO
-    namedWindow(wndname,1);
-#endif
+  #ifdef _SHOW_PHOTO
+  namedWindow(wndname,1);
+  #endif
   //RMVideoCapture capture("/dev/video0", 3);
-    capture.setVideoFormat(800, 600, 1);
-    // capture.setExposureTime(0, 62);//settings->exposure_time);
-   
-    //RMVideoCapture cap("/dev/video0", 3);
-    createTrackbar("exposure_time",wndname,&::exp_time,100,on_expTracker);
-    createTrackbar("gain",wndname,&::gain,100,on_gainTracker);
-    createTrackbar("whiteness",wndname,&::whiteness_,100,on_whitenessTracker);
-    createTrackbar("brightness_",wndname,&::brightness_,100,on_brightnessTracker);
-    createTrackbar("saturation",wndname,&::saturation_,100,on_saturationTracker);
-    on_brightnessTracker(0,0);
-    on_expTracker(0,0);
-    on_gainTracker(0,0);
-    on_saturationTracker(0,0);
-    on_whitenessTracker(0,0);
+  capture.setVideoFormat(800, 600, 1);
+  // capture.setExposureTime(0, 62);//settings->exposure_time);
+  
+  //RMVideoCapture cap("/dev/video0", 3);
+  createTrackbar("exposure_time",wndname,&::exp_time,100,on_expTracker);
+  createTrackbar("gain",wndname,&::gain,100,on_gainTracker);
+  createTrackbar("whiteness",wndname,&::whiteness_,100,on_whitenessTracker);
+  createTrackbar("brightness_",wndname,&::brightness_,100,on_brightnessTracker);
+  createTrackbar("saturation",wndname,&::saturation_,100,on_saturationTracker);
+  on_brightnessTracker(0,0);
+  on_expTracker(0,0);
+  on_gainTracker(0,0);
+  on_saturationTracker(0,0);
+  on_whitenessTracker(0,0);
 }
 
 int main(int argc, char** argv)
 {  
-    setcamera();
-    if(!capture.startStream())
-    {
-     cout<<"Open Camera failure.\n"; 
-     return 1;
-    }
-    
+  setcamera();
+  if(!capture.startStream())
+  {
+    cout<<"Open Camera failure.\n"; 
+    return 1;
+  }
+  
   init();
   int workState = 0;
-  uint32_t cnt = 0;
+  //uint32_t cnt = 0;
   Rmp_Config(&rmp, 50000);
   Maf_Init(&maf, maf_buf, MAF_BUF_LEN);
   Tri_Init(&tri, 2.5e4);
-
+  
   const char* device = "/dev/ttyTHS2";
   if (connect_serial(device,115200) == -1)
   {
@@ -377,27 +384,52 @@ int main(int argc, char** argv)
   MyThread kylibotMsgPullerTread;
   MyThread kylibotMsgPusherTread;
   MyThread kylibotMarkDetectionTread;
+  detection_mode=1;
   
   kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
   kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
   kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc,NULL);
-  workState=2;
+  int i=0;
   while ((!exit_flag))//&&(capture.read(frame))) 
   {
+    
     switch(workState)
     {
       case 0:  //TODO:
-	detection_mode=0;
+	
+	detection_mode=1;
+	i++;
+	if(i>50)
+	{
+	  //cout<<"workState="<<workState<<endl;
+	  workState=1;
+	}
+	if(useUltrasonic)
+	  detection_mode=2;
 	break;
       case 1:  //TODO
+	
 	detection_mode=1;
+	i++;
+	if(i>100)
+	{
+	  //cout<<"workState="<<workState<<endl;
+	  workState=2;
+	}
 	break;
       case 2:
 	detection_mode=2;
+	i++;
+	if(i>150)
+	{
+	  //cout<<"workState="<<workState<<endl;
+	  workState=0;
+	  i=0;
+	}
 	break;
       default:
 	break;
-
+	
     }
     
   }
