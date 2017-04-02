@@ -194,11 +194,19 @@ string.h
 
 ../uart/linux/serial.h
 
+<<<<<<< HEAD
 /home/ling/Documents/jwwangchn/ICRA/kylin/Markdetection.h
 opencv2/opencv.hpp
 /home/ling/Documents/jwwangchn/ICRA/kylin/opencv2/opencv.hpp
 
 /home/ling/Documents/jwwangchn/ICRA/kylin/RMVideoCapture.hpp
+=======
+/home/yang/workspace/kylin/Markdetection.h
+opencv2/opencv.hpp
+/home/yang/workspace/kylin/opencv2/opencv.hpp
+
+/home/yang/workspace/kylin/RMVideoCapture.hpp
+>>>>>>> 3e09d233613b13c8f8e253407b1beb8a3526efd7
 linux/videodev2.h
 /home/ling/Documents/jwwangchn/ICRA/kylin/linux/videodev2.h
 stdio.h

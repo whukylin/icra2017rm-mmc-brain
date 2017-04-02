@@ -18,8 +18,8 @@ using namespace cv;
 
 using namespace std;
 const char* wndname = "Square Detection Demo";
-double ry,rz,rx;
-double tx,ty,tz;
+volatile double ry,rz,rx;
+volatile double tx,ty,tz;
 
 int grey_thresh=100;
 int numframe=0;   //frame numbers
@@ -217,7 +217,7 @@ void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
 			 if(ROI_image_2.rows != 0 && ROI_image_2.cols != 0)
 			 {
 				 int rect_2_true=Color_judge(ROI_image_2,(cand_2[2].x-cand_2[0].x)*(cand_2[2].y-cand_2[0].y));
-				cout<<"rect2 true: "<<rect_2_true<<endl;
+				//cout<<"rect2 true: "<<rect_2_true<<endl;
             if(rect_2_true)
                 squares.push_back(cand_2);
 			 }
@@ -231,7 +231,7 @@ void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
 				if(ROI_image_3.rows != 0 && ROI_image_3.cols != 0)
 				{
 					int rect_3_true=Color_judge(ROI_image_3,(cand_3[2].x-cand_3[0].x)*(cand_3[2].y-cand_3[0].y));
-					cout<<"rect3 true: "<<rect_3_true<<endl;
+					//cout<<"rect3 true: "<<rect_3_true<<endl;
                 if(rect_3_true)
                     squares.push_back(cand_3);
 				}
@@ -355,7 +355,7 @@ void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_
     double rm[9];
     cv::Mat rotM(3, 3, CV_64FC1, rm);
     Rodrigues(rvec,rotM);
-    cout<<"tvec: "<<tvec<<endl;
+
     double r11 = rotM.ptr<double>(0)[0];
     double r12 = rotM.ptr<double>(0)[1];
     double r13 = rotM.ptr<double>(0)[2];
@@ -375,9 +375,13 @@ void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_
     tx=tvec.ptr<double>(0)[0];
     ty=tvec.ptr<double>(1)[0];
     tz=tvec.ptr<double>(2)[0];
+#ifdef _SHOW_OUTPUT
+    cout<<"tvec: "<<tvec<<endl;
     cout<<"thetay: "<<thetay<<endl;
     cout<<"thetaz: "<<thetaz<<endl;
     cout<<"thetax: "<<thetax<<endl;
+#endif
+    
 }
 int Color_judge(Mat &src,int area)
 {

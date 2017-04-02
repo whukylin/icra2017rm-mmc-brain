@@ -1,8 +1,8 @@
 //Image processing
 #include "opencv2/opencv.hpp"
 
-#define _SHOW_PHOTO
-#define _SHOW_OUTPUT
+//#define _SHOW_PHOTO
+//#define _SHOW_OUTPUT
 //#define Camera_One
 using namespace cv;
 
