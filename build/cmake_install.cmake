@@ -1,4 +1,4 @@
-# Install script for directory: /home/yang/workspace/kylin
+# Install script for directory: /home/ling/Documents/jwwangchn/ICRA/kylin
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -38,7 +38,7 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
-FILE(WRITE "/home/yang/workspace/kylin/build/${CMAKE_INSTALL_MANIFEST}" "")
+FILE(WRITE "/home/ling/Documents/jwwangchn/ICRA/kylin/build/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  FILE(APPEND "/home/yang/workspace/kylin/build/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  FILE(APPEND "/home/ling/Documents/jwwangchn/ICRA/kylin/build/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 ENDFOREACH(file)
