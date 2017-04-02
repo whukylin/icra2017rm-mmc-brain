@@ -472,7 +472,7 @@ int main(int argc, char **argv)
         if ((txKylinMsg.cbus.fs & (1u << 31)) == 0x80000000) //0xFF == 1111 1111   0x80000000
         {
             double absoluteDistance = pow((kylinMsg.cbus.cp.x - txKylinMsg.cbus.cp.x), 2) + pow((kylinMsg.cbus.cp.y - txKylinMsg.cbus.cp.y), 2);
-            double absuluteAngle = anb(txKylinMsg.cbus.cp.z - kylinMsg.cbus.cp.x);
+            double absuluteAngle = abs(txKylinMsg.cbus.cp.z - kylinMsg.cbus.cp.z);
             if (absoluteDistance < 10 && absuluteAngle < 5 * PI / 2)
             {
                 finishAbsoluteMoveFlag = true; //完成绝对位置移动的控制标志位
@@ -497,7 +497,7 @@ int main(int argc, char **argv)
 
             if (finishAbsoluteMoveFlag == true)
             {
-                workState = 1; //完成移动，进入下一阶段
+                //workState = 1; //完成移动，进入下一阶段
                 finishAbsoluteMoveFlag = false;
             }
 
