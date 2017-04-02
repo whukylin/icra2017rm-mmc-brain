@@ -21,7 +21,7 @@ int whiteness_ = 86;
 int saturation_ = 60;
 
 int8_t exit_flag = 0;
-
+int workState = 0;
 volatile int8_t detection_mode = 0;
 bool useUltrasonic = false;
 
@@ -398,11 +398,13 @@ void setcamera()
 void logicInit()
 {
     txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
-    detection_mode = 0; //摄像头关闭
+    detection_mode = 0;                //摄像头关闭
+    cout << "Logic init finish!!" << endl;
 }
 void workStateFlagPrint()
 {
-    cout<<
+    cout << "workState: " << workState;
+    cout << " finishAbsoluteMoveFlag:" << finishAbsoluteMoveFlag << endl;
 }
 
 int main(int argc, char **argv)
@@ -415,7 +417,6 @@ int main(int argc, char **argv)
     }
 
     init();
-    int workState = 0;
     //uint32_t cnt = 0;
     Rmp_Config(&rmp, 50000);
     Maf_Init(&maf, maf_buf, MAF_BUF_LEN);
@@ -444,7 +445,7 @@ int main(int argc, char **argv)
     // txKylinMsg.cbus.gp.e = ty;     //抓子高度
     // txKylinMsg.cbus.gv.e = 0;
 
-    // KylinMsg.cbus.cp.x 
+    // KylinMsg.cbus.cp.x
     // kylinMsg.cbus.cp.y
     // kylinMsg.cbus.cp.z
     // kylinMsg.cbus.gp.e
@@ -463,11 +464,12 @@ int main(int argc, char **argv)
     finishGraspFlag             抓子是否合拢
     finishSlidFlag              滑台是否达到指定高度
     */
-    logicInit();        //逻辑控制初始化
-    while ((!exit_flag)) //&&(capture.read(frame)))
+    logicInit();          //逻辑控制初始化
+    workStateFlagPrint(); //打印当前状态
+    while ((!exit_flag))  //&&(capture.read(frame)))
     {
         //如果当前处于绝对位置控制模式,进入判断条件
-        if((txKylinMsg.cbus.fs & (1u << 31))  == 0x80000000)           //0xFF == 1111 1111   0x80000000
+        if ((txKylinMsg.cbus.fs & (1u << 31)) == 0x80000000) //0xFF == 1111 1111   0x80000000
         {
             double absoluteDistance = pow((kylinMsg.cbus.cp.x - txKylinMsg.cbus.cp.x), 2) + pow((kylinMsg.cbus.cp.y - txKylinMsg.cbus.cp.y), 2);
             if (absoluteDistance < 10)
@@ -475,7 +477,7 @@ int main(int argc, char **argv)
                 finishAbsoluteMoveFlag = true; //完成绝对位置移动的控制标志位
             }
         }
-        workStateFlagPrint();   //打印当前状态
+        workStateFlagPrint(); //打印当前状态
         switch (workState)
         {
         case 0:
