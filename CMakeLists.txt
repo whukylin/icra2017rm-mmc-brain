@@ -7,7 +7,7 @@ project(kylin)
 find_package(OpenCV REQUIRED)
 
 if(NOT WIN32)
-ADD_DEFINITIONS("-std=c++0x -O3")
+ADD_DEFINITIONS( "-O0")
 endif(NOT WIN32)
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)

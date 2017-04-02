@@ -13,7 +13,8 @@ extern double ry, rz, rx;
 extern double tx, ty, tz;
 extern const char *wndname;
 
-RMVideoCapture capture("/dev/video0", 3);
+//RMVideoCapture capture("/dev/video0", 3);
+VideoCapture capture;
 int exp_time = 62;
 int gain = 30;
 int brightness_ = 10;
@@ -23,7 +24,7 @@ int saturation_ = 60;
 int8_t exit_flag = 0;
 int workState = 0;
 volatile int8_t detection_mode = 0;
-bool useUltrasonic = false;
+volatile bool useUltrasonic = false;
 
 FIFO_t rx_fifo;
 uint8_t rx_buf[2][BUF_LEN];
@@ -32,6 +33,10 @@ ZGyroMsg_t zgyroMsg;
 KylinMsg_t kylinMsg;
 Sr04sMsg_t sr04sMsg;
 PosCalibMsg_t posCalibMsg;
+
+#define SR04_MAF_LEN 10
+Maf_t sr04maf[2];
+float sr04buf[2][SR04_MAF_LEN];
 
 FIFO_t tx_fifo;
 uint8_t tx_buf[2][BUF_LEN];
@@ -90,10 +95,12 @@ void PullMsg()
     // Check if any message received
     if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_kylin, &kylinMsg))
     {
-        Dnl_ProcKylinMsg(&kylinMsg);
+       // Dnl_ProcKylinMsg(&kylinMsg);
     }
     if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_sr04s, &sr04sMsg))
     {
+		Maf_Proc(&sr04maf[0], sr04sMsg.fixed);
+		Maf_Proc(&sr04maf[1], sr04sMsg.moble);
         //Dnl_ProcSr04sMsg(&sr04sMsg);
     }
     if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg))
@@ -140,6 +147,8 @@ void init()
 
     FIFO_Init(&rx_fifo, rx_buf[0], BUF_LEN);
     FIFO_Init(&tx_fifo, tx_buf[0], BUF_LEN);
+	Maf_Init(&sr04maf[0], sr04buf[0], SR04_MAF_LEN);
+	Maf_Init(&sr04maf[1], sr04buf[1], SR04_MAF_LEN);
 }
 
 typedef struct
@@ -267,24 +276,29 @@ void *KylinBotMarkDetecThreadFunc(void *param)
     vector<vector<Point>> squares;
     int lostFlag = false;
     //KylinBotMsgPullerThreadFunc(NULL);
+	printf("hjhklhjllllllhkl\n");
+	printf("exit_flag=%d\n",exit_flag);
+	int lostCount = 0;
+	int CountVframe=0;
     while (exit_flag == 0) //&&(capture.read(frame)))
     {
         squares.clear();
         double t = (double)getTickCount();
 
         capture >> frame;
-        //cout<<"IN"<<endl;
         if (frame.empty())
             continue;
 
-        int lostCount = 0;
+
         int dif_x = 0, dif_y = 0;
         Mat src = frame.clone();
+		//cout << "detection_mode=" << (int)detection_mode << endl;
         switch (detection_mode)
         {
         case 0: //do nothing
             //TODO:
-            cout << "detection_mode=" << (int)detection_mode << endl;
+			//imshow("IM",frame);
+           cout << "detection_mode=" << (int)detection_mode << endl;
             break;
         case 1: //detect squares
             cout << "detection_mode=" << (int)detection_mode << endl;
@@ -296,6 +310,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             {
                 lostCount = 0;
                 lostFlag = false;
+				CountVframe++;
                 // txKylinMsg.cbus.cp.x = tx;
                 // txKylinMsg.cbus.cv.x = 500;
                 // txKylinMsg.cbus.cp.y = tz;
@@ -305,22 +320,23 @@ void *KylinBotMarkDetecThreadFunc(void *param)
                 // txKylinMsg.cbus.gp.e = ty;
                 // txKylinMsg.cbus.gv.e = 0;
             }
-            else if (squares.size() == 0)
+            if (squares.size() == 0)
             {
                 lostCount++;
                 if (lostCount >= 3)
                 {
+					printf("lost frame\n");
                     lostCount = 0;
                     lostFlag = true;
+					tx = 60;
+					ty = 0;
                     tz = 0;
-                    txKylinMsg.cbus.cp.y = 0;
-                    txKylinMsg.cbus.cp.z = 0;
-                    //rx = 0;
-                    //ry = 0;
-                    //rz = 0;
+                    rx = 0;
+                    ry = 0;
+                    rz = 0;
                 }
             }
-            if (abs(tz) < 30 && (lostFlag == false))
+            if (abs(tz) < 700 && (lostFlag == false)&&CountVframe>10)
             { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
                 finishDetectBoxFlag = true;
             }
@@ -328,10 +344,10 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             {
                 finishDetectBoxFlag = false;
             }
-
+             printf("tz=%lf\n",tz);
             break;
         case 2: //detect green area
-            // cout << "detection_mode=" << (int)detection_mode << endl;
+            cout << "detection_mode=" << (int)detection_mode << endl;
             Color_detect(src, dif_x, dif_y);
             tx = 10 * dif_x;
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
@@ -343,6 +359,14 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             }
             break;
         case 3: //follow line
+            cout << "detection_mode=" << (int)detection_mode << endl;
+			break;
+		case 4: //follow line
+            cout << "detection_mode=" << (int)detection_mode << endl;
+			break;
+		case 5: //follow line
+            cout << "detection_mode=" << (int)detection_mode << endl;
+
             //TODO:
             break;
         default:
@@ -354,28 +378,29 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         if ((char)c == 'q')
             break;
     }
+
 }
 
 void on_expTracker(int, void *)
 {
-    capture.setExposureTime(0, ::exp_time); //settings->exposure_time);
+    //capture.setExposureTime(0, ::exp_time); //settings->exposure_time);
 }
 void on_gainTracker(int, void *)
 {
-    capture.setpara(gain, brightness_, whiteness_, saturation_); // cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+    //capture.setpara(gain, brightness_, whiteness_, saturation_); // cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
 }
 void on_brightnessTracker(int, void *)
 {
 
-    capture.setpara(gain, brightness_, whiteness_, saturation_); //cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+    //capture.setpara(gain, brightness_, whiteness_, saturation_); //cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
 }
 void on_whitenessTracker(int, void *)
 {
-    capture.setpara(gain, brightness_, whiteness_, saturation_); // cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+    //capture.setpara(gain, brightness_, whiteness_, saturation_); // cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
 }
 void on_saturationTracker(int, void *)
 {
-    capture.setpara(gain, brightness_, whiteness_, saturation_); //cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+    //capture.setpara(gain, brightness_, whiteness_, saturation_); //cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
 }
 void setcamera()
 {
@@ -383,26 +408,30 @@ void setcamera()
     namedWindow(wndname, 1);
 #endif
     //RMVideoCapture capture("/dev/video0", 3);
-    capture.setVideoFormat(800, 600, 1);
+   // capture.setVideoFormat(800, 600, 1);
+
+	capture.open(0);	
+	capture.set(CV_CAP_PROP_FRAME_WIDTH,800);
+    capture.set(CV_CAP_PROP_FRAME_HEIGHT,600);	
     // capture.setExposureTime(0, 62);//settings->exposure_time);
 
     //RMVideoCapture cap("/dev/video0", 3);
-    createTrackbar("exposure_time", wndname, &::exp_time, 100, on_expTracker);
-    createTrackbar("gain", wndname, &::gain, 100, on_gainTracker);
-    createTrackbar("whiteness", wndname, &::whiteness_, 100, on_whitenessTracker);
-    createTrackbar("brightness_", wndname, &::brightness_, 100, on_brightnessTracker);
-    createTrackbar("saturation", wndname, &::saturation_, 100, on_saturationTracker);
-    on_brightnessTracker(0, 0);
-    on_expTracker(0, 0);
-    on_gainTracker(0, 0);
-    on_saturationTracker(0, 0);
-    on_whitenessTracker(0, 0);
+   // createTrackbar("exposure_time", wndname, &::exp_time, 100, on_expTracker);
+   // createTrackbar("gain", wndname, &::gain, 100, on_gainTracker);
+   // createTrackbar("whiteness", wndname, &::whiteness_, 100, on_whitenessTracker);
+   // createTrackbar("brightness_", wndname, &::brightness_, 100, on_brightnessTracker);
+   // createTrackbar("saturation", wndname, &::saturation_, 100, on_saturationTracker);
+   // on_brightnessTracker(0, 0);
+   // on_expTracker(0, 0);
+   // on_gainTracker(0, 0);
+   // on_saturationTracker(0, 0);
+   // on_whitenessTracker(0, 0);
 }
 void logicInit()
 {
-    txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
-    detection_mode = 0;                //摄像头关闭
-    cout << "Logic init finish!!" << endl;
+    txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+    //detection_mode = 0;                //摄像头关闭
+    //cout << "Logic init finish!!" << endl;
 }
 void workStateFlagPrint()
 {
@@ -410,14 +439,56 @@ void workStateFlagPrint()
     cout << " finishAbsoluteMoveFlag:" << finishAbsoluteMoveFlag << endl;
 }
 
+KylinMsg_t kylinOdomCalib;
+static uint32_t frame_cnt = 0;
+uint8_t updateOdomCalib()
+{
+	uint32_t frame_id = kylinMsg.frame_id;
+	while (frame_cnt < 10) {
+		if (kylinMsg.frame_id != frame_id) {
+			frame_id = kylinMsg.frame_id;
+			frame_cnt++;
+		}
+		//cout << "waiting for new KylinMsg" << endl;
+	}
+	memcpy(&kylinOdomCalib, &kylinMsg, sizeof(KylinMsg_t));
+	//cout << "kylinOdomCalib updated!" << endl;
+	return 1;
+}
+
+KylinMsg_t kylinOdomError;
+uint8_t updateOdomError()
+{
+	kylinOdomError.frame_id = kylinMsg.frame_id;
+	kylinOdomError.cbus.cp.x = txKylinMsg.cbus.cp.x - kylinMsg.cbus.cp.x;// + kylinOdomCalib.cbus.cp.x;
+	kylinOdomError.cbus.cp.y = txKylinMsg.cbus.cp.y - kylinMsg.cbus.cp.y;// + kylinOdomCalib.cbus.cp.y;
+	kylinOdomError.cbus.cp.z = txKylinMsg.cbus.cp.z - kylinMsg.cbus.cp.z;// + kylinOdomCalib.cbus.cp.z;
+	//cout << "ref.x=" << txKylinMsg.cbus.cp.x << ", fdb.x=" << kylinMsg.cbus.cp.x << endl;
+	//cout << "ref.y=" << txKylinMsg.cbus.cp.y << ", fdb.y=" << kylinMsg.cbus.cp.y << endl;
+	kylinOdomError.cbus.gp.e = txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e;// + kylinOdomCalib.cbus.gp.e;
+	kylinOdomError.cbus.gp.c = txKylinMsg.cbus.gp.c - kylinMsg.cbus.gp.c;// + kylinOdomCalib.cbus.gp.c;
+	kylinOdomError.cbus.cv.x = txKylinMsg.cbus.cv.x - kylinMsg.cbus.cp.x;// + kylinOdomCalib.cbus.cv.x;
+	kylinOdomError.cbus.cv.y = txKylinMsg.cbus.cv.y - kylinMsg.cbus.cv.y;// + kylinOdomCalib.cbus.cv.y;
+	kylinOdomError.cbus.cv.z = txKylinMsg.cbus.cv.z - kylinMsg.cbus.cv.z;// + kylinOdomCalib.cbus.cv.z;
+	kylinOdomError.cbus.gv.e = txKylinMsg.cbus.gv.e - kylinMsg.cbus.gv.e;// + kylinOdomCalib.cbus.gv.e;
+	kylinOdomError.cbus.gv.c = txKylinMsg.cbus.gv.c - kylinMsg.cbus.gv.c;// + kylinOdomCalib.cbus.gv.c;
+}
+
 int main(int argc, char **argv)
 {
     setcamera();
-    if (!capture.startStream())
+    if (!capture.isOpened())//startStream())
     {
         cout << "Open Camera failure.\n";
         return 1;
     }
+    Mat img;
+	capture>>img;
+	printf("%d %d \n",img.cols,img.rows);
+	if(img.empty())
+		return 0;
+	capture>>img;
+	capture>>img;
 
     init();
     //uint32_t cnt = 0;
@@ -428,8 +499,8 @@ int main(int argc, char **argv)
     const char *device = "/dev/ttyTHS2";
     if (connect_serial(device, 115200) == -1)
     {
-        //printf("serial open error!\n");
-        //return -1;
+        printf("serial open error!\n");
+        return -1;
     }
 
     MyThread kylibotMsgPullerTread;
@@ -476,57 +547,65 @@ int main(int argc, char **argv)
     finishGraspFlag             抓子是否合拢
     finishSlidFlag              滑台是否达到指定高度
     */
+	updateOdomCalib();
+	//cout << "w111s: " << workState << endl;
     logicInit();          //逻辑控制初始化
-    workStateFlagPrint(); //打印当前状态
+    //workStateFlagPrint(); //打印当前状态
     while ((!exit_flag))  //&&(capture.read(frame)))
     {
+		//cout << "ws: " << workState << endl;
+		updateOdomError();
+		
         //如果当前处于绝对位置控制模式,进入判断条件
-        if ((txKylinMsg.cbus.fs & (1u << 31)) == 0x80000000) //0xFF == 1111 1111   0x80000000
+        if (txKylinMsg.cbus.fs & (1u << 30)) //0xFF == 1111 1111   0x80000000
         {
-            double absoluteDistance = pow((kylinMsg.cbus.cp.x - txKylinMsg.cbus.cp.x), 2) + pow((kylinMsg.cbus.cp.y - txKylinMsg.cbus.cp.y), 2);
-            double absuluteAngle = abs(txKylinMsg.cbus.cp.z - kylinMsg.cbus.cp.z);
-            if (absoluteDistance < 10 && absuluteAngle < 5 * PI / 2)
+			
+            double absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
+            double absuluteAngle = abs(kylinOdomError.cbus.cp.z);
+			//cout<<"absoluteDistance" << absoluteDistance << endl;
+			//cout<<"absuluteAngle" << absuluteAngle << endl;
+            if (absoluteDistance < 10 && absuluteAngle < 5.0f * PI / 2.0f)
             {
                 finishAbsoluteMoveFlag = true; //完成绝对位置移动的控制标志位
             }
         }
 
-        if((txKylinMsg.cbus.fs & (1u << 31)) == 0x00000000)
+        if((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
         {
-            if(sr04sMsg.moble > 20)
+            if(sr04maf[1].avg < 80)
             {
                 finishMobleUltrasonicFlag = true;
             }
-            if(txKylinMsg.cbus.gp.c == 2199)
+            if(kylinMsg.cbus.gp.c == posCalibMsg.data.ch)
             {
                 finishGraspFlag = true;
             }
-            if(txKylinMsg.cbus.gp.e >= 280)
+            if(kylinMsg.cbus.gp.e >= (posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f)
             {
                 finishSlidFlag = true;
             }
             
         }
-        workStateFlagPrint(); //打印当前状态
+        //workStateFlagPrint(); //打印当前状态
         switch (workState)
         {
         case 0:
             //关闭视觉检测，小车在原点旋转90度，启动视觉检测（本阶段视觉关）仅仅只是//小车旋转
             detection_mode = 0;             //关闭视觉
-            txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
-            txKylinMsg.cbus.cp.x = 0;
+            txKylinMsg.cbus.fs |= (1u << 30); //切换到绝对位置控制模式
+            txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
             txKylinMsg.cbus.cv.x = 0;
-            txKylinMsg.cbus.cp.y = 0;
+            txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
             txKylinMsg.cbus.cv.y = 0;
-            txKylinMsg.cbus.cp.z = 1000 * PI / 2; //旋转90度
-            txKylinMsg.cbus.cv.z = 500;
+            txKylinMsg.cbus.cp.z = 10+ kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
+            txKylinMsg.cbus.cv.z = 1000;
             txKylinMsg.cbus.gp.e = 0;
             txKylinMsg.cbus.gv.e = 0;
             txKylinMsg.cbus.gp.c = 314; //抓子张开
 
             if (finishAbsoluteMoveFlag == true)
             {
-                //workState = 1; //完成移动，进入下一阶段
+                workState = 1; //完成移动，进入下一阶段
                 finishAbsoluteMoveFlag = false;
             }
 
@@ -535,10 +614,12 @@ int main(int argc, char **argv)
             //利用视觉引导小车移动
             if (finishDetectBoxFlag == false)
             {
+				
                 detection_mode = 1;                //打开视觉,检测矩形
-                txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
+                //cout<<"detection_mode"<<(int)detection_mode<<endl;
+                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
 
-                txKylinMsg.cbus.cp.x = tx;
+                txKylinMsg.cbus.cp.x = tx-60;
                 txKylinMsg.cbus.cv.x = 500;
                 txKylinMsg.cbus.cp.y = tz;
                 txKylinMsg.cbus.cv.y = 800;
@@ -552,8 +633,8 @@ int main(int argc, char **argv)
             if (finishDetectBoxFlag == true && finishDetectCentroidFlag == false)
             {
                 detection_mode = 2;                //打开视觉,检测质心
-                txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
-                txKylinMsg.cbus.cp.x = tx;
+                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+                txKylinMsg.cbus.cp.x = tx-60;
                 txKylinMsg.cbus.cv.x = 500;
                 txKylinMsg.cbus.cp.y = 0;
                 txKylinMsg.cbus.cv.y = 0;
@@ -567,10 +648,10 @@ int main(int argc, char **argv)
             if (finishDetectCentroidFlag == true && finishMobleUltrasonicFlag == false)
             {
                 detection_mode = 0;                //关闭视觉
-                txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
+                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
                 txKylinMsg.cbus.cp.x = 0;
                 txKylinMsg.cbus.cv.x = 0;
-                txKylinMsg.cbus.cp.y = sr04sMsg.moble;
+                txKylinMsg.cbus.cp.y = sr04maf[1].avg;
                 txKylinMsg.cbus.cv.y = 500;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
@@ -588,9 +669,10 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.y = 0;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
-                txKylinMsg.cbus.gp.e = 0;
-                txKylinMsg.cbus.gv.e = 0;
-                txKylinMsg.cbus.gp.c = 2199 - txKylinMsg.cbus.gp.c; //抓子合拢
+                txKylinMsg.cbus.gp.e = (posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
+                txKylinMsg.cbus.gv.e = 1000;
+                txKylinMsg.cbus.gp.c = posCalibMsg.data.ch - 100; //抓子合拢
+                txKylinMsg.cbus.gv.c = 8000;
             }
             //抓子合拢, 开始抬高滑台
             if (finishGraspFlag == true && finishSlidFlag == false)
@@ -602,9 +684,10 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.y = 0;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
-                txKylinMsg.cbus.gp.e = 300 - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
-                txKylinMsg.cbus.gv.e = 400;
-                txKylinMsg.cbus.gp.c = 2199; //抓子合拢
+                txKylinMsg.cbus.gp.e = posCalibMsg.data.el; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
+                txKylinMsg.cbus.gv.e = 1000;
+                txKylinMsg.cbus.gp.c = posCalibMsg.data.ch; //抓子合拢
+                txKylinMsg.cbus.gv.c = 0;
             }
             //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
             if (finishSlidFlag == true)
@@ -616,7 +699,7 @@ int main(int argc, char **argv)
         case 2:
             //小车回到原点, 车头朝向前方
             detection_mode = 0;             //关闭视觉
-            txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+            txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 1000;
             txKylinMsg.cbus.cp.y = 0;
@@ -635,7 +718,7 @@ int main(int argc, char **argv)
         case 3:
             //小车从原点达到基地区第一堆盒子的位置, 第一堆盒子的坐标 (0,3485)
             detection_mode = 0;             //关闭视觉
-            txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+            txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 1000;
             txKylinMsg.cbus.cp.y = 3485;
@@ -650,7 +733,7 @@ int main(int argc, char **argv)
                 //到达指定位置，放下盒子
                 if (finishSlidFlag == false)
                 {
-                    txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+                    txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
                     txKylinMsg.cbus.cp.x = 0;
                     txKylinMsg.cbus.cv.x = 1000;
                     txKylinMsg.cbus.cp.y = 3485;
@@ -664,7 +747,7 @@ int main(int argc, char **argv)
                 //松开抓子
                 if (finishSlidFlag == true && finishGraspFlag == false)
                 {
-                    txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+                    txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
                     txKylinMsg.cbus.cp.x = 0;
                     txKylinMsg.cbus.cv.x = 1000;
                     txKylinMsg.cbus.cp.y = 3485;
@@ -685,7 +768,7 @@ int main(int argc, char **argv)
         case 4:
             //回原点
             detection_mode = 0;             //关闭视觉
-            txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
+            txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 1000;
             txKylinMsg.cbus.cp.y = 0;
@@ -705,6 +788,9 @@ int main(int argc, char **argv)
             break;
         }
     }
+    
+    if(capture.isOpened())
+		capture.release();
     disconnect_serial();
     return 0;
 }
