@@ -803,12 +803,6 @@ kylin: /usr/local/lib/libopencv_features2d.so.2.4.13
 kylin: /usr/local/lib/libopencv_core.so.2.4.13
 kylin: /usr/local/lib/libopencv_contrib.so.2.4.13
 kylin: /usr/local/lib/libopencv_calib3d.so.2.4.13
-kylin: /usr/lib/x86_64-linux-gnu/libGLU.so
-kylin: /usr/lib/x86_64-linux-gnu/libGL.so
-kylin: /usr/lib/x86_64-linux-gnu/libSM.so
-kylin: /usr/lib/x86_64-linux-gnu/libICE.so
-kylin: /usr/lib/x86_64-linux-gnu/libX11.so
-kylin: /usr/lib/x86_64-linux-gnu/libXext.so
 kylin: /usr/local/lib/libopencv_nonfree.so.2.4.13
 kylin: /usr/local/lib/libopencv_ocl.so.2.4.13
 kylin: /usr/local/lib/libopencv_gpu.so.2.4.13

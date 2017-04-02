@@ -395,6 +395,15 @@ void setcamera()
     on_saturationTracker(0, 0);
     on_whitenessTracker(0, 0);
 }
+void logicInit()
+{
+    txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
+    detection_mode = 0; //摄像头关闭
+}
+void workStateFlagPrint()
+{
+    cout<<
+}
 
 int main(int argc, char **argv)
 {
@@ -435,6 +444,17 @@ int main(int argc, char **argv)
     // txKylinMsg.cbus.gp.e = ty;     //抓子高度
     // txKylinMsg.cbus.gv.e = 0;
 
+    // KylinMsg.cbus.cp.x 
+    // kylinMsg.cbus.cp.y
+    // kylinMsg.cbus.cp.z
+    // kylinMsg.cbus.gp.e
+    // kylinMsg.cbus.gp.c
+    // kylinMsg.cbus.cv.x
+    // kylinMsg.cbus.cv.y
+    // kylinMsg.cbus.cv.z
+    // kylinMsg.cbus.gv.e
+    // kylinMsg.cbus.gv.c
+
     /*Flag变量汇总:
     finishAbsoluteMoveFlag      完成绝对位置移动
     finishDetectBoxFlag         完成检测盒子(小车到了检测不到盒子的位置)
@@ -443,13 +463,24 @@ int main(int argc, char **argv)
     finishGraspFlag             抓子是否合拢
     finishSlidFlag              滑台是否达到指定高度
     */
+    logicInit();        //逻辑控制初始化
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
+        //如果当前处于绝对位置控制模式,进入判断条件
+        if((txKylinMsg.cbus.fs & (1u << 31))  == 0x80000000)           //0xFF == 1111 1111   0x80000000
+        {
+            double absoluteDistance = pow((kylinMsg.cbus.cp.x - txKylinMsg.cbus.cp.x), 2) + pow((kylinMsg.cbus.cp.y - txKylinMsg.cbus.cp.y), 2);
+            if (absoluteDistance < 10)
+            {
+                finishAbsoluteMoveFlag = true; //完成绝对位置移动的控制标志位
+            }
+        }
+        workStateFlagPrint();   //打印当前状态
         switch (workState)
         {
         case 0:
             //关闭视觉检测，小车在原点旋转90度，启动视觉检测（本阶段视觉关）仅仅只是//小车旋转
-            detection_mode = 0;         //关闭视觉
+            detection_mode = 0;             //关闭视觉
             txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 0;
@@ -472,7 +503,7 @@ int main(int argc, char **argv)
             //利用视觉引导小车移动
             if (finishDetectBoxFlag == false)
             {
-                detection_mode = 1;            //打开视觉,检测矩形
+                detection_mode = 1;                //打开视觉,检测矩形
                 txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
 
                 txKylinMsg.cbus.cp.x = tx;
@@ -488,7 +519,7 @@ int main(int argc, char **argv)
             //盒子到了检测不到的位置, 开启质心检测
             if (finishDetectBoxFlag == true && finishDetectCentroidFlag == false)
             {
-                detection_mode = 2;            //打开视觉,检测质心
+                detection_mode = 2;                //打开视觉,检测质心
                 txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
                 txKylinMsg.cbus.cp.x = tx;
                 txKylinMsg.cbus.cv.x = 1000;
@@ -503,7 +534,7 @@ int main(int argc, char **argv)
             //完成了质心检测,开始使用 moble 超声波进行引导
             if (finishDetectCentroidFlag == true && finishMobleUltrasonicFlag == false)
             {
-                detection_mode = 0;            //关闭视觉
+                detection_mode = 0;                //关闭视觉
                 txKylinMsg.cbus.fs &= ~(1u << 31); //切换到相对位置控制模式
                 txKylinMsg.cbus.cp.x = 0;
                 txKylinMsg.cbus.cv.x = 0;
@@ -552,7 +583,7 @@ int main(int argc, char **argv)
             break;
         case 2:
             //小车回到原点, 车头朝向前方
-            detection_mode = 0;         //关闭视觉
+            detection_mode = 0;             //关闭视觉
             txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 1000;
@@ -571,7 +602,7 @@ int main(int argc, char **argv)
             break;
         case 3:
             //小车从原点达到基地区第一堆盒子的位置, 第一堆盒子的坐标 (0,3485)
-            detection_mode = 0;         //关闭视觉
+            detection_mode = 0;             //关闭视觉
             txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 1000;
@@ -621,7 +652,7 @@ int main(int argc, char **argv)
             break;
         case 4:
             //回原点
-            detection_mode = 0;         //关闭视觉
+            detection_mode = 0;             //关闭视觉
             txKylinMsg.cbus.fs |= 1u << 31; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 1000;
@@ -645,4 +676,3 @@ int main(int argc, char **argv)
     disconnect_serial();
     return 0;
 }
-
