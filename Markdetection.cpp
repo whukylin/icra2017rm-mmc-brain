@@ -40,8 +40,8 @@ Mat cameraMatrix=(Mat_<double>(3,3)<<1079.2096,0,342.5224,0,1075.3261,353.0309,0
 Mat distCoeffs=(Mat_<double>(1,4)<<-0.4513,0.1492,-0.0030,0.0043);
 #endif
 
-const int ARROW_AREA_MIN=3000;//variable
-const int ARROW_AREA_MAX=700*500;
+const int ARROW_AREA_MIN=2800;//variable
+const int ARROW_AREA_MAX=40000;
 Mat pro_after;
 int cx=343;   //To change to calibration parameter.
 int cy=320;   //the same with cameraMatrix.cx,cy
@@ -489,8 +489,9 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     cvtColor(frame, HSVImage, CV_BGR2HSV);
     split(HSVImage,HSVSplit);
     //Hgreen=HSVSplit[0]>lower&&HSVSplit[0]<up , mask, threshold can be fine tuned.
-    inRange(HSVSplit[0], Scalar(80), Scalar(120), HGreen);
-    threshold(HSVSplit[1], SGreen, 80, 255, THRESH_BINARY);    //S channal intensity
+    inRange(HSVSplit[0], Scalar(90), Scalar(120), HGreen);
+	inRange(HSVSplit[1], Scalar(114), Scalar(210), SGreen);
+    //threshold(HSVSplit[1], SGreen, 80, 255, THRESH_BINARY);    //S channal intensity
     //bitwise conjunction
     cv::bitwise_and(HGreen, SGreen, out);
     morphologyEx(out, out, MORPH_OPEN, element);//open operator,remove isolated noise points.
@@ -512,15 +513,19 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
         max_tmp=(r.area()>max_tmp.area())?r:max_tmp;
     }
     if(max_tmp.area()<ARROW_AREA_MIN||max_tmp.area()>ARROW_AREA_MAX)
+	{
+		diff_x=DIF_CEN;
+		diff_y=0;
         return 0;
+	}
     Mat pro;
     solid(max_tmp).copyTo(pro);
     pro_after=pro.clone();
     rectangle(result, max_tmp, Scalar(255), 2);
     cout<<"area "<<max_tmp.area()<<endl;
-#ifdef _SHOW_PHOTO
+//#ifdef _SHOW_PHOTO
     imshow("result",result);
-#endif
+//#endif
    // if('q'==(char)waitKey(7)) exit(0);
     
     //caculate the center of green area

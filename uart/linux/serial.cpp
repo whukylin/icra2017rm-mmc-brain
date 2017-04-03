@@ -146,7 +146,7 @@ int read_serial( unsigned char *buf, int len, int timeout )
     int read_len = 0;
     for( ; read_len < len; )
     {
-	    int n = read(g_sdk_uart_fd, buf + read_len, len);
+	    int n = read(g_sdk_uart_fd, buf + read_len, len-read_len);
         if( n < 0 )
         {
             break;
@@ -166,7 +166,7 @@ int write_serial( unsigned char* buf, int len, int timeout )
     int w_len = 0;
     for( ; w_len < len; )
     {
-	    int n = write(g_sdk_uart_fd, buf + w_len, len);
+	    int n = write(g_sdk_uart_fd, buf + w_len, len-w_len);
         if( n < 0 )
         {
             break;

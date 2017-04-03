@@ -27,6 +27,7 @@ typedef struct
 {
 	uint32_t scale;
 	uint32_t count;
+	float out;
 }Rmp_t;
 
 void Rmp_Config(Rmp_t* rmp, uint32_t scale);
@@ -37,6 +38,7 @@ uint8_t Rmp_IsOverflow(const Rmp_t* rmp);
 #define RMP(SCALE) { \
 	.scale = SCALE, \
 	.count = 0, \
+	.out = 0, \
 }
 	
 #ifdef __cpluplus

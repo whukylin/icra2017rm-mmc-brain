@@ -26,14 +26,15 @@ float Rmp_Calc(Rmp_t* rmp)
 	if(rmp->count < rmp->scale)
 	{
 		rmp->count++;
-		return rmp->count / (float)rmp->scale;
+		rmp->out = rmp->count / (float)rmp->scale;
 	}
-	return 1;
+	return rmp->out;
 }
 
 void Rmp_Reset(Rmp_t* rmp)
 {
 	rmp->count = 0;
+	rmp->out = 0;
 }
 
 uint8_t Rmp_IsOverflow(const Rmp_t* rmp)

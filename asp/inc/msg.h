@@ -166,6 +166,8 @@ typedef struct
 	uint32_t frame_id;
 	uint16_t fixed;
 	uint16_t moble;
+	uint16_t left;
+	uint16_t right;
 }Sr04sMsg_t;
 
 #define KYLIN_MSG_VALUE_SCALE CBUS_VALUE_SCALE
@@ -391,13 +393,6 @@ uint32_t Msg_Push(FIFO_t* fifo, void* buf, const void* head, const void* body);
  * @return Message length (num of bytes)
  */
 uint32_t Msg_Pop(FIFO_t* fifo, void* buf, const void* head, void* body);
-
-/**
- * @brief Get the full length of a specific message head. 
- * @param head Message head
- * @return Full (head + body + crc) message length (num of bytes)
- */
-uint32_t Msg_GetFullLen(const void* head);
 
 extern const MsgHead_t msg_head_vrc;
 extern const MsgHead_t msg_head_vhc;
