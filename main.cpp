@@ -33,9 +33,10 @@ KylinMsg_t kylinMsg;
 Sr04sMsg_t sr04sMsg;
 PosCalibMsg_t posCalibMsg;
 
+#define SR04_NUM 4
 #define SR04_MAF_LEN 10
-Maf_t sr04maf[2];
-float sr04buf[2][SR04_MAF_LEN];
+Maf_t sr04maf[SR04_NUM];
+float sr04buf[SR04_NUM][SR04_MAF_LEN];
 
 FIFO_t tx_fifo;
 uint8_t tx_buf[2][BUF_LEN];
@@ -52,7 +53,6 @@ volatile bool finishSlidFlag = false;            //滑台是否达到指定高�
 
 static void Dnl_ProcZGyroMsg(const ZGyroMsg_t *zgyroMsg)
 {
-	
 	//printf("*************************************ZGYRO********************************************\n");
 	printf("id=%d,angle=%d,rate=%d\n", zgyroMsg->frame_id, zgyroMsg->angle, zgyroMsg->rate);
 }
@@ -102,7 +102,9 @@ void PullMsg()
 	{
 		Maf_Proc(&sr04maf[0], sr04sMsg.fixed);
 		Maf_Proc(&sr04maf[1], sr04sMsg.moble);
-		Dnl_ProcSr04sMsg(&sr04sMsg);
+		Maf_Proc(&sr04maf[2], sr04sMsg.left);
+		Maf_Proc(&sr04maf[3], sr04sMsg.right);
+		//Dnl_ProcSr04sMsg(&sr04sMsg);
 	}
 	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg))
 	{
@@ -116,7 +118,6 @@ void PullMsg()
 
 void *KylinBotMsgPullerThreadFunc(void *param)
 {
-	
 	while (exit_flag == 0)
 	{
 		PullMsg();
@@ -154,6 +155,7 @@ void init()
 
 typedef struct
 {
+
 	uint8_t dir;
 	uint32_t cnt;
 	uint32_t scl;
@@ -161,6 +163,7 @@ typedef struct
 
 void Tri_Init(Tri_t *tri, uint32_t scl)
 {
+
 	tri->scl = scl;
 	tri->cnt = 0;
 	tri->dir = 0;
@@ -191,6 +194,7 @@ float Tri_Proc(Tri_t *tri)
 
 void Tri_Reset(Tri_t *tri)
 {
+
 	tri->cnt = 0;
 	tri->dir = 0;
 	//memset(tri, 0, sizeof(Tri_t));
@@ -470,52 +474,51 @@ void workStateFlagPrint()
 {
 	cout << "workState: " << workState;
 	cout << " finishAbsoluteMoveFlag:" << finishAbsoluteMoveFlag << endl;
+
 }
 
 KylinMsg_t kylinOdomCalib;
 static uint32_t frame_cnt = 0;
 uint8_t updateOdomCalib()
 {
-	uint32_t frame_id = kylinMsg.frame_id;
-	while (frame_cnt < 10) {
-		if (kylinMsg.frame_id != frame_id) {
-			frame_id = kylinMsg.frame_id;
-			frame_cnt++;
-		}
-		//cout << "waiting for new KylinMsg" << endl;
-	}
-	memcpy(&kylinOdomCalib, &kylinMsg, sizeof(KylinMsg_t));
-	//cout << "kylinOdomCalib updated!" << endl;
-	return 1;
+  uint32_t frame_id = kylinMsg.frame_id;
+  while (frame_cnt < 10) {
+    if (kylinMsg.frame_id != frame_id) {
+      frame_id = kylinMsg.frame_id;
+      frame_cnt++;
+    }
+    //cout << "waiting for new KylinMsg" << endl;
+  }
+  memcpy(&kylinOdomCalib, &kylinMsg, sizeof(KylinMsg_t));
+  //cout << "kylinOdomCalib updated!" << endl;
+  return 1;
 }
 
 KylinMsg_t kylinOdomError;
 uint8_t updateOdomError()
 {
-	kylinOdomError.frame_id = kylinMsg.frame_id;
-	kylinOdomError.cbus.cp.x = txKylinMsg.cbus.cp.x - kylinMsg.cbus.cp.x;// + kylinOdomCalib.cbus.cp.x;
-	kylinOdomError.cbus.cp.y = txKylinMsg.cbus.cp.y - kylinMsg.cbus.cp.y;// + kylinOdomCalib.cbus.cp.y;
-	kylinOdomError.cbus.cp.z = txKylinMsg.cbus.cp.z - kylinMsg.cbus.cp.z;// + kylinOdomCalib.cbus.cp.z;
-	//cout << "ref.x=" << txKylinMsg.cbus.cp.x << ", fdb.x=" << kylinMsg.cbus.cp.x << endl;
-	//cout << "ref.y=" << txKylinMsg.cbus.cp.y << ", fdb.y=" << kylinMsg.cbus.cp.y << endl;
-	kylinOdomError.cbus.gp.e = txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e;// + kylinOdomCalib.cbus.gp.e;
-	kylinOdomError.cbus.gp.c = txKylinMsg.cbus.gp.c - kylinMsg.cbus.gp.c;// + kylinOdomCalib.cbus.gp.c;
-	kylinOdomError.cbus.cv.x = txKylinMsg.cbus.cv.x - kylinMsg.cbus.cp.x;// + kylinOdomCalib.cbus.cv.x;
-	kylinOdomError.cbus.cv.y = txKylinMsg.cbus.cv.y - kylinMsg.cbus.cv.y;// + kylinOdomCalib.cbus.cv.y;
-	kylinOdomError.cbus.cv.z = txKylinMsg.cbus.cv.z - kylinMsg.cbus.cv.z;// + kylinOdomCalib.cbus.cv.z;
-	kylinOdomError.cbus.gv.e = txKylinMsg.cbus.gv.e - kylinMsg.cbus.gv.e;// + kylinOdomCalib.cbus.gv.e;
-	kylinOdomError.cbus.gv.c = txKylinMsg.cbus.gv.c - kylinMsg.cbus.gv.c;// + kylinOdomCalib.cbus.gv.c;
+  kylinOdomError.frame_id = kylinMsg.frame_id;
+  kylinOdomError.cbus.cp.x = txKylinMsg.cbus.cp.x - kylinMsg.cbus.cp.x;// + kylinOdomCalib.cbus.cp.x;
+  kylinOdomError.cbus.cp.y = txKylinMsg.cbus.cp.y - kylinMsg.cbus.cp.y;// + kylinOdomCalib.cbus.cp.y;
+  kylinOdomError.cbus.cp.z = txKylinMsg.cbus.cp.z - kylinMsg.cbus.cp.z;// + kylinOdomCalib.cbus.cp.z;
+  //cout << "ref.x=" << txKylinMsg.cbus.cp.x << ", fdb.x=" << kylinMsg.cbus.cp.x << endl;
+  //cout << "ref.y=" << txKylinMsg.cbus.cp.y << ", fdb.y=" << kylinMsg.cbus.cp.y << endl;
+  kylinOdomError.cbus.gp.e = txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e;// + kylinOdomCalib.cbus.gp.e;
+  kylinOdomError.cbus.gp.c = txKylinMsg.cbus.gp.c - kylinMsg.cbus.gp.c;// + kylinOdomCalib.cbus.gp.c;
+  kylinOdomError.cbus.cv.x = txKylinMsg.cbus.cv.x - kylinMsg.cbus.cp.x;// + kylinOdomCalib.cbus.cv.x;
+  kylinOdomError.cbus.cv.y = txKylinMsg.cbus.cv.y - kylinMsg.cbus.cv.y;// + kylinOdomCalib.cbus.cv.y;
+  kylinOdomError.cbus.cv.z = txKylinMsg.cbus.cv.z - kylinMsg.cbus.cv.z;// + kylinOdomCalib.cbus.cv.z;
+  kylinOdomError.cbus.gv.e = txKylinMsg.cbus.gv.e - kylinMsg.cbus.gv.e;// + kylinOdomCalib.cbus.gv.e;
+  kylinOdomError.cbus.gv.c = txKylinMsg.cbus.gv.c - kylinMsg.cbus.gv.c;// + kylinOdomCalib.cbus.gv.c;
 }
 
 int main(int argc, char **argv)
 {
-	/*
 	if(!setcamera())
 	{
 		cout<<"Setup camera failure. Won't do anything."<<endl;
 		return   -1;
 	}
-	*/
 	
 	init();
 	//uint32_t cnt = 0;
@@ -829,4 +832,5 @@ int main(int argc, char **argv)
 	capture.closeStream();
 	disconnect_serial();
 	return 0;
+
 }
