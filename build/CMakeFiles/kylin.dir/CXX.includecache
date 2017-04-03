@@ -194,13 +194,13 @@ string.h
 
 ../uart/linux/serial.h
 
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Markdetection.h
+/home/yang/workspace/icra2017rm-mmc-brain/Markdetection.h
 opencv2/opencv.hpp
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/opencv2/opencv.hpp
+/home/yang/workspace/icra2017rm-mmc-brain/opencv2/opencv.hpp
 
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/RMVideoCapture.hpp
+/home/yang/workspace/icra2017rm-mmc-brain/RMVideoCapture.hpp
 linux/videodev2.h
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/linux/videodev2.h
+/home/yang/workspace/icra2017rm-mmc-brain/linux/videodev2.h
 stdio.h
 -
 unistd.h
@@ -212,31 +212,31 @@ sys/ioctl.h
 sys/mman.h
 -
 opencv2/opencv.hpp
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/opencv2/opencv.hpp
+/home/yang/workspace/icra2017rm-mmc-brain/opencv2/opencv.hpp
 iostream
 -
 
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/main.cpp
+/home/yang/workspace/icra2017rm-mmc-brain/main.cpp
 main.h
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/main.h
+/home/yang/workspace/icra2017rm-mmc-brain/main.h
 RMVideoCapture.hpp
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/RMVideoCapture.hpp
+/home/yang/workspace/icra2017rm-mmc-brain/RMVideoCapture.hpp
 Markdetection.h
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Markdetection.h
+/home/yang/workspace/icra2017rm-mmc-brain/Markdetection.h
 
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/main.h
+/home/yang/workspace/icra2017rm-mmc-brain/main.h
 asp.h
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/asp.h
+/home/yang/workspace/icra2017rm-mmc-brain/asp.h
 serial.h
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/serial.h
+/home/yang/workspace/icra2017rm-mmc-brain/serial.h
 mythread.hpp
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/mythread.hpp
+/home/yang/workspace/icra2017rm-mmc-brain/mythread.hpp
 unistd.h
 -
 stdio.h
 -
 opencv2/opencv.hpp
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/opencv2/opencv.hpp
+/home/yang/workspace/icra2017rm-mmc-brain/opencv2/opencv.hpp
 iostream
 -
 math.h
@@ -260,7 +260,7 @@ sys/ioctl.h
 linux/videodev2.h
 -
 
-/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/mythread.hpp
+/home/yang/workspace/icra2017rm-mmc-brain/mythread.hpp
 pthread.h
 -
 
