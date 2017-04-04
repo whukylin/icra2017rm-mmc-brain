@@ -501,6 +501,8 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     findContours(out,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
     if( contours.size() == 0 )
     {
+        diff_x=DIF_CEN;
+   	diff_y=0;
         cout<<"no contour..."<<endl;
         return 0;
     }
