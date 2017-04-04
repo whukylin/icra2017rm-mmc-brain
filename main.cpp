@@ -55,11 +55,18 @@ volatile bool finishDetectCentroidFlag = false;  //完成质心检测
 volatile bool finishMobleUltrasonicFlag = false; //超声波到达极限距离
 volatile bool finishGraspFlag = false;           //抓子是否合拢
 volatile bool finishSlidFlag = false;            //滑台是否达到指定高度
+volatile bool finishGraspOpFlag = false;           //抓子是否合拢
+volatile bool finishSlidBwFlag = false;            //滑台是否达到指定高度
+
 volatile bool finishFixedUltrasonicFlag = false;
 volatile bool finish_LR_UltrasonicFlag = false;
 volatile bool finish_L_UltrasonicFlag = false;
 volatile bool finish_R_UltrasonicFlag = false;
 
+
+volatile int GraspBwCout = 0;
+volatile int GraspTpCout = 0;
+volatile int absoluteDistanceCout = 0;
 static void Dnl_ProcZGyroMsg(const ZGyroMsg_t *zgyroMsg)
 {
 	//printf("*************************************ZGYRO********************************************\n");
@@ -210,6 +217,7 @@ void Tri_Reset(Tri_t *tri)
 	//memset(tri, 0, sizeof(Tri_t));
 }
 
+#define RMP_CNT 100000
 #define MAF_BUF_LEN 20
 static uint32_t cnt = 0;
 static Rmp_t rmp;
@@ -285,6 +293,17 @@ void kylinbot_control()
 	printf("cnt=%d\n", tri.cnt);
 }
 
+void rstRmp()
+{
+	Rmp_Config(&rmp, RMP_CNT);
+	Rmp_Reset(&rmp);
+}
+
+float genRmp()
+{
+	return Rmp_Calc(&rmp);
+}
+
 void *KylinBotMarkDetecThreadFunc(void *param)
 {
 	Mat frame;
@@ -312,6 +331,9 @@ void *KylinBotMarkDetecThreadFunc(void *param)
 		cout<<"sr04maf[SR04_IDX_L].avg:"<<sr04maf[SR04_IDX_L].avg<<" sr04maf[SR04_IDX_R].avg: "<<sr04maf[SR04_IDX_R].avg<<endl;
 		cout<<"sr04maf[SR04_IDX_F].avg:"<<sr04maf[SR04_IDX_F].avg<<" sr04maf[SR04_IDX_M].avg: "<<sr04maf[SR04_IDX_M].avg<<endl;
 		cout<<"finishDetectCentroidFlag"<<endl;
+		cout<<"GraspBwCout: "<<GraspBwCout<<" GraspTpCout: "<<GraspTpCout<<endl;
+		cout<<"kylinMsg.cbus.gp.e"<<kylinMsg.cbus.gp.e<<endl;
+cout<<"absoluteDistanceCout: "<<absoluteDistanceCout<<endl;
 		switch (detection_mode)
 		{
 			case 0: //do nothing
@@ -369,11 +391,11 @@ void *KylinBotMarkDetecThreadFunc(void *param)
 			case 2: //detect green area
 				cout << "detection_mode=" << (int)detection_mode << endl;
 				Color_detect(src, dif_x, dif_y);
-				tx = 3 * (dif_x-DIF_CEN);
+				tx = 2 * (dif_x-DIF_CEN);
 				// txKylinMsg.cbus.cp.x = 10 * dif_x;
 				// txKylinMsg.cbus.cp.y = 0;
 				// txKylinMsg.cbus.cp.z = 0;
-				if (abs(tx-50)< 50) //number of pixels  
+				if (abs(tx - 20) < 20) //number of pixels  
 				{
 					finishDetectCentroidFlag = true;
 				}
@@ -526,6 +548,8 @@ uint8_t updateOdomError()
   kylinOdomError.cbus.gv.c = txKylinMsg.cbus.gv.c - kylinMsg.cbus.gv.c;// + kylinOdomCalib.cbus.gv.c;
 }
 
+int lastWs = 0;
+
 int main(int argc, char **argv)
 {
 	if(!setcamera())
@@ -535,8 +559,9 @@ int main(int argc, char **argv)
 	}
 	
 	init();
+	rstRmp();
 	//uint32_t cnt = 0;
-	Rmp_Config(&rmp, 50000);
+	//Rmp_Config(&rmp, 50000);
 	Maf_Init(&maf, maf_buf, MAF_BUF_LEN);
 	Tri_Init(&tri, 2.5e4);
 	
@@ -599,10 +624,19 @@ int main(int argc, char **argv)
 	int GraspBw=posCalibMsg.data.eh;
 	int GraspOp=posCalibMsg.data.cl;
 	int GraspCl=posCalibMsg.data.ch;
+	int moveDistance = 0;
+	
+	GraspBwCout = GraspBw;
+	GraspTpCout = GraspTp;
 	//sr04maf[1].avg moble
 	//sr04maf[0].avg fixed
 	//sr04maf[2].avg left
 	//sr04maf[3].avg right
+	double absoluteDistance = 100;
+	double absuluteAngle = 100;
+	double absuluteGraspOpCl =100;
+	double absuluteGrasp = 100;
+	int workState0_Num = 0, workState1_Num = 0, workState2_Num =0, workState3_Num = 0, workState4_Num = 0;
 	while ((!exit_flag))  //&&(capture.read(frame)))
 	{
 		//cout << "ws: " << workState << endl;
@@ -612,56 +646,70 @@ int main(int argc, char **argv)
 		if (txKylinMsg.cbus.fs & (1u << 30)) //0xFF == 1111 1111   0x80000000
 		{
 			
-			double absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
-			double absuluteAngle = abs(kylinOdomError.cbus.cp.z);
+			absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
+absoluteDistanceCout = absoluteDistance;
+			absuluteAngle = abs(kylinOdomError.cbus.cp.z);
+			absuluteGrasp = abs(kylinOdomError.cbus.gp.e);
+			absuluteGraspOpCl = abs(kylinOdomError.cbus.gp.c);
 			//cout<<"absoluteDistance" << absoluteDistance << endl;
 			//cout<<"absuluteAngle" << absuluteAngle << endl;
-			if (absoluteDistance < 10 && absuluteAngle < 5.0f * PI / 2.0f)
+			if (absoluteDistance < 10 && absuluteAngle < 5.0f * PI / 2.0f)// && absuluteGrasp < 10)
 			{
-				finishAbsoluteMoveFlag = true; //完成绝对位置移动的控制标志位
+				finishAbsoluteMoveFlag = true;
+			}
+			if(coutLogicFlag == 10 && absuluteGrasp < 10)//(GraspTp + GBw) / 2.f)
+			//if(coutLogicFlag == 7 && abs(txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e) < 20)
+			{
+				finishSlidBwFlag = true;
+			}
+			if(coutLogicFlag == 11 && absuluteGraspOpCl < 20)
+			{
+				finishGraspOpFlag = true;
 			}
 		}
 		
 		if((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
 		{
-			if(sr04maf[SR04_IDX_M].avg < 80)
+			if(sr04maf[SR04_IDX_M].avg < 60)
 			{
 				finishMobleUltrasonicFlag = true;
 			}
-			if(kylinMsg.cbus.gp.c <= GraspCl + 100)
+			//Grasp close
+			if(kylinMsg.cbus.gp.c == GraspCl)
 			{
 				finishGraspFlag = true;
 			}
-			if(kylinMsg.cbus.gp.e >= GraspTp)//(GraspTp + GraspBw) / 2.f)
+			//Graps Open
+			
+			if(coutLogicFlag == 7 && kylinMsg.cbus.gp.e <= (GraspBw + GraspTp)/2.0)//(GraspTp + GraspBw) / 2.f)
+			//if(coutLogicFlag == 7 && abs(txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e) < 20)
 			{
 				finishSlidFlag = true;
 			}
+			
+			
 			//fixed Ultra
 			if(sr04maf[SR04_IDX_F].avg < 350 && finishDetectBoxFlag == true)
 			{
 				finishFixedUltrasonicFlag = true;
 			}
-			
-			if(finishMobleUltrasonicFlag == false && finishFixedUltrasonicFlag == true && sr04maf[SR04_IDX_L].avg > 500 && sr04maf[SR04_IDX_R].avg > 500)
+
+			if(coutLogicFlag == 3 && sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
 			{
 				finish_LR_UltrasonicFlag = true;
-				finish_L_UltrasonicFlag = true;
-				finish_R_UltrasonicFlag = true;
+				moveDistance = 0;
 			}
-			if(finishMobleUltrasonicFlag == false && sr04maf[SR04_IDX_L].avg > 500 && sr04maf[SR04_IDX_R].avg < 200)
+			if(sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 200)
 			{
-				finish_L_UltrasonicFlag = true;
-				finish_R_UltrasonicFlag = false;
-				finish_LR_UltrasonicFlag = false;
+				moveDistance = 100;
 			}
-			if(finishMobleUltrasonicFlag == false && sr04maf[SR04_IDX_L].avg < 200 && sr04maf[SR04_IDX_R].avg > 500)
+			if(sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 500)
 			{
-				finish_R_UltrasonicFlag = true;
-				finish_L_UltrasonicFlag = false;
-				finish_LR_UltrasonicFlag = false;
+				moveDistance = -100;
 			}
 			
 		}
+		
 		//workStateFlagPrint(); //打印当前状态
 		switch (workState)
 		{
@@ -674,32 +722,37 @@ int main(int argc, char **argv)
 				txKylinMsg.cbus.cv.x = 0;
 				txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
 				txKylinMsg.cbus.cv.y = 0;
-				txKylinMsg.cbus.cp.z = 10 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
-				txKylinMsg.cbus.cv.z = 1000;
-				txKylinMsg.cbus.gp.e = GraspBw - 50;
-				txKylinMsg.cbus.gv.e = 800;
+				txKylinMsg.cbus.cp.z = 1572 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
+				txKylinMsg.cbus.cv.z = 1000 * genRmp();
+				txKylinMsg.cbus.gp.e = GraspBw - 50; //+ kylinOdomCalib.cbus.gp.e;
+				txKylinMsg.cbus.gv.e = 1000;
 				txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 				txKylinMsg.cbus.gv.c = 8000;
 				if (finishAbsoluteMoveFlag == true)
 				{
+					lastWs = workState;
+					rstRmp();
 					workState = 1; //完成移动，进入下一阶段
+					
 					finishAbsoluteMoveFlag = false;
 				}
 				
 				break;
 			case 1:
+				//if (lastWs != 1) rstRmp();
 				//begin detect squares
 				if (finishDetectBoxFlag == false)
 				{
+					
 					coutLogicFlag = 1;
 					detection_mode = 1;                //打开视觉,检测矩形
 					//cout<<"detection_mode"<<(int)detection_mode<<endl;
 					txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
 					
 					txKylinMsg.cbus.cp.x = tx - 60;
-					txKylinMsg.cbus.cv.x = 500;
+					txKylinMsg.cbus.cv.x = 500 * genRmp();
 					txKylinMsg.cbus.cp.y = tz;
-					txKylinMsg.cbus.cv.y = 800;
+					txKylinMsg.cbus.cv.y = 800 * genRmp();;
 					txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
 					txKylinMsg.cbus.cv.z = 0;
 					txKylinMsg.cbus.gp.e = GraspBw - 50 + kylinMsg.cbus.gp.e;
@@ -730,24 +783,16 @@ int main(int argc, char **argv)
 					//finishDetectBoxFlag = false;
 					coutLogicFlag = 3;
 					detection_mode = 0;
-					int moveDistance = 0;
+					
 					txKylinMsg.cbus.fs &= ~(1u << 30);
-					if(finish_L_UltrasonicFlag == true && finish_R_UltrasonicFlag == false)
-					{
-						moveDistance = 50;
-					}
-					if(finish_L_UltrasonicFlag == false && finish_R_UltrasonicFlag == true)
-					{
-						moveDistance = -50;
-					}
 					txKylinMsg.cbus.cp.x = moveDistance;
 					txKylinMsg.cbus.cv.x = 100;
 					txKylinMsg.cbus.cp.y = 0;
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw - 50 + kylinMsg.cbus.gp.e;
-					txKylinMsg.cbus.gv.e = 0;
+					txKylinMsg.cbus.gp.e = GraspBw + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
 				}
@@ -759,13 +804,13 @@ int main(int argc, char **argv)
 					detection_mode = 2;                //打开视觉,检测质心
 					txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
 					txKylinMsg.cbus.cp.x = tx;
-					txKylinMsg.cbus.cv.x = 300;
+					txKylinMsg.cbus.cv.x = 100;
 					txKylinMsg.cbus.cp.y = 0;
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
 					txKylinMsg.cbus.gp.e = GraspBw - 50 + kylinMsg.cbus.gp.e;
-					txKylinMsg.cbus.gv.e = 0;
+					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
 				}
@@ -784,7 +829,7 @@ int main(int argc, char **argv)
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
 					txKylinMsg.cbus.gp.e = GraspBw + kylinMsg.cbus.gp.e;
-					txKylinMsg.cbus.gv.e = 0;
+					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
 				}
@@ -801,8 +846,8 @@ int main(int argc, char **argv)
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = 0;//(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
-					txKylinMsg.cbus.gv.e = 0;
+					txKylinMsg.cbus.gp.e = GraspBw;//(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
 					txKylinMsg.cbus.gv.c = 8000;
 				}
@@ -819,113 +864,142 @@ int main(int argc, char **argv)
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspTp;//(GraspBw + GraspTp)/2.0; //+ kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
-					txKylinMsg.cbus.gv.e = 1000;
+					txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0 - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
+					txKylinMsg.cbus.gv.e = 800;
 					txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
 					txKylinMsg.cbus.gv.c = 0;
 				}
 				//抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
 				if (finishSlidFlag == true)
 				{
-					//workState = 2; //切换到下一阶段
+					txKylinMsg.cbus.gv.e = 0;
+					lastWs = workState;
+					rstRmp();
+					workState = 2; //切换到下一阶段
+					finishAbsoluteMoveFlag = false;
 				}
 				
 				break;
 				case 2:
+					//if (lastWs != 2) rstRmp();
 					//小车回到原点, 车头朝向前方
+					workState2_Num ++;
 					coutLogicFlag = 8;
 					detection_mode = 0;             //关闭视觉
 					txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-					txKylinMsg.cbus.cp.x = 0;
-					txKylinMsg.cbus.cv.x = 1000;
-					txKylinMsg.cbus.cp.y = 0;
-					txKylinMsg.cbus.cv.y = 1000;
-					txKylinMsg.cbus.cp.z = 0;
-					txKylinMsg.cbus.cv.z = 1000;
-					txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0;
-					txKylinMsg.cbus.gv.e = 0;
-					txKylinMsg.cbus.gp.c = GraspCl;
-					txKylinMsg.cbus.gv.c = 0;
-					if (finishAbsoluteMoveFlag == true) //完成绝对位置控制模式
+					txKylinMsg.cbus.cp.x = -50 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cv.x = 1000 * genRmp();
+					txKylinMsg.cbus.cp.y = -100 + kylinOdomCalib.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 1000 * genRmp();
+					if(absoluteDistance < 10)
+					{
+						txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
+						txKylinMsg.cbus.cv.z = 1000 * genRmp();
+					}
+					else
+					{
+						txKylinMsg.cbus.cv.z = 0;
+					}
+					
+					//txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0;
+					//txKylinMsg.cbus.gv.e = 0;
+					//txKylinMsg.cbus.gp.c = GraspCl;
+					//txKylinMsg.cbus.gv.c = 0;
+					if (finishAbsoluteMoveFlag == true && workState2_Num != 1) //完成绝对位置控制模式
 					{
 						workState = 3; //切换到下一阶段
 						finishAbsoluteMoveFlag == false;
+txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cv.x = 0;
+					txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 0;
 					}
 					break;
 				case 3:
 					//小车从原点达到基地区第一堆盒子的位置, 第一堆盒子的坐标 (0,3485)
+					workState3_Num++;
 					coutLogicFlag = 9;
 					detection_mode = 0;             //关闭视觉
 					txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-					txKylinMsg.cbus.cp.x = 0;
+					txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
 					txKylinMsg.cbus.cv.x = 1000;
-					txKylinMsg.cbus.cp.y = 3485;
+					txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
 					txKylinMsg.cbus.cv.y = 1000;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0;
-					txKylinMsg.cbus.gv.e = 0;
-					txKylinMsg.cbus.gp.c = GraspCl;
-					txKylinMsg.cbus.gv.c = 0;
-					if (finishAbsoluteMoveFlag == true) //完成绝对位置控制模式
+					//txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0;
+					//txKylinMsg.cbus.gv.e = 0;
+					////txKylinMsg.cbus.gp.c = GraspCl;
+				//	txKylinMsg.cbus.gv.c = 0;
+
+if (finishAbsoluteMoveFlag == true)// && workState3_Num >= 2000) //完成绝对位置控制模式
 					{
 						//到达指定位置，放下盒子
-						if (finishSlidFlag == false)
+						if (finishSlidBwFlag == false)
 						{
 							coutLogicFlag = 10;
 							txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-							txKylinMsg.cbus.cp.x = 0;
+							txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
 							txKylinMsg.cbus.cv.x = 1000;
-							txKylinMsg.cbus.cp.y = 3485;
+							txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
 							txKylinMsg.cbus.cv.y = 1000;
 							txKylinMsg.cbus.cp.z = 0;
 							txKylinMsg.cbus.cv.z = 0;
 							txKylinMsg.cbus.gp.e = GraspBw;
 							txKylinMsg.cbus.gv.e = 400;
-							txKylinMsg.cbus.gp.c = GraspCl;
-							txKylinMsg.cbus.gv.c = 0;
+							//txKylinMsg.cbus.gp.c = GraspCl;
+							//txKylinMsg.cbus.gv.c = 0;
 						}
 						//松开抓子
-						if (finishSlidFlag == true && finishGraspFlag == false)
+						if (finishSlidBwFlag == true && finishGraspOpFlag == false)
 						{
 							coutLogicFlag = 11;
 							txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-							txKylinMsg.cbus.cp.x = 0;
+							txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
 							txKylinMsg.cbus.cv.x = 1000;
-							txKylinMsg.cbus.cp.y = 3485;
+							txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
 							txKylinMsg.cbus.cv.y = 1000;
-							txKylinMsg.cbus.cp.z = 0;
+							txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z;
 							txKylinMsg.cbus.cv.z = 1000;
-							txKylinMsg.cbus.gp.e = GraspBw;
-							txKylinMsg.cbus.gv.e = 0;
+							//txKylinMsg.cbus.gp.e = GraspBw;
+							//txKylinMsg.cbus.gv.e = 0;
 							txKylinMsg.cbus.gp.c = GraspOp;
 							txKylinMsg.cbus.gv.c = 8000;
 						}
-						if (finishGraspFlag == true)
+						if (finishGraspOpFlag == true)
 						{
+							lastWs = workState;
 							workState = 4;                   //进入下一阶段
 							finishAbsoluteMoveFlag == false; //完成本阶段的绝对位置控制
+txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cv.x = 0;
+					txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 0;
+
 						}
 					}
 					break;
 				case 4:
 					//回原点
+					workState4_Num ++;
 					detection_mode = 0;             //关闭视觉
 					coutLogicFlag = 12;
 					txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-					txKylinMsg.cbus.cp.x = 0;
+					txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
 					txKylinMsg.cbus.cv.x = 1000;
-					txKylinMsg.cbus.cp.y = 0;
+					txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
 					txKylinMsg.cbus.cv.y = 1000;
-					txKylinMsg.cbus.cp.z = 0;
+					txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z;
 					txKylinMsg.cbus.cv.z = 1000;
 					txKylinMsg.cbus.gp.e = GraspBw;
 					txKylinMsg.cbus.gv.e = 0;
 					txKylinMsg.cbus.gp.c = GraspOp;
 					txKylinMsg.cbus.gv.c = 0;
-					if (finishAbsoluteMoveFlag == true)
+					if (finishAbsoluteMoveFlag == true && workState4_Num != 1)
 					{
-						workState = 0;                   //进入下一阶段
+						lastWs = workState;
+						rstRmp();
+						//workState = 0;                   //进入下一阶段
 						finishAbsoluteMoveFlag == false; //完成本阶段的绝对位置控制
 					}
 					break;

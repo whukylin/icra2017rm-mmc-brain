@@ -19,6 +19,7 @@
 void Rmp_Config(Rmp_t* rmp, uint32_t scale)
 {
 	rmp->scale = scale;
+	Rmp_Reset(rmp);
 }
 
 float Rmp_Calc(Rmp_t* rmp)

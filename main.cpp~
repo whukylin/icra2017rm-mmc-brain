@@ -1,227 +1,160 @@
 #include "main.h"
-
-
+#include "RMVideoCapture.hpp"
+#include "Markdetection.h"
 #define COM_PORT 1 //"COM7"
 #define BUF_LEN 256
 #define TIMEOUT 30
 #define FRAME_N 20000
-
-
-#define BUFFER_EXPOSURE_VALUE 150
-//#define DEFAULT_FRAME_WIDTH 1280
-//#define DEFAULT_FRAME_HEIGHT 720
-#define DEFAULT_FRAME_WIDTH 640
-#define DEFAULT_FRAME_HEIGHT 480
-#define _SHOW_PHOTO
-#define _SHOW_OUTPUT
-
-
 using namespace cv;
 using namespace std;
 
+extern double ry, rz, rx;
+extern double tx, ty, tz;
+extern const char *wndname;
 
+RMVideoCapture capture("/dev/video0", 3);
+//VideoCapture capture;
+int exp_time = 62;
+int gain = 30;
+int brightness_ = 10;
+int whiteness_ = 86;
+int saturation_ = 60;
 
-int thresh = 50, N =1;
-const char* wndname = "Square Detection Demo";
-
-// int grey_thresh=60;
-int grey_thresh=50;
-
-double ry,rz,rx;
-double tx,ty,tz;
-Mat cameraMatrix=(Mat_<double>(3,3)<<569.2681,0,288.1437,0,569.4591,263.6782,0,0,1);
-//for 640x480.
-Mat distCoeffs=(Mat_<double>(1,4)<<0.0344,-0.0085,-0.0032,-0.0028);
-Point3f world_pnt_tl(-65,-85,0);   //unit: mm
-Point3f world_pnt_tr(65,-85,0);
-Point3f world_pnt_br(65,85,0);
-Point3f world_pnt_bl(-65,85,0);
-
-void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_br,Point3f world_pnt_bl,Point2f pnt_tl_src,Point2f pnt_tr_src,Point2f pnt_br_src,Point2f pnt_bl_src);
-int Color_judge(Mat &src,int area);
-void Sort_rect(vector<Point>& approx);
-class MyPoint
-{
-public:
-    MyPoint(Point pnt)
-    {
-        x=pnt.x;
-        y=pnt.y;
-    };
-    int x;
-    int y;
-    bool operator<(const MyPoint&p)const
-    {
-        return x<p.x;
-    }
-};
-
-
-
-
-void VRC_Proc(const VirtualRC_t* vrc)
-{
-	printf("*************************************VRC********************************************\n");
-	printf("ch0=%d,ch1=%d,ch2=%d,ch3=%d,s1=%d,s2=%d\n",
-		vrc->ch[0], vrc->ch[1], vrc->ch[2], vrc->ch[3], vrc->sw[0], vrc->sw[1]);
-	//printf("*************************************VRC********************************************\n");
-}
-
-void VHC_Proc(const VirtualHC_t* vhc)
-{
-	printf("*************************************VHC********************************************\n");
-	printf("k=%d,x=%d,y=%d,z=%d,l=%d,r=%d\n",
-		vhc->key.val, vhc->mouse.x, vhc->mouse.y, vhc->mouse.z,
-		vhc->mouse.b[0], vhc->mouse.b[1]);
-	//printf("*************************************VHC********************************************\n");
-}
-
-void VDBUS_Proc(const VirtualDBUS_t* vdbus)
-{
-	//printf("*************************************VDBUS********************************************\n");
-	printf("ch0=%d,ch1=%d,ch2=%d,ch3=%d,s1=%d,s2=%d,k=%d,x=%d,y=%d,z=%d,l=%d,r=%d\n",
-		vdbus->rcp.ch[0], vdbus->rcp.ch[1], vdbus->rcp.ch[2], vdbus->rcp.ch[3], vdbus->rcp.sw[0],
-		vdbus->rcp.sw[1], vdbus->hcp.key.val, vdbus->hcp.mouse.x, vdbus->hcp.mouse.y, vdbus->hcp.mouse.z,
-		vdbus->hcp.mouse.b[0], vdbus->hcp.mouse.b[1]);
-	//printf("*************************************VDBUS********************************************\n");
-}
-
-void VCBUS_Proc(const VirtualCBUS_t* vcbus)
-{
-}
-
-static void Dnl_ProcCalibMsg(const CalibMsg_t* calibMsg)
-{
-	//printf("*************************************CALIB********************************************\n");
-	//printf("calib_msg=%x\n", calibMsg->auto_cali_flag);
-	//printf("kp=%d,ki=%d,kd=%d,eh=%d,el=%d,ph=%d,pl=%d\n", calibMsg->pid.kp, calibMsg->pid.ki, calibMsg->pid.kd, calibMsg->pos.elevator_h, calibMsg->pos.elevator_l, calibMsg->pos.pwm_h, calibMsg->pos.pwm_l);
-	//printf("*************************************CALIB********************************************\n");
-}
-
-static void Dnl_ProcMotorMsg(const MotorMsg_t* motorMsg)
-{
-	//printf("*************************************MOTOR********************************************\n");
-	printf("id=%d,ecd_angle=%d,angle=%d,rate=%d,current=%d\n", motorMsg->id, motorMsg->ecd_angle, motorMsg->angle, motorMsg->rate, motorMsg->current);
-}
-
-static void Dnl_ProcOdomeMsg(const OdomeMsg_t* odomeMsg)
-{
-	//printf("*************************************ODOME********************************************\n");
-	printf("px=%d,py=%d,pz=%d,vx=%d,vy=%d,vz=%d\n", odomeMsg->px, odomeMsg->py, odomeMsg->pz, odomeMsg->vx, odomeMsg->vy, odomeMsg->vz);
-}
-
-static void Dnl_ProcStatuMsg(const StatuMsg_t* statuMsg)
-{
-	//printf("*************************************STATU********************************************\n");
-	printf("wgd=%d,ini=%d\n", statuMsg->wdg, statuMsg->ini);
-}
-
-static void Dnl_ProcZGyroMsg(const ZGyroMsg_t* zgyroMsg)
-{
-	//printf("*************************************ZGYRO********************************************\n");
-	printf("angle=%d,rate=%d\n", zgyroMsg->angle, zgyroMsg->rate);
-}
-
-static void Dnl_ProcKylinMsg(const KylinMsg_t* kylinMsg)
-{
-        //printf("*************************************KYLIN********************************************\n");
-        printf("fs=%x,px=%d,py=%d,pz=%d,pe=%d,pc=%d,vx=%d,vy=%d,vz=%d,ve=%d,vc=%d\n", kylinMsg->fs,
-                kylinMsg->cp.x, kylinMsg->cp.y, kylinMsg->cp.z, kylinMsg->gp.e, kylinMsg->gp.c,
-                kylinMsg->cv.x, kylinMsg->cv.y, kylinMsg->cv.z, kylinMsg->gv.e, kylinMsg->gv.c);
-}
-
-uint8_t exit_flag = 0;
+int8_t exit_flag = 0;
+int workState = 0;
+volatile int8_t detection_mode = 0;
+volatile bool useUltrasonic = false;
 
 FIFO_t rx_fifo;
 uint8_t rx_buf[2][BUF_LEN];
 
-VirtualDBUS_t vdbus;
-VirtualCBUS_t vcbus;
-CalibMsg_t calibMsg;
-MotorMsg_t motorMsg;
 ZGyroMsg_t zgyroMsg;
-OdomeMsg_t odomeMsg;
-GraspMsg_t graspMsg;
 KylinMsg_t kylinMsg;
+Sr04sMsg_t sr04sMsg;
+PosCalibMsg_t posCalibMsg;
+
+#define SR04_NUM 4
+#define SR04_IDX_F 0
+#define SR04_IDX_M 1
+#define SR04_IDX_L 2
+#define SR04_IDX_R 3
+
+#define SR04_MAF_LEN 10
+Maf_t sr04maf[SR04_NUM];
+float sr04buf[SR04_NUM][SR04_MAF_LEN];
+
+FIFO_t tx_fifo;
+uint8_t tx_buf[2][BUF_LEN];
+KylinMsg_t txKylinMsg;
+
+volatile int coutLogicFlag = 0;
+
+volatile bool finishAbsoluteMoveFlag = false;    //完成绝对位置移动
+volatile bool finishDetectBoxFlag = false;       //完成检测盒子(小车到了检测不到盒子的位置)
+volatile bool finishDetectCentroidFlag = false;  //完成质心检测
+volatile bool finishMobleUltrasonicFlag = false; //超声波到达极限距离
+volatile bool finishGraspFlag = false;           //抓子是否合拢
+volatile bool finishSlidFlag = false;            //滑台是否达到指定高度
+volatile bool finishGraspOpFlag = false;           //抓子是否合拢
+volatile bool finishSlidBwFlag = false;            //滑台是否达到指定高度
+
+volatile bool finishFixedUltrasonicFlag = false;
+volatile bool finish_LR_UltrasonicFlag = false;
+volatile bool finish_L_UltrasonicFlag = false;
+volatile bool finish_R_UltrasonicFlag = false;
+
+
+volatile int GraspBwCout = 0;
+volatile int GraspTpCout = 0;
+volatile int absoluteDistanceCout = 0;
+static void Dnl_ProcZGyroMsg(const ZGyroMsg_t *zgyroMsg)
+{
+	//printf("*************************************ZGYRO********************************************\n");
+	printf("id=%d,angle=%d,rate=%d\n", zgyroMsg->frame_id, zgyroMsg->angle, zgyroMsg->rate);
+}
+
+static void Dnl_ProcKylinMsg(const KylinMsg_t *kylinMsg)
+{
+	
+	//printf("*************************************KYLIN********************************************\n");
+	printf("id=%d,fs=%x,px=%d,py=%d,pz=%d,pe=%d,pc=%d,vx=%d,vy=%d,vz=%d,ve=%d,vc=%d\n", kylinMsg->frame_id, kylinMsg->cbus.fs,
+		   kylinMsg->cbus.cp.x, kylinMsg->cbus.cp.y, kylinMsg->cbus.cp.z, kylinMsg->cbus.gp.e, kylinMsg->cbus.gp.c,
+		kylinMsg->cbus.cv.x, kylinMsg->cbus.cv.y, kylinMsg->cbus.cv.z, kylinMsg->cbus.gv.e, kylinMsg->cbus.gv.c);
+}
+//超声波信息
+static void Dnl_ProcSr04sMsg(const Sr04sMsg_t *sr04sMsg)
+{
+	//printf("*************************************KYLIN********************************************\n");
+	printf("id=%d,fixed=%d,moble=%d,left=%d,right=%d\n", sr04sMsg->frame_id, sr04sMsg->fixed, sr04sMsg->moble, sr04sMsg->left, sr04sMsg->right);
+}
+//抓子初始化
+static void Dnl_ProcPosCalibMsg(const PosCalibMsg_t *posCalibMsg)
+{
+	
+	//printf("*************************************KYLIN********************************************\n");
+	printf("id=%d,el=%d,eh=%d,cl=%d,ch=%d\n", posCalibMsg->frame_id, posCalibMsg->data.el, posCalibMsg->data.eh, posCalibMsg->data.cl, posCalibMsg->data.ch);
+}
 
 void PullMsg()
 {
 	// Get fifo free space
 	int len = FIFO_GetFree(&rx_fifo);
 	// If fifo free space insufficient, pop one element out
-	if (!len) {
+	if (!len)
+	{
 		uint8_t b;
 		len = FIFO_Pop(&rx_fifo, &b, 1);
 	}
 	// Read input stream according to the fifo free space left
 	len = read_serial(rx_buf[1], len, TIMEOUT);
-	//printf("PULL LEN= %d\n", len);
 	// Push stream into fifo
 	FIFO_Push(&rx_fifo, rx_buf[1], len);
 	// Check if any message received
-	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_vrc, &vdbus.rcp)) {
-		//VRC_Proc(&vdbus.rcp);
+	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_kylin, &kylinMsg))
+	{
+		// Dnl_ProcKylinMsg(&kylinMsg);
 	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_vhc, &vdbus.hcp)) {
-		//VHC_Proc(&vdbus.hcp);
+	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_sr04s, &sr04sMsg))
+	{
+		Maf_Proc(&sr04maf[SR04_IDX_F], sr04sMsg.fixed);
+		Maf_Proc(&sr04maf[SR04_IDX_M], sr04sMsg.moble);
+		Maf_Proc(&sr04maf[SR04_IDX_L], sr04sMsg.left);
+		Maf_Proc(&sr04maf[SR04_IDX_R], sr04sMsg.right);
+		Dnl_ProcSr04sMsg(&sr04sMsg);
 	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_vdbus, &vdbus)) {
-		//VDBUS_Proc(&vdbus);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_vcbus, &vcbus)) {
-		//VCBUS_Proc(&vcbus);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_calib, &calibMsg)) {
-		//Dnl_ProcCalibMsg(&calibMsg);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_motor, &motorMsg)) {
-		//Dnl_ProcMotorMsg(&motorMsg);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg)) {
+	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_zgyro, &zgyroMsg))
+	{
 		//Dnl_ProcZGyroMsg(&zgyroMsg);
 	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_odome, &odomeMsg)) {
-		//Dnl_ProcOdomeMsg(&odomeMsg);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_grasp, &graspMsg)) {
-		//Dnl_ProcGraspMsg(&graspMsg);
-	}
-	else if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_kylin, &kylinMsg)) {
-		//printf("Before pop -> size: %d, used: %d, free: %d\n", FIFO_GetSize(&rx_fifo), FIFO_GetUsed(&rx_fifo), FIFO_GetFree(&rx_fifo));
-		//printf("Before pop: %d\n", FIFO_GetFree(&rx_fifo));
-		Dnl_ProcKylinMsg(&kylinMsg);
-		//printf("After pop: %d\n", FIFO_GetFree(&rx_fifo));
-	}
-	else {
-		//uint8_t b;
-		//len = FIFO_Pop(&rx_fifo, &b, 1);
+	if (Msg_Pop(&rx_fifo, rx_buf[1], &msg_head_pos_calib, &posCalibMsg))
+	{
+		//Dnl_ProcPosCalibMsg(&posCalibMsg);
 	}
 }
 
-void *KylinBotMsgPullerThreadFunc(void* param)
+void *KylinBotMsgPullerThreadFunc(void *param)
 {
-    while (exit_flag == 0) {
-	      PullMsg();
-	      usleep(4000);
+	while (exit_flag == 0)
+	{
+		PullMsg();
+		usleep(1000);
 	}
 	return NULL;
 }
 
-FIFO_t tx_fifo;
-uint8_t tx_buf[2][BUF_LEN];
-KylinMsg_t txKylinMsg;
 void PushMsg()
 {
-	//txKylinMsg.fs = 1;
-	//txKylinMsg.cv.x = 2000;
-	uint32_t len = Msg_Push(&tx_fifo, tx_buf[1], & msg_head_kylin, &txKylinMsg);
+	
+	uint32_t len = Msg_Push(&tx_fifo, tx_buf[1], &msg_head_kylin, &txKylinMsg);
 	FIFO_Pop(&tx_fifo, tx_buf[1], len);
 	write_serial(tx_buf[1], len, TIMEOUT);
 }
 
-void *KylinBotMsgPusherThreadFunc(void* param)
+void *KylinBotMsgPusherThreadFunc(void *param)
 {
-  while (exit_flag == 0) {
+	
+	while (exit_flag == 0)
+	{
 		PushMsg();
 		usleep(4000);
 	}
@@ -229,49 +162,62 @@ void *KylinBotMsgPusherThreadFunc(void* param)
 
 void init()
 {
+	uint32_t i = 0;
 	FIFO_Init(&rx_fifo, rx_buf[0], BUF_LEN);
 	FIFO_Init(&tx_fifo, tx_buf[0], BUF_LEN);
+	for (i = 0; i < SR04_NUM; i++) {
+		Maf_Init(&sr04maf[i], sr04buf[i], SR04_MAF_LEN);
+	}
 }
 
 typedef struct
 {
-  uint8_t dir;
-  uint32_t cnt;
-  uint32_t scl;
-}Tri_t;
 
-void Tri_Init(Tri_t* tri, uint32_t scl)
+	uint8_t dir;
+	uint32_t cnt;
+	uint32_t scl;
+} Tri_t;
+
+void Tri_Init(Tri_t *tri, uint32_t scl)
 {
-  tri->scl = scl;
-  tri->cnt = 0;
-  tri->dir = 0;
+
+	tri->scl = scl;
+	tri->cnt = 0;
+	tri->dir = 0;
 }
 
-float Tri_Proc(Tri_t* tri)
+float Tri_Proc(Tri_t *tri)
 {
-  if (tri->dir == 0) {
-     if (tri->cnt < tri->scl) {
-       tri->cnt++;
-     }
-     else {
-       tri->dir = 1;
-     }
-  }
-  else if (tri->dir == 1) {
-     if (tri->cnt > 0) {
-       tri->cnt--;
-     }
-  }
-  return (float)tri->cnt / (float)tri->scl;
+	if (tri->dir == 0)
+	{
+		if (tri->cnt < tri->scl)
+		{
+			tri->cnt++;
+		}
+		else
+		{
+			tri->dir = 1;
+		}
+	}
+	else if (tri->dir == 1)
+	{
+		if (tri->cnt > 0)
+		{
+			tri->cnt--;
+		}
+	}
+	return (float)tri->cnt / (float)tri->scl;
 }
 
-void Tri_Reset(Tri_t* tri)
+void Tri_Reset(Tri_t *tri)
 {
-  tri->cnt = 0;
-  tri->dir = 0;
-  //memset(tri, 0, sizeof(Tri_t));
+
+	tri->cnt = 0;
+	tri->dir = 0;
+	//memset(tri, 0, sizeof(Tri_t));
 }
 
+#define RMP_CNT 100000
 #define MAF_BUF_LEN 20
 static uint32_t cnt = 0;
 static Rmp_t rmp;
@@ -281,542 +227,791 @@ static float maf_buf[MAF_BUF_LEN];
 static uint8_t dir = 0;
 void kylinbot_control()
 {
-  ++cnt;
-  
-  if (cnt < 5e4) {
-    if (dir != 1) {
-      Rmp_Reset(&rmp);
-      Tri_Reset(&tri);
-      dir = 1;
-    }
-    // Move forward
-    printf("Move forward\n");
-    memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
-    txKylinMsg.cp.y = 1000;
-    txKylinMsg.cv.y = 1000 * Tri_Proc(&tri); //* Rmp_Calc(&rmp);
-  }
-  else if (cnt < 10e4) {
-    if (dir != 2) {
-      Rmp_Reset(&rmp);
-      Tri_Reset(&tri);
-      dir = 2;
-    }
-    // Move right
-    printf("Move right\n");
-    memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
-    txKylinMsg.cp.x = 1000;
-    txKylinMsg.cv.x = 1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
-  }
-  else if (cnt < 15e4) {
-    if (dir != 3) {
-      Rmp_Reset(&rmp);
-      Tri_Reset(&tri);
-      dir = 3;
-    }
-    // Move backward
-    printf("Move backward\n");
-    memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
-    txKylinMsg.cp.y = -1000;
-    txKylinMsg.cv.y = -1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
-  }
-  else if (cnt < 20e4) {
-    if (dir != 4) {
-      Rmp_Reset(&rmp);
-      Tri_Reset(&tri);
-      dir = 4;
-    }
-    // Move left
-    printf("Move left\n");
-    memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
-    txKylinMsg.cp.x = -1000;
-    txKylinMsg.cv.x = -1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
-  }
-  else {
-    cnt = 0;
-  }
-  
-  printf("cnt=%d\n", tri.cnt);
+	++cnt;
+	
+	if (cnt < 5e4)
+	{
+		if (dir != 1)
+		{
+			Rmp_Reset(&rmp);
+			Tri_Reset(&tri);
+			dir = 1;
+		}
+		// Move forward
+		printf("Move forward\n");
+		memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
+		txKylinMsg.cbus.cp.y = 1000;
+		txKylinMsg.cbus.cv.y = 1000 * Tri_Proc(&tri); //* Rmp_Calc(&rmp);
+	}
+	else if (cnt < 10e4)
+	{
+		if (dir != 2)
+		{
+			Rmp_Reset(&rmp);
+			Tri_Reset(&tri);
+			dir = 2;
+		}
+		// Move right
+		printf("Move right\n");
+		memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
+		txKylinMsg.cbus.cp.x = 1000;
+		txKylinMsg.cbus.cv.x = 1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
+	}
+	else if (cnt < 15e4)
+	{
+		if (dir != 3)
+		{
+			Rmp_Reset(&rmp);
+			Tri_Reset(&tri);
+			dir = 3;
+		}
+		// Move backward
+		printf("Move backward\n");
+		memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
+		txKylinMsg.cbus.cp.y = -1000;
+		txKylinMsg.cbus.cv.y = -1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
+	}
+	else if (cnt < 20e4)
+	{
+		if (dir != 4)
+		{
+			Rmp_Reset(&rmp);
+			Tri_Reset(&tri);
+			dir = 4;
+		}
+		// Move left
+		printf("Move left\n");
+		memset(&txKylinMsg, 0, sizeof(KylinMsg_t));
+		txKylinMsg.cbus.cp.x = -1000;
+		txKylinMsg.cbus.cv.x = -1000 * Tri_Proc(&tri); // * Rmp_Calc(&rmp);;
+	}
+	else
+	{
+		cnt = 0;
+	}
+	
+	printf("cnt=%d\n", tri.cnt);
 }
 
-
-void set_camera_exposure(int val) {
-
-    int cam_fd;
-    if ((cam_fd = open("/dev/video0", O_RDWR)) == -1) {
-        cerr << "Camera open error" << endl;
-        exit(0);
-    }
-
-    struct v4l2_control control_s;
-    control_s.id = V4L2_CID_EXPOSURE_AUTO;
-    control_s.value = V4L2_EXPOSURE_MANUAL;
-    ioctl(cam_fd, VIDIOC_S_CTRL, &control_s);
-
-    control_s.id = V4L2_CID_EXPOSURE_ABSOLUTE;
-    control_s.value = val;
-    ioctl(cam_fd, VIDIOC_S_CTRL, &control_s);
-    close(cam_fd);
-}
-
-static double angle( Point pt1, Point pt2, Point pt0 )
+void rstRmp()
 {
-    double dx1 = pt1.x - pt0.x;
-    double dy1 = pt1.y - pt0.y;
-    double dx2 = pt2.x - pt0.x;
-    double dy2 = pt2.y - pt0.y;
-    return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
+	Rmp_Config(&rmp, RMP_CNT);
+	Rmp_Reset(&rmp);
 }
 
-static void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
+float genRmp()
 {
-    squares.clear();
-
-    Mat pyr, timg, gray0(image.size(), CV_8U), gray;
-
-    pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
-    pyrUp(pyr, timg, image.size());
-    vector<vector<Point> > contours;
-
-    int counts=0,counts_2=0,counts_3=0;
-    vector<Point> cand_1,cand_2,cand_3;
-    vector<vector<Point>> rect_2;
-    vector<vector<Point>> rect_3;
-    vector<vector<Point>> out;
-
-
-	cvtColor( timg, gray0, CV_BGR2GRAY );
-        for( int l = 0; l < N; l++ )
-        {
-            Canny(gray0, gray, 50, 200, 5);
-	    //dilate(gray, gray, Mat(), Point(-1,-1));
-            findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-            vector<Point> approx;
-            for( size_t i = 0; i < contours.size(); i++ )
-            {
-                if (contours[i].size()<50||contours[i].size()>400)
-                {
-                    continue;
-                }
-                approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
-                if( approx.size() == 4 &&
-                        fabs(contourArea(Mat(approx))) > 1000 &&
-                        isContourConvex(Mat(approx)) )
-                {
-                    double maxCosine = 0;
-                    for( int j = 2; j < 5; j++ )
-                    {
-                        double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
-                        maxCosine = MAX(maxCosine, cosine);
-                    }
-                    if( maxCosine < 0.3 )
-                    {
-                        counts++;
-                        int tl_x,tl_y,br_x,br_y;
-			int tl_x_2,tl_y_2,br_x_2,br_y_2;
-			int tl_x_3,tl_y_3,br_x_3,br_y_3;
-                        Sort_rect(approx);
-                        if(counts>100)
-                            counts=counts%10+2;
-                        if(counts==1)
-                        {
-                            cand_1=approx;
-                            tl_x=approx[0].x;
-                            tl_y=approx[0].y;
-                            br_x=approx[2].x;
-                            br_y=approx[2].y;
-#ifdef _SHOW_OUTPUT
-                            cout<<"rect_1 come ! "<<endl;
-                            cout<<"static int tl x: "<<tl_x<<endl;
-                            cout<<"static int tl y: "<<tl_y<<endl;
-                            cout<<"static int br x: "<<br_x<<endl;
-                            cout<<"static int br y: "<<br_y<<endl;
-#endif
-                        }
-                        else
-                        {
-                            if(abs(tl_x-approx[0].x)<10&&abs(tl_y-approx[0].y)<10&&abs(br_x-approx[2].x)<10&&abs(br_y-approx[2].y)<10)
-                            continue;
-                        else
-                        {
-                            counts_2++;
-                            if(counts_2>100)
-                                counts_2=counts_2%10+2;
-                            if(counts_2==1)
-                            {
-                                cand_2=approx;
-                                tl_x_2=approx[0].x;
-                                tl_y_2=approx[0].y;
-                                br_x_2=approx[2].x;
-                                br_y_2=approx[2].y;
-#ifdef _SHOW_OUTPUT
-                                cout<<"rect_2 come ! "<<endl;
-                                cout<<"static int tl x: "<<tl_x_2<<endl;
-                                cout<<"static int tl y: "<<tl_y_2<<endl;
-                                cout<<"static int br x: "<<br_x_2<<endl;
-                                cout<<"static int br y: "<<br_y_2<<endl;
-#endif
-                            }
-                            else
-                            {
-                                if(abs(tl_x_2-approx[0].x)<10&&abs(tl_y_2-approx[0].y)<10&&abs(br_x_2-approx[2].x)<10&&abs(br_y_2-approx[2].y)<10)
-                                    continue;
-                                else
-                                {
-                                    counts_3++;
-                                    if(counts_3>100)
-                                        counts_3=counts_3%10+2;
-                                    if(counts_3==1)
-                                    {
-                                        cand_3=approx;
-                                        tl_x_3=approx[0].x;
-                                        tl_y_3=approx[0].y;
-                                        br_x_3=approx[2].x;
-                                        br_y_3=approx[2].y;
-#ifdef _SHOW_OUTPUT
-                                        cout<<"rect_3 come ! "<<endl;
-                                        cout<<"static int tl x: "<<tl_x_3<<endl;
-                                        cout<<"static int tl y: "<<tl_y_3<<endl;
-                                        cout<<"static int br x: "<<br_x_3<<endl;
-                                        cout<<"static int br y: "<<br_y_3<<endl;
-#endif
-                                        if(abs(tl_x_3-approx[0].x)<10&&abs(tl_y_3-approx[0].y)<10&&abs(br_x_3-approx[2].x)<10&&abs(br_y_3-approx[2].y)<10)
-                                            continue;
-                                        else
-                                            out.push_back(approx);
-                                    }
-                                }
-                            }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    if(cand_1.size()>0)
-    {
-        Mat ROI_image;
-        Rect roi(cand_1[0],cand_1[2]);
-        src(roi).copyTo(ROI_image);
-        int rect_1_true=Color_judge(ROI_image,(cand_1[2].x-cand_1[0].x)*(cand_1[2].y-cand_1[0].y));
-        if(rect_1_true)
-            squares.push_back(cand_1);
-        if(cand_2.size()>0)
-        {
-            Mat ROI_image_2;
-            Rect roi_2(cand_2[0],cand_2[2]);
-            src(roi_2).copyTo(ROI_image_2);
-            int rect_2_true=Color_judge(ROI_image_2,(cand_2[2].x-cand_2[0].x)*(cand_2[2].y-cand_2[0].y));
-            if(rect_2_true)
-                squares.push_back(cand_2);
-            if(cand_3.size()>0)
-            {
-                Mat ROI_image_3;
-                Rect roi_3(cand_3[0],cand_3[2]);
-                src(roi_3).copyTo(ROI_image_3);
-                int rect_3_true=Color_judge(ROI_image_3,(cand_3[2].x-cand_3[0].x)*(cand_3[2].y-cand_3[0].y));
-                if(rect_3_true)
-                    squares.push_back(cand_3);
-                if(out.size()>0)
-                    cout<<"too much rect ! "<<endl;
-            }
-        }
-    }
-}
-static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
-{
-    for( size_t i = 0; i < squares.size(); i++ )
-    {
-        const Point* p = &squares[i][0];
-        int n = (int)squares[i].size();
-#ifdef _SHOW_PHOTO
-        polylines(image, &p, &n, 1, true, Scalar(0,255,0), 1, CV_AA);
-
-#endif
-    }
-    cout<<"squares.size: "<<squares.size()<<endl;
-    if(squares.size()>0)
-    {
-        Point tl,tr,br,bl;
-        int max=squares[0][0].y;
-        int id=0;
-        for(int i=1; i<squares.size(); i++)
-        {
-            if(squares[i][0].y>max)
-            {
-                max=squares[i][0].y;
-                id=i;
-            }
-        }
-        tl=squares[id][0];
-        tr=squares[id][1];
-        br=squares[id][2];
-        bl=squares[id][3];
-        Calcu_attitude(world_pnt_tl,world_pnt_tr,world_pnt_br,world_pnt_bl,tl,tr,br,bl);
-        cout<<"final tl: "<<tl<<endl;
-        cout<<"final tr: "<<tr<<endl;
-        cout<<"final br: "<<br<<endl;
-        cout<<"final bl: "<<bl<<endl;
-#ifdef _SHOW_PHOTO
-        char str_y[20];
-        char str_z[20];
-        char str_x[20];
-        char str_tz[20];
-        char str_ty[20];
-        char str_tx[20];
-        sprintf(str_y,"%lf",ry);
-        sprintf(str_z,"%lf",rz);
-        sprintf(str_x,"%lf",rx);
-        sprintf(str_tz,"%lf",tz);
-        sprintf(str_ty,"%lf",ty);
-        sprintf(str_tx,"%lf",tx);
-        string pre_str_y="thetay: ";
-        string pre_str_z="thetaz: ";
-        string pre_str_x="thetax: ";
-        string pre_str_tz="tz: ";
-        string pre_str_ty="ty: ";
-        string pre_str_tx="tx: ";
-        string full_y=pre_str_y+str_y;
-        string full_z=pre_str_z+str_z;
-        string full_x=pre_str_x+str_x;
-        string full_tz=pre_str_tz+str_tz;
-        string full_ty=pre_str_ty+str_ty;
-        string full_tx=pre_str_tx+str_tx;
-        putText(image,full_y,Point(30,30),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,0,255),2);
-        putText(image,full_z,Point(30,70),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
-        putText(image,full_x,Point(30,100),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
-        putText(image,full_tz,Point(30,130),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,0,255),2);
-        putText(image,full_ty,Point(30,170),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
-        putText(image,full_tx,Point(30,200),CV_FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
-#endif
-    }
-#ifdef _SHOW_PHOTO
-    imshow(wndname, image);
-#endif
+	return Rmp_Calc(&rmp);
 }
 
-
-
-void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_br,Point3f world_pnt_bl,Point2f pnt_tl_src,Point2f pnt_tr_src,Point2f pnt_br_src,Point2f pnt_bl_src)
+void *KylinBotMarkDetecThreadFunc(void *param)
 {
-    vector<Point3f> Points3D;
-    vector<Point2f> Points2D;
-    // Vec3d  rvec,tvec;
-    cv::Mat rvec = cv::Mat::zeros(3, 1, CV_64FC1);
-    cv::Mat tvec = cv::Mat::zeros(3, 1, CV_64FC1);
-    Points3D.push_back(world_pnt_tl);
-    Points3D.push_back(world_pnt_tr);
-    Points3D.push_back(world_pnt_br);
-    Points3D.push_back(world_pnt_bl);
-    Points2D.push_back(pnt_tl_src);
-    Points2D.push_back(pnt_tr_src);
-    Points2D.push_back(pnt_br_src);
-    Points2D.push_back(pnt_bl_src);
-    solvePnP(Points3D,Points2D,cameraMatrix,distCoeffs,rvec,tvec);
-    //Mat rotM(3,3,CV_64FC1);
-    double rm[9];
-    cv::Mat rotM(3, 3, CV_64FC1, rm);
-    Rodrigues(rvec,rotM);
-    cout<<"tvec: "<<tvec<<endl;
-    double r11 = rotM.ptr<double>(0)[0];
-    double r12 = rotM.ptr<double>(0)[1];
-    double r13 = rotM.ptr<double>(0)[2];
-    double r21 = rotM.ptr<double>(1)[0];
-    double r22 = rotM.ptr<double>(1)[1];
-    double r23 = rotM.ptr<double>(1)[2];
-    double r31 = rotM.ptr<double>(2)[0];
-    double r32 = rotM.ptr<double>(2)[1];
-    double r33 = rotM.ptr<double>(2)[2];
-
-    double thetaz = atan2(r21, r11) / CV_PI * 180;
-    double thetay = atan2(-1 * r31, sqrt(r32*r32 + r33*r33)) / CV_PI * 180;
-    double thetax = atan2(r32, r33) / CV_PI * 180;
-    ry=thetay;
-    rz=thetaz;
-    rx=thetax;
-    tx=tvec.ptr<double>(0)[0];
-    ty=tvec.ptr<double>(1)[0];
-    tz=tvec.ptr<double>(2)[0];
-    cout<<"thetay: "<<thetay<<endl;
-    cout<<"thetaz: "<<thetaz<<endl;
-    cout<<"thetax: "<<thetax<<endl;
-}
-int Color_judge(Mat &src,int area)
-{
-  //judge from the center point: BGR
-  int x=src.cols/2;
-  int y=src.rows/2;
-  cout<<"RGB of Center ("<<y<<","<<x<<")="<<(int)src.at<Vec3b>(y,x)[0]<<" "<<(int)src.at<Vec3b>(y,x)[1]<<" "<<(int)src.at<Vec3b>(y,x)[2]<<endl;
-  if(src.at<Vec3b>(y,x)[2]<50&&src.at<Vec3b>(y,x)[1]>50&&src.at<Vec3b>(y,x)[1]<200&&src.at<Vec3b>(y,x)[0]>100)
-  {
-    Mat grey;
-    cvtColor(src,grey,CV_BGR2GRAY);
-    const int channels[1]= {0};
-    const int histSize[1]= {256};
-    float hranges[2]= {0,255};
-    const float* ranges[1]= {hranges};
-    MatND hist;
-    calcHist(&grey,1,channels,Mat(),hist,1,histSize,ranges);
-    //cout<<"hist: "<<hist<<endl;
-    float sum=0;
-    for(int i=0; i<grey_thresh; i++)
-    {
-      sum+=hist.at<float>(i);
-    }
-    cout<<"sum: "<<sum<<endl;
-    cout<<"portion: "<<sum/area<<endl;
-    if(sum/area>0.7&&sum/area<0.92) 
-      return 1;
-  }
-  else 
-    return 0;
-
-}
-void Sort_rect(vector<Point>& approx)
-{
-    Point tl,tr,br,bl;
-    vector<MyPoint> my_rect;
-    my_rect.push_back(approx[0]);
-    my_rect.push_back(approx[1]);
-    my_rect.push_back(approx[2]);
-    my_rect.push_back(approx[3]);
-    sort(my_rect.begin(),my_rect.end());
-    if(my_rect[0].y<my_rect[1].y)
-    {
-        tl.x=my_rect[0].x;
-        tl.y=my_rect[0].y;
-        bl.x=my_rect[1].x;
-        bl.y=my_rect[1].y;
-    }
-    else
-    {
-        tl.x=my_rect[1].x;
-        tl.y=my_rect[1].y;
-        bl.x=my_rect[0].x;
-        bl.y=my_rect[0].y;
-    }
-    if(my_rect[2].y<my_rect[3].y)
-    {
-        tr.x=my_rect[2].x;
-        tr.y=my_rect[2].y;
-        br.x=my_rect[3].x;
-        br.y=my_rect[3].y;
-    }
-    else
-    {
-        tr.x=my_rect[3].x;
-        tr.y=my_rect[3].y;
-        br.x=my_rect[2].x;
-        br.y=my_rect[2].y;
-    }
-    approx[0]=tl;
-    approx[1]=tr;
-    approx[2]=br;
-    approx[3]=bl;
-#ifdef _SHOW_OUTPUT
-    cout<<"sorted approx: "<<approx<<endl;
-#endif
+	Mat frame;
+	vector<vector<Point>> squares;
+	int lostFlag = false;
+	//KylinBotMsgPullerThreadFunc(NULL);
+	//printf("hjhklhjllllllhkl\n");
+	printf("exit_flag=%d\n",exit_flag);
+	int lostCount = 0;
+	int CountVframe=0;
+	while (exit_flag == 0) //&&(capture.read(frame)))
+	{
+		squares.clear();
+		double t = (double)getTickCount();
+		
+		capture >> frame;
+		if (frame.empty())
+			continue;
+		
+		
+		int dif_x = 0, dif_y = 0;
+		Mat src = frame.clone();
+		//cout << "detection_mode=" << (int)detection_mode << endl;
+		cout<<"coutLogicFlag: "<<coutLogicFlag<<endl;
+		cout<<"sr04maf[SR04_IDX_L].avg:"<<sr04maf[SR04_IDX_L].avg<<" sr04maf[SR04_IDX_R].avg: "<<sr04maf[SR04_IDX_R].avg<<endl;
+		cout<<"sr04maf[SR04_IDX_F].avg:"<<sr04maf[SR04_IDX_F].avg<<" sr04maf[SR04_IDX_M].avg: "<<sr04maf[SR04_IDX_M].avg<<endl;
+		cout<<"finishDetectCentroidFlag"<<endl;
+		cout<<"GraspBwCout: "<<GraspBwCout<<" GraspTpCout: "<<GraspTpCout<<endl;
+		cout<<"kylinMsg.cbus.gp.e"<<kylinMsg.cbus.gp.e<<endl;
+cout<<"absoluteDistanceCout: "<<absoluteDistanceCout<<endl;
+		switch (detection_mode)
+		{
+			case 0: //do nothing
+				//TODO:
+				//imshow("IM",frame);
+				cout << "detection_mode=" << (int)detection_mode << endl;
+				break;
+			case 1: //detect squares
+				cout << "detection_mode=" << (int)detection_mode << endl;
+				findSquares(src, frame, squares);
+				LocationMarkes(squares);
+				drawSquares(frame, squares);
+				
+				if (squares.size() > 0)
+				{
+					lostCount = 0;
+					lostFlag = false;
+					CountVframe++;
+					// txKylinMsg.cbus.cp.x = tx;
+					// txKylinMsg.cbus.cv.x = 500;
+					// txKylinMsg.cbus.cp.y = tz;
+					// txKylinMsg.cbus.cv.y = 800;
+					// txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+					// txKylinMsg.cbus.cv.z = 500;
+					// txKylinMsg.cbus.gp.e = ty;
+					// txKylinMsg.cbus.gv.e = 0;
+				}
+				if (squares.size() == 0)
+				{
+					lostCount++;
+					if (lostCount >= 3)
+					{
+						printf("lost frame\n");
+						lostCount = 0;
+						lostFlag = true;
+						tx = 60;
+						ty = 0;
+						tz = 0;
+						rx = 0;
+						ry = 0;
+						rz = 0;
+					}
+				}
+				if (abs(tz) < 700 && (lostFlag == false)&&CountVframe>10)
+				{ //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
+					finishDetectBoxFlag = true;
+					CountVframe=0;
+				}
+				else
+				{
+					finishDetectBoxFlag = false;
+				}
+				printf("tz=%lf\n",tz);
+				break;
+			case 2: //detect green area
+				cout << "detection_mode=" << (int)detection_mode << endl;
+				Color_detect(src, dif_x, dif_y);
+				tx = 2 * (dif_x-DIF_CEN);
+				// txKylinMsg.cbus.cp.x = 10 * dif_x;
+				// txKylinMsg.cbus.cp.y = 0;
+				// txKylinMsg.cbus.cp.z = 0;
+				if (abs(tx - 20) < 20) //number of pixels  
+				{
+					finishDetectCentroidFlag = true;
+				}
+				break;
+			case 3: //follow line
+				cout << "detection_mode=" << (int)detection_mode << endl;
+				break;
+			case 4: //follow line
+				cout << "detection_mode=" << (int)detection_mode << endl;
+				break;
+			case 5: //follow line
+				cout << "detection_mode=" << (int)detection_mode << endl;
+				
+				//TODO:
+				break;
+			default:
+				break;
+		}
+		
+		int c = waitKey(1);
+		
+		if ((char)c == 'q')
+			break;
+	}
+	
 }
 
-
-int main(int argc, char** argv)
+void on_expTracker(int, void *)
 {
-	VideoCapture capture;
-	    capture.open(0);
-	    if (!capture.isOpened())
-	    {
-		cout << " failed to open!" << endl;
-		return 1;   
-	    }
-	    capture.set(CV_CAP_PROP_FRAME_WIDTH, DEFAULT_FRAME_WIDTH);
-	    capture.set(CV_CAP_PROP_FRAME_HEIGHT, DEFAULT_FRAME_HEIGHT);
-	    //set_camera_exposure(BUFFER_EXPOSURE_VALUE);
-	    Mat frame;
-	    capture.read(frame);
-	    capture.read(frame);
-	    capture.read(frame);
+	//capture.set(CV_CAP_PROP_EXPOSURE,exp_time);
+	capture.setExposureTime(0, ::exp_time); //settings->exposure_time);
+}
+void on_gainTracker(int, void *)
+{
+	//capture.set(CV_CAP_PROP_GAIN,::gain);
+	capture.setpara(gain, brightness_, whiteness_, saturation_); // cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+}
+void on_brightnessTracker(int, void *)
+{
+	
+	//capture.set(CV_CAP_PROP_BRIGHTNESS,::brightness_);
+	capture.setpara(gain, brightness_, whiteness_, saturation_); //cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+}
+void on_whitenessTracker(int, void *)
+{
+	//capture.set(CV_CAP_PROP_WHITE_BALANCE_BLUE_U,::whiteness_);
+	capture.setpara(gain, brightness_, whiteness_, saturation_); // cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+}
+void on_saturationTracker(int, void *)
+{
+	//capture.set(CV_CAP_PROP_SATURATION,::saturation_);
+	capture.setpara(gain, brightness_, whiteness_, saturation_); //cap.setExposureTime(0, ::exp_time);//settings->exposure_time);
+}
+bool setcamera()
+{
 	#ifdef _SHOW_PHOTO
-	    namedWindow( wndname, 1 );
-	#endif 
-	    vector<vector<Point> > squares;
-        init();
-	uint32_t cnt = 0;
-	Rmp_Config(&rmp, 50000);
+	namedWindow(wndname, 1);
+	#endif
+	//RMVideoCapture capture("/dev/video0", 3);
+    capture.setVideoFormat(800, 600, 1);
+	
+	//capture.open(0);	
+	//capture.set(CV_CAP_PROP_FRAME_WIDTH,800);
+	//capture.set(CV_CAP_PROP_FRAME_HEIGHT,600);	
+	// capture.setExposureTime(0, 62);//settings->exposure_time);
+	if (!capture.startStream())
+	{
+		cout << "Open Camera failure.\n";
+		return false;
+	}
+	Mat img;
+	//printf("%d %d \n",img.cols,img.rows);
+	//if(img.empty())
+	//	return 0;
+	capture>>img;
+	cout<<img.cols<<" "<<img.rows<<endl;
+	namedWindow("Tuning",1);
+	createTrackbar("exposure_time", "Tuning", &::exp_time, 100, on_expTracker);
+	createTrackbar("gain", "Tuning", &::gain, 100, on_gainTracker);
+	createTrackbar("whiteness", "Tuning", &::whiteness_, 100, on_whitenessTracker);
+	createTrackbar("brightness_", "Tuning", &::brightness_, 100, on_brightnessTracker);
+	createTrackbar("saturation", "Tuning", &::saturation_, 100, on_saturationTracker);
+	on_brightnessTracker(0, 0);
+	on_expTracker(0, 0);
+	on_gainTracker(0, 0);
+	on_saturationTracker(0, 0);
+	on_whitenessTracker(0, 0);
+	 
+	while(1)
+	{
+		capture>>img;
+		
+		if(img.empty())
+			continue;
+		imshow("Tuning",img);
+		int c=waitKey(20);
+		if((char)c=='w')
+			break;
+	}
+	destroyWindow("Tuning");
+	return true;
+	//RMVideoCapture cap("/dev/video0", 3);
+	
+}
+void logicInit()
+{
+	txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+	//detection_mode = 0;                //摄像头关闭
+	//cout << "Logic init finish!!" << endl;
+}
+void workStateFlagPrint()
+{
+	cout << "workState: " << workState;
+	cout << " finishAbsoluteMoveFlag:" << finishAbsoluteMoveFlag << endl;
+
+}
+
+KylinMsg_t kylinOdomCalib;
+static uint32_t frame_cnt = 0;
+uint8_t updateOdomCalib()
+{
+  uint32_t frame_id = kylinMsg.frame_id;
+  while (frame_cnt < 10) {
+    if (kylinMsg.frame_id != frame_id) {
+      frame_id = kylinMsg.frame_id;
+      frame_cnt++;
+    }
+    //cout << "waiting for new KylinMsg" << endl;
+  }
+  memcpy(&kylinOdomCalib, &kylinMsg, sizeof(KylinMsg_t));
+  //cout << "kylinOdomCalib updated!" << endl;
+  return 1;
+}
+
+KylinMsg_t kylinOdomError;
+uint8_t updateOdomError()
+{
+  kylinOdomError.frame_id = kylinMsg.frame_id;
+  kylinOdomError.cbus.cp.x = txKylinMsg.cbus.cp.x - kylinMsg.cbus.cp.x;// + kylinOdomCalib.cbus.cp.x;
+  kylinOdomError.cbus.cp.y = txKylinMsg.cbus.cp.y - kylinMsg.cbus.cp.y;// + kylinOdomCalib.cbus.cp.y;
+  kylinOdomError.cbus.cp.z = txKylinMsg.cbus.cp.z - kylinMsg.cbus.cp.z;// + kylinOdomCalib.cbus.cp.z;
+  //cout << "ref.x=" << txKylinMsg.cbus.cp.x << ", fdb.x=" << kylinMsg.cbus.cp.x << endl;
+  //cout << "ref.y=" << txKylinMsg.cbus.cp.y << ", fdb.y=" << kylinMsg.cbus.cp.y << endl;
+  kylinOdomError.cbus.gp.e = txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e;// + kylinOdomCalib.cbus.gp.e;
+  kylinOdomError.cbus.gp.c = txKylinMsg.cbus.gp.c - kylinMsg.cbus.gp.c;// + kylinOdomCalib.cbus.gp.c;
+  kylinOdomError.cbus.cv.x = txKylinMsg.cbus.cv.x - kylinMsg.cbus.cp.x;// + kylinOdomCalib.cbus.cv.x;
+  kylinOdomError.cbus.cv.y = txKylinMsg.cbus.cv.y - kylinMsg.cbus.cv.y;// + kylinOdomCalib.cbus.cv.y;
+  kylinOdomError.cbus.cv.z = txKylinMsg.cbus.cv.z - kylinMsg.cbus.cv.z;// + kylinOdomCalib.cbus.cv.z;
+  kylinOdomError.cbus.gv.e = txKylinMsg.cbus.gv.e - kylinMsg.cbus.gv.e;// + kylinOdomCalib.cbus.gv.e;
+  kylinOdomError.cbus.gv.c = txKylinMsg.cbus.gv.c - kylinMsg.cbus.gv.c;// + kylinOdomCalib.cbus.gv.c;
+}
+
+int lastWs = 0;
+
+int main(int argc, char **argv)
+{
+	if(!setcamera())
+	{
+		cout<<"Setup camera failure. Won't do anything."<<endl;
+		return   -1;
+	}
+	
+	init();
+	rstRmp();
+	//uint32_t cnt = 0;
+	//Rmp_Config(&rmp, 50000);
 	Maf_Init(&maf, maf_buf, MAF_BUF_LEN);
 	Tri_Init(&tri, 2.5e4);
-        if (argc < 2) {
-            printf("Please input device name\n");
-            return 0;
-        }
-        char* device = argv[1];
-        if (connect_serial(device,115200) == -1)
+	
+	const char *device = "/dev/ttyTHS2";
+	if (connect_serial(device, 115200) == -1)
 	{
 		printf("serial open error!\n");
 		return -1;
 	}
-
+	
 	MyThread kylibotMsgPullerTread;
 	MyThread kylibotMsgPusherTread;
+	MyThread kylibotMarkDetectionTread;
 	
 	kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
 	kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
+	kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
+	// txKylinMsg.cbus.cp.x = tx;     //小车左右
+	// txKylinMsg.cbus.cv.x = 500;
+	// txKylinMsg.cbus.cp.y = tz;     //小车前后
+	// txKylinMsg.cbus.cv.y = 800;
+	// txKylinMsg.cbus.cp.z = ry;     //小车旋转
+	// txKylinMsg.cbus.cv.z = 500;
+	// txKylinMsg.cbus.gp.e = ty;     //抓子高度
+	// txKylinMsg.cbus.gv.e = 0;
 	
-	//KylinBotMsgPullerThreadFunc(NULL);
-	while ((!exit_flag)&&(capture.read(frame))) {
-	#ifdef _SHOW_OUTPUT
-        double t = (double)getTickCount();
-#endif
-        capture >> frame;
-        if (frame.empty())
-            break;
-
-        Mat src=frame.clone();
-        findSquares(src,frame, squares);
-        drawSquares(frame, squares);
-	/*****************************/
-	/*******send the object position to ARM*********/
-	/***********************************************/
-        //imshow(wndname, frame);
-        int c = waitKey(1);
-#ifdef _SHOW_OUTPUT
-        t = ((double)getTickCount() - t)/getTickFrequency();
-        cout<<"time: "<<t<<" second"<<endl;
-#endif
-        if((char)c == 'q')
-            break;
-
+	// KylinMsg.cbus.cp.x
+	// kylinMsg.cbus.cp.y
+	// kylinMsg.cbus.cp.z
+	// kylinMsg.cbus.gp.e
+	// kylinMsg.cbus.gp.c
+	// kylinMsg.cbus.cv.x
+	// kylinMsg.cbus.cv.y
+	// kylinMsg.cbus.cv.z
+	// kylinMsg.cbus.gv.e
+	// kylinMsg.cbus.gv.c
+	/* 经验值
+	 *        txKylinMsg.cbus.cp.x = tx;
+	 *        txKylinMsg.cbus.cv.x = 500;
+	 *        txKylinMsg.cbus.cp.y = tz;
+	 *        txKylinMsg.cbus.cv.y = 800;
+	 *        txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+	 *        txKylinMsg.cbus.cv.z = 500;
+	 *        txKylinMsg.cbus.gp.e = ty;
+	 *        txKylinMsg.cbus.gv.e = 0;
+	 */
+	/*Flag变量汇总:
+	 *    finishAbsoluteMoveFlag      完成绝对位置移动
+	 *    finishDetectBoxFlag         完成检测盒子(小车到了检测不到盒子的位置)
+	 *    finishDetectCentroidFlag    完成质心检测
+	 *    finishMobleUltrasonicFlag   超声波到达极限距离
+	 *    finishGraspFlag             抓子是否合拢
+	 *    finishSlidFlag              滑台是否达到指定高度
+	 */
+	updateOdomCalib();
+	//cout << "w111s: " << workState << endl;
+	logicInit();          //逻辑控制初始化
+	//workStateFlagPrint(); //打印当前状态
+	int GraspTp=posCalibMsg.data.el;
+	int GraspBw=posCalibMsg.data.eh;
+	int GraspOp=posCalibMsg.data.cl;
+	int GraspCl=posCalibMsg.data.ch;
+	int moveDistance = 0;
 	
+	GraspBwCout = GraspBw;
+	GraspTpCout = GraspTp;
+	//sr04maf[1].avg moble
+	//sr04maf[0].avg fixed
+	//sr04maf[2].avg left
+	//sr04maf[3].avg right
+	double absoluteDistance = 100;
+	double absuluteAngle = 100;
+	double absuluteGraspOpCl =100;
+	double absuluteGrasp = 100;
+	int workState0_Num = 0, workState1_Num = 0, workState2_Num =0, workState3_Num = 0, workState4_Num = 0;
+	while ((!exit_flag))  //&&(capture.read(frame)))
+	{
+		//cout << "ws: " << workState << endl;
+		updateOdomError();
+		
+		//如果当前处于绝对位置控制模式,进入判断条件
+		if (txKylinMsg.cbus.fs & (1u << 30)) //0xFF == 1111 1111   0x80000000
+		{
+			
+			absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
+absoluteDistanceCout = absoluteDistance;
+			absuluteAngle = abs(kylinOdomError.cbus.cp.z);
+			absuluteGrasp = abs(kylinOdomError.cbus.gp.e);
+			absuluteGraspOpCl = abs(kylinOdomError.cbus.gp.c);
+			//cout<<"absoluteDistance" << absoluteDistance << endl;
+			//cout<<"absuluteAngle" << absuluteAngle << endl;
+			if (absoluteDistance < 10 && absuluteAngle < 5.0f * PI / 2.0f)// && absuluteGrasp < 10)
+			{
+				finishAbsoluteMoveFlag = true;
+			}
+			if(coutLogicFlag == 10 && absuluteGrasp < 10)//(GraspTp + GBw) / 2.f)
+			//if(coutLogicFlag == 7 && abs(txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e) < 20)
+			{
+				finishSlidBwFlag = true;
+			}
+			if(coutLogicFlag == 11 && absuluteGraspOpCl < 20)
+			{
+				finishGraspOpFlag = true;
+			}
+		}
+		
+		if((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
+		{
+			if(sr04maf[SR04_IDX_M].avg < 60)
+			{
+				finishMobleUltrasonicFlag = true;
+			}
+			//Grasp close
+			if(kylinMsg.cbus.gp.c == GraspCl)
+			{
+				finishGraspFlag = true;
+			}
+			//Graps Open
+			
+			if(coutLogicFlag == 7 && kylinMsg.cbus.gp.e <= (GraspBw + GraspTp)/2.0)//(GraspTp + GraspBw) / 2.f)
+			//if(coutLogicFlag == 7 && abs(txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e) < 20)
+			{
+				finishSlidFlag = true;
+			}
+			
+			
+			//fixed Ultra
+			if(sr04maf[SR04_IDX_F].avg < 350 && finishDetectBoxFlag == true)
+			{
+				finishFixedUltrasonicFlag = true;
+			}
 
-	  txKylinMsg.cp.x = 1000;
-	  txKylinMsg.cv.x = 1000;
-	  txKylinMsg.cp.y = ty;
-	  txKylinMsg.cv.y = ty;
-	  txKylinMsg.cp.z = tz;
-	  txKylinMsg.cv.z = tz;
-	  usleep(10000);
-	  //kylinbot_control();
-	  //PullMsg();
+			if(coutLogicFlag == 3 && sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
+			{
+				finish_LR_UltrasonicFlag = true;
+				moveDistance = 0;
+			}
+			if(sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 200)
+			{
+				moveDistance = 100;
+			}
+			if(sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 500)
+			{
+				moveDistance = -100;
+			}
+			
+		}
+		
+		//workStateFlagPrint(); //打印当前状态
+		switch (workState)
+		{
+			case 0:
+				coutLogicFlag = 0;
+				//关闭视觉检测，小车在原点旋转90度，启动视觉检测（本阶段视觉关）仅仅只是//小车旋转
+				detection_mode = 0;             //关闭视觉
+				txKylinMsg.cbus.fs |= (1u << 30); //切换到绝对位置控制模式
+				txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+				txKylinMsg.cbus.cv.x = 0;
+				txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
+				txKylinMsg.cbus.cv.y = 0;
+				txKylinMsg.cbus.cp.z = 1572 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
+				txKylinMsg.cbus.cv.z = 1000 * genRmp();
+				txKylinMsg.cbus.gp.e = GraspBw - 50; //+ kylinOdomCalib.cbus.gp.e;
+				txKylinMsg.cbus.gv.e = 1000;
+				txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
+				txKylinMsg.cbus.gv.c = 8000;
+				if (finishAbsoluteMoveFlag == true)
+				{
+					lastWs = workState;
+					rstRmp();
+					workState = 1; //完成移动，进入下一阶段
+					
+					finishAbsoluteMoveFlag = false;
+				}
+				
+				break;
+			case 1:
+				//if (lastWs != 1) rstRmp();
+				//begin detect squares
+				if (finishDetectBoxFlag == false)
+				{
+					
+					coutLogicFlag = 1;
+					detection_mode = 1;                //打开视觉,检测矩形
+					//cout<<"detection_mode"<<(int)detection_mode<<endl;
+					txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+					
+					txKylinMsg.cbus.cp.x = tx - 60;
+					txKylinMsg.cbus.cv.x = 500 * genRmp();
+					txKylinMsg.cbus.cp.y = tz;
+					txKylinMsg.cbus.cv.y = 800 * genRmp();;
+					txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+					txKylinMsg.cbus.cv.z = 0;
+					txKylinMsg.cbus.gp.e = GraspBw - 50 + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gv.e = 0;
+					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
+					txKylinMsg.cbus.gv.c = 0;
+				}
+				//fixed Ultrasonic
+				if(finishDetectBoxFlag == true && finishFixedUltrasonicFlag == false)
+				{
+					coutLogicFlag = 2;
+					detection_mode = 0;                
+					txKylinMsg.cbus.fs &= ~(1u << 30); 
+					txKylinMsg.cbus.cp.x = 0;
+					txKylinMsg.cbus.cv.x = 0;
+					txKylinMsg.cbus.cp.y = sr04maf[0].avg;// - kylinMsg.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 200;
+					txKylinMsg.cbus.cp.z = 0;
+					txKylinMsg.cbus.cv.z = 0;
+					txKylinMsg.cbus.gp.e = GraspBw - 50 + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gv.e = 0;
+					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
+					txKylinMsg.cbus.gv.c = 0;
+				}
+				//left right Ultrasonic
+				if(finishFixedUltrasonicFlag == true && finish_LR_UltrasonicFlag == false)
+				{
+					//finishDetectBoxFlag = false;
+					coutLogicFlag = 3;
+					detection_mode = 0;
+					
+					txKylinMsg.cbus.fs &= ~(1u << 30);
+					txKylinMsg.cbus.cp.x = moveDistance;
+					txKylinMsg.cbus.cv.x = 100;
+					txKylinMsg.cbus.cp.y = 0;
+					txKylinMsg.cbus.cv.y = 0;
+					txKylinMsg.cbus.cp.z = 0;
+					txKylinMsg.cbus.cv.z = 0;
+					txKylinMsg.cbus.gp.e = GraspBw + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gv.e = 1000;
+					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
+					txKylinMsg.cbus.gv.c = 0;
+				}
+				//squares detection finished, begin detect green area
+				if (finish_LR_UltrasonicFlag == true && finishDetectCentroidFlag == false)
+				{
+					//finishFixedUltrasonicFlag = false;
+					coutLogicFlag = 4;
+					detection_mode = 2;                //打开视觉,检测质心
+					txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+					txKylinMsg.cbus.cp.x = tx;
+					txKylinMsg.cbus.cv.x = 100;
+					txKylinMsg.cbus.cp.y = 0;
+					txKylinMsg.cbus.cv.y = 0;
+					txKylinMsg.cbus.cp.z = 0;
+					txKylinMsg.cbus.cv.z = 0;
+					txKylinMsg.cbus.gp.e = GraspBw - 50 + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gv.e = 1000;
+					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
+					txKylinMsg.cbus.gv.c = 0;
+				}
+				//image detection finished. only go forward
+				if (finishDetectCentroidFlag == true && finishMobleUltrasonicFlag == false)
+				{
+					
+					coutLogicFlag = 5;
+					//finish_LR_UltrasonicFlag = false;
+					detection_mode = 0;                //关闭视觉
+					txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+					txKylinMsg.cbus.cp.x = 0;
+					txKylinMsg.cbus.cv.x = 0;
+					txKylinMsg.cbus.cp.y = sr04maf[SR04_IDX_M].avg;
+					txKylinMsg.cbus.cv.y = 400;
+					txKylinMsg.cbus.cp.z = 0;
+					txKylinMsg.cbus.cv.z = 0;
+					txKylinMsg.cbus.gp.e = GraspBw + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gv.e = 1000;
+					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
+					txKylinMsg.cbus.gv.c = 0;
+				}
+				//begin grasp.
+				if (finishMobleUltrasonicFlag == true && finishGraspFlag == false)
+				{
+					coutLogicFlag = 6;
+					//finishDetectCentroidFlag = false;   //clear the flag
+					detection_mode = 0; //关闭视觉
+					txKylinMsg.cbus.fs &= ~(1u << 30);
+					txKylinMsg.cbus.cp.x = 0;
+					txKylinMsg.cbus.cv.x = 0;
+					txKylinMsg.cbus.cp.y = 0;
+					txKylinMsg.cbus.cv.y = 0;
+					txKylinMsg.cbus.cp.z = 0;
+					txKylinMsg.cbus.cv.z = 0;
+					txKylinMsg.cbus.gp.e = GraspBw;//(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gv.e = 1000;
+					txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
+					txKylinMsg.cbus.gv.c = 8000;
+				}
+				//finish grasp. begin pull up.
+				if (finishGraspFlag == true && finishSlidFlag == false)
+				{
+					coutLogicFlag = 7;
+					//finishMobleUltrasonicFlag = false;
+					detection_mode = 0; //关闭视觉
+					txKylinMsg.cbus.fs &= ~(1u << 30);
+					txKylinMsg.cbus.cp.x = 0;
+					txKylinMsg.cbus.cv.x = 0;
+					txKylinMsg.cbus.cp.y = 0;
+					txKylinMsg.cbus.cv.y = 0;
+					txKylinMsg.cbus.cp.z = 0;
+					txKylinMsg.cbus.cv.z = 0;
+					txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0 - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
+					txKylinMsg.cbus.gv.e = 800;
+					txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
+					txKylinMsg.cbus.gv.c = 0;
+				}
+				//抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
+				if (finishSlidFlag == true)
+				{
+					txKylinMsg.cbus.gv.e = 0;
+					lastWs = workState;
+					rstRmp();
+					workState = 2; //切换到下一阶段
+					finishAbsoluteMoveFlag = false;
+				}
+				
+				break;
+				case 2:
+					//if (lastWs != 2) rstRmp();
+					//小车回到原点, 车头朝向前方
+					workState2_Num ++;
+					coutLogicFlag = 8;
+					detection_mode = 0;             //关闭视觉
+					txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+					txKylinMsg.cbus.cp.x = -50 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cv.x = 1000 * genRmp();
+					txKylinMsg.cbus.cp.y = -100 + kylinOdomCalib.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 1000 * genRmp();
+					if(absoluteDistance < 10)
+					{
+						txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
+						txKylinMsg.cbus.cv.z = 1000 * genRmp();
+					}
+					else
+					{
+						txKylinMsg.cbus.cv.z = 0;
+					}
+					
+					//txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0;
+					//txKylinMsg.cbus.gv.e = 0;
+					//txKylinMsg.cbus.gp.c = GraspCl;
+					//txKylinMsg.cbus.gv.c = 0;
+					if (finishAbsoluteMoveFlag == true && workState2_Num != 1) //完成绝对位置控制模式
+					{
+						workState = 3; //切换到下一阶段
+						finishAbsoluteMoveFlag == false;
+txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cv.x = 0;
+					txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 0;
+					}
+					break;
+				case 3:
+					//小车从原点达到基地区第一堆盒子的位置, 第一堆盒子的坐标 (0,3485)
+					workState3_Num++;
+					coutLogicFlag = 9;
+					detection_mode = 0;             //关闭视觉
+					txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+					txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cv.x = 1000;
+					txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 1000;
+					txKylinMsg.cbus.cp.z = 0;
+					txKylinMsg.cbus.cv.z = 0;
+					//txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0;
+					//txKylinMsg.cbus.gv.e = 0;
+					////txKylinMsg.cbus.gp.c = GraspCl;
+				//	txKylinMsg.cbus.gv.c = 0;
+
+if (finishAbsoluteMoveFlag == true)// && workState3_Num >= 2000) //完成绝对位置控制模式
+					{
+						//到达指定位置，放下盒子
+						if (finishSlidBwFlag == false)
+						{
+							coutLogicFlag = 10;
+							txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+							txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+							txKylinMsg.cbus.cv.x = 1000;
+							txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
+							txKylinMsg.cbus.cv.y = 1000;
+							txKylinMsg.cbus.cp.z = 0;
+							txKylinMsg.cbus.cv.z = 0;
+							txKylinMsg.cbus.gp.e = GraspBw;
+							txKylinMsg.cbus.gv.e = 400;
+							//txKylinMsg.cbus.gp.c = GraspCl;
+							//txKylinMsg.cbus.gv.c = 0;
+						}
+						//松开抓子
+						if (finishSlidBwFlag == true && finishGraspOpFlag == false)
+						{
+							coutLogicFlag = 11;
+							txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+							txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+							txKylinMsg.cbus.cv.x = 1000;
+							txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
+							txKylinMsg.cbus.cv.y = 1000;
+							txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z;
+							txKylinMsg.cbus.cv.z = 1000;
+							//txKylinMsg.cbus.gp.e = GraspBw;
+							//txKylinMsg.cbus.gv.e = 0;
+							txKylinMsg.cbus.gp.c = GraspOp;
+							txKylinMsg.cbus.gv.c = 8000;
+						}
+						if (finishGraspOpFlag == true)
+						{
+							lastWs = workState;
+							workState = 4;                   //进入下一阶段
+							finishAbsoluteMoveFlag == false; //完成本阶段的绝对位置控制
+txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cv.x = 0;
+					txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 0;
+
+						}
+					}
+					break;
+				case 4:
+					//回原点
+					workState4_Num ++;
+					detection_mode = 0;             //关闭视觉
+					coutLogicFlag = 12;
+					txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+					txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cv.x = 1000;
+					txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
+					txKylinMsg.cbus.cv.y = 1000;
+					txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z;
+					txKylinMsg.cbus.cv.z = 1000;
+					txKylinMsg.cbus.gp.e = GraspBw;
+					txKylinMsg.cbus.gv.e = 0;
+					txKylinMsg.cbus.gp.c = GraspOp;
+					txKylinMsg.cbus.gv.c = 0;
+					if (finishAbsoluteMoveFlag == true && workState4_Num != 1)
+					{
+						lastWs = workState;
+						rstRmp();
+						//workState = 0;                   //进入下一阶段
+						finishAbsoluteMoveFlag == false; //完成本阶段的绝对位置控制
+					}
+					break;
+				default:
+					break;
+		}
 	}
 	
+	//if(capture.isOpened())
+	//	capture.release();
+	capture.closeStream();
 	disconnect_serial();
-
-	//while (getchar() == '\0');
 	return 0;
+
 }
-
-int main__(int argc, char** argv)
-{
-  int flag = Kylinbot_Connect();
-  if (flag == -1) {
-    return -1;
-  }
-  
-  while (flag != -1) {
-    usleep(10000);
-  }
-  
-  Kylinbot_Disconnect();
-  
-  return 0;
-}
-
-
