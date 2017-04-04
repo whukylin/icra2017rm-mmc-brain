@@ -791,7 +791,7 @@ absoluteDistanceCout = absoluteDistance;
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
@@ -809,7 +809,7 @@ absoluteDistanceCout = absoluteDistance;
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw - 50 + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw - 50 - kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
@@ -828,7 +828,7 @@ absoluteDistanceCout = absoluteDistance;
 					txKylinMsg.cbus.cv.y = 400;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
@@ -846,7 +846,7 @@ absoluteDistanceCout = absoluteDistance;
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw;//(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;//(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
 					txKylinMsg.cbus.gv.c = 8000;
@@ -909,7 +909,7 @@ absoluteDistanceCout = absoluteDistance;
 					{
 						workState = 3; //切换到下一阶段
 						finishAbsoluteMoveFlag == false;
-txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cp.x = 1000 + kylinOdomCalib.cbus.cp.x;
 					txKylinMsg.cbus.cv.x = 0;
 					txKylinMsg.cbus.cp.y = 3485 + kylinOdomCalib.cbus.cp.y;
 					txKylinMsg.cbus.cv.y = 0;
@@ -932,7 +932,7 @@ txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
 					////txKylinMsg.cbus.gp.c = GraspCl;
 				//	txKylinMsg.cbus.gv.c = 0;
 
-if (finishAbsoluteMoveFlag == true)// && workState3_Num >= 2000) //完成绝对位置控制模式
+					if (finishAbsoluteMoveFlag == true)// && workState3_Num >= 2000) //完成绝对位置控制模式
 					{
 						//到达指定位置，放下盒子
 						if (finishSlidBwFlag == false)
@@ -971,7 +971,7 @@ if (finishAbsoluteMoveFlag == true)// && workState3_Num >= 2000) //完成绝对�
 							lastWs = workState;
 							workState = 4;                   //进入下一阶段
 							finishAbsoluteMoveFlag == false; //完成本阶段的绝对位置控制
-txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
+					txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
 					txKylinMsg.cbus.cv.x = 0;
 					txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
 					txKylinMsg.cbus.cv.y = 0;
