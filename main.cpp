@@ -73,6 +73,10 @@ volatile bool finishFixedUltrasonicFlag_2_PutBox = false;
 volatile int GraspBwCout = 0;
 volatile int GraspTpCout = 0;
 volatile int absoluteDistanceCout = 0;
+int	GraspTp;
+int	GraspBw;
+int	GraspOp;
+int	GraspCl;
 static void Dnl_ProcZGyroMsg(const ZGyroMsg_t *zgyroMsg)
 {
 	//printf("*************************************ZGYRO********************************************\n");
@@ -626,10 +630,10 @@ int main(int argc, char **argv)
 	//cout << "w111s: " << workState << endl;
 	logicInit();          //逻辑控制初始化
 	//workStateFlagPrint(); //打印当前状态
-	int GraspTp=posCalibMsg.data.el;
-	int GraspBw=posCalibMsg.data.eh;
-	int GraspOp=posCalibMsg.data.cl;
-	int GraspCl=posCalibMsg.data.ch;
+	GraspTp=posCalibMsg.data.el;
+	GraspBw=posCalibMsg.data.eh;
+	GraspOp=posCalibMsg.data.cl;
+	GraspCl=posCalibMsg.data.ch;
 	int moveDistance = 0;
 	
 	GraspBwCout = GraspBw;
@@ -1114,11 +1118,13 @@ int main(int argc, char **argv)
 	return 0;
 
 }
+/*
 finishDetectBoxFlag_PutBox = false;
 finishFixedUltrasonicFlag_1_PutBox = false;
 finish_LR_UltrasonicFlag_PutBox = false;
 finishFixedUltrasonicFlag_2_PutBox = false;
-
+*/
+/*
 void videoMove_PutBox()
 {
 				if (finishDetectBoxFlag_PutBox == false)
@@ -1206,3 +1212,4 @@ void videoMove_PutBox()
 					
 				}
 }
+*/
