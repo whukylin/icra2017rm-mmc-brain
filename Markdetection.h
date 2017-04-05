@@ -1,11 +1,10 @@
 //Image processing
 #include "opencv2/opencv.hpp"
-#define DIF_CEN 165
+#define DIF_CEN 150
 //#define _SHOW_PHOTO
 //#define _SHOW_OUTPUT
 //#define Camera_One
 using namespace cv;
-
 class MyPoint
 {
 public:
