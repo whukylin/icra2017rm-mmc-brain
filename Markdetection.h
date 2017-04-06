@@ -1,6 +1,6 @@
 //Image processing
 #include "opencv2/opencv.hpp"
-#define DIF_CEN 147
+#define DIF_CEN 155
 //#define _SHOW_PHOTO
 //#define _SHOW_OUTPUT
 //#define Camera_One

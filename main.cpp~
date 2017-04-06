@@ -344,7 +344,8 @@ void *KylinBotMarkDetecThreadFunc(void *param)
 		cout<<"sr04maf[SR04_IDX_F].avg:"<<sr04maf[SR04_IDX_F].avg<<" sr04maf[SR04_IDX_M].avg: "<<sr04maf[SR04_IDX_M].avg<<endl;
 		cout<<"finishDetectCentroidFlag"<<endl;
 		cout<<"GraspBwCout: "<<GraspBwCout<<" GraspTpCout: "<<GraspTpCout<<endl;
-		cout<<"kylinMsg.cbus.gp.e"<<kylinMsg.cbus.gp.e<<endl;
+                //cout<<"GraspOp:"<<GraspOp<<"GraspCl"<<GraspCl<<endl;
+		cout<<"kylinMsg.cbus.gp.e"<<kylinMsg.cbus.gp.e<<"  "<<kylinMsg.cbus.gp.c <<endl;
         	cout<<"absoluteDistanceCout: "<<absoluteDistanceCout<<endl;
 cout<<"finishDetectBoxFlag_PutBox: "<<finishDetectBoxFlag_PutBox<<endl;
 cout<<"coutLogicFlag_PutBox"<<coutLogicFlag_PutBox<<endl;
@@ -419,7 +420,7 @@ finishDetectBoxFlag_PutBox = false;
 				// txKylinMsg.cbus.cp.x = 10 * dif_x;
 				// txKylinMsg.cbus.cp.y = 0;
 				// txKylinMsg.cbus.cp.z = 0;
-				if (abs(tx - 20) < 20) //number of pixels  
+				if (abs(tx) < 20) //number of pixels  
 				{
 					finishDetectCentroidFlag = true;
 				}
@@ -729,7 +730,7 @@ int main(int argc, char **argv)
 if(coutLogicFlag == 9 && finishFixedUltrasonicFlag_1_PutBox == true && kylinMsg.cbus.gp.e >= GraspBw - 20){
 finishGraspBwFlag_PutBox = true;
 }
-            if(coutLogicFlag == 9 && sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300 && finishFixedUltrasonicFlag_1_PutBox == true)
+            if(coutLogicFlag == 9 && sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300 && finishGraspBwFlag_PutBox == true)
             {
                 finish_LR_UltrasonicFlag_PutBox = true;
                 moveDistance = 0;
@@ -930,7 +931,7 @@ finishGraspBwFlag_PutBox = true;
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0 - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
+					txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0 -10- kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)
 					txKylinMsg.cbus.gv.e = 800;
 					txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
 					txKylinMsg.cbus.gv.c = 0;
@@ -1036,15 +1037,15 @@ finishGraspBwFlag_PutBox = true;
 							txKylinMsg.cbus.cv.z = 0;			
 							if(boxNum == 1)
 							{
-								txKylinMsg.cbus.gp.e = GraspBw - 40;
+								txKylinMsg.cbus.gp.e = GraspBw - 30;
 							}
 							if(boxNum == 2)
 							{
-								txKylinMsg.cbus.gp.e = GraspBw - 40 - 250;
+								txKylinMsg.cbus.gp.e = GraspBw - 30 - 220;
 							}
 							if(boxNum == 3)
 							{
-								txKylinMsg.cbus.gp.e = GraspBw - 40 - 500;
+								txKylinMsg.cbus.gp.e = GraspBw - 40 - 440;
 							}
 							//txKylinMsg.cbus.gp.e = GraspBw - 40;
 							txKylinMsg.cbus.gv.e = 400;
@@ -1064,7 +1065,7 @@ finishGraspBwFlag_PutBox = true;
 							txKylinMsg.cbus.cv.z = 0;
 							
 							txKylinMsg.cbus.gp.c = GraspOp;
-							txKylinMsg.cbus.gv.c = 8000;
+							txKylinMsg.cbus.gv.c = 10000;
 						}
 						if (finishGraspOpFlag == true)
 						{
