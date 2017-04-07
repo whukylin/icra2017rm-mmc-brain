@@ -229,7 +229,7 @@ void Tri_Reset(Tri_t *tri)
 	//memset(tri, 0, sizeof(Tri_t));
 }
 
-#define RMP_CNT 100000
+#define RMP_CNT 200000
 #define MAF_BUF_LEN 20
 static uint32_t cnt = 0;
 static Rmp_t rmp;
@@ -392,7 +392,7 @@ cout<<"coutLogicFlag_PutBox"<<coutLogicFlag_PutBox<<endl;
 						rz = 0;
 					}
 				}
-				if (sr04maf[SR04_IDX_M].avg < 600 || (abs(tz) < 700 && (lostFlag == false)&&CountVframe>10))
+				if (sr04maf[SR04_IDX_M].avg < 400 || (abs(tz) < 700 && (lostFlag == false)&&CountVframe>10))
 				{ //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
 					finishDetectBoxFlag = true;
                     
@@ -402,7 +402,7 @@ cout<<"coutLogicFlag_PutBox"<<coutLogicFlag_PutBox<<endl;
 				{
 					finishDetectBoxFlag = false;
 				}
-				if(coutLogicFlag == 9 && sr04maf[SR04_IDX_F].avg < 550 || (abs(tz) < 700 && (lostFlag == false)&&CountVframe>10))
+				if(coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false)&&CountVframe>10)))
                     		{
                         		finishDetectBoxFlag_PutBox = true;
 CountVframe=0;
@@ -544,7 +544,7 @@ static uint32_t frame_cnt = 0;
 uint8_t updateOdomCalib()
 {
   uint32_t frame_id = kylinMsg.frame_id;
-  while (frame_cnt < 10) {
+  while (frame_cnt < 50) {
     if (kylinMsg.frame_id != frame_id) {
       frame_id = kylinMsg.frame_id;
       frame_cnt++;
@@ -681,7 +681,7 @@ int main(int argc, char **argv)
 			absuluteGraspOpCl = abs(kylinOdomError.cbus.gp.c);
 			//cout<<"absoluteDistance" << absoluteDistance << endl;
 			//cout<<"absuluteAngle" << absuluteAngle << endl;
-			if (coutLogicFlag != 12 && absoluteDistance < 10 && absuluteAngle < 5.0f * PI / 2.0f)// && absuluteGrasp < 10)
+			if (coutLogicFlag != 12 && absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f)// && absuluteGrasp < 10)
 			{
 				finishAbsoluteMoveFlag = true;
 			}
@@ -782,7 +782,7 @@ finishGraspBwFlag_PutBox = true;
 				txKylinMsg.cbus.cv.y = 0;
 				txKylinMsg.cbus.cp.z =-1572 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
 				txKylinMsg.cbus.cv.z = 1000 * genRmp();
-				txKylinMsg.cbus.gp.e = GraspBw - 50; //+ kylinOdomCalib.cbus.gp.e;
+				txKylinMsg.cbus.gp.e = GraspBw - 70; //+ kylinOdomCalib.cbus.gp.e;
 				txKylinMsg.cbus.gv.e = 1000;
 				txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 				txKylinMsg.cbus.gv.c = 8000;
@@ -823,7 +823,7 @@ finishGraspBwFlag_PutBox = true;
 					txKylinMsg.cbus.cv.y = 800 * genRmp();;
 					txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw - 50 + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw - 100 + kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 0;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
@@ -840,7 +840,7 @@ finishGraspBwFlag_PutBox = true;
 					txKylinMsg.cbus.cv.y = 200;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw + kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw -10+ kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 0;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
@@ -958,7 +958,7 @@ finishGraspBwFlag_PutBox = true;
 					txKylinMsg.cbus.cp.x = -50 + kylinOdomCalib.cbus.cp.x;
 					txKylinMsg.cbus.cv.x = 800 * genRmp();
 					txKylinMsg.cbus.cp.y = -100 + kylinOdomCalib.cbus.cp.y;
-					txKylinMsg.cbus.cv.y = 800 * genRmp();
+					txKylinMsg.cbus.cv.y = 700 * genRmp();
 					if(absoluteDistance < 10)
 					{
 						txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
@@ -1098,12 +1098,12 @@ finishGraspBwFlag_PutBox = true;
 							txKylinMsg.cbus.cv.x =0;
 						else
 						{
-							txKylinMsg.cbus.cv.x = 800 * genRmp();
+							txKylinMsg.cbus.cv.x = 600 * genRmp();
 						}
 						txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
-						txKylinMsg.cbus.cv.y = 800 * genRmp();
+						txKylinMsg.cbus.cv.y = 600 * genRmp();
 						txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z;
-						txKylinMsg.cbus.cv.z = 0;
+						txKylinMsg.cbus.cv.z = 200;
 						txKylinMsg.cbus.gp.e = GraspBw;
 						txKylinMsg.cbus.gv.e = 0;
 						txKylinMsg.cbus.gp.c = GraspOp;
@@ -1188,7 +1188,7 @@ void videoMove_PutBox()
     //fixed Ultrasonic
     if (finishDetectBoxFlag_PutBox == true && finishFixedUltrasonicFlag_1_PutBox == false)
     {
-coutLogicFlag_PutBox = 9.2;
+	coutLogicFlag_PutBox = 9.2;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
         txKylinMsg.cbus.cp.x = 0;
