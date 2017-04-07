@@ -420,7 +420,7 @@ finishDetectBoxFlag_PutBox = false;
 				// txKylinMsg.cbus.cp.x = 10 * dif_x;
 				// txKylinMsg.cbus.cp.y = 0;
 				// txKylinMsg.cbus.cp.z = 0;
-				if (abs(tx) < 40) //number of pixels  
+				if (abs(tx) < 20) //number of pixels  
 				{
 					finishDetectCentroidFlag = true;
 				}
@@ -724,7 +724,7 @@ int main(int argc, char **argv)
 			}
             //Put box by video
             
-            if(coutLogicFlag == 9 && sr04maf[SR04_IDX_F].avg < 450 && finishDetectBoxFlag_PutBox == true)
+            if(coutLogicFlag == 9 && sr04maf[SR04_IDX_F].avg < 550 && finishDetectBoxFlag_PutBox == true)
             {
                 finishFixedUltrasonicFlag_1_PutBox = true;
             }
@@ -877,7 +877,7 @@ finishGraspBwFlag_PutBox = true;
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw -10- kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 0;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
@@ -896,7 +896,7 @@ finishGraspBwFlag_PutBox = true;
 					txKylinMsg.cbus.cv.y = 300;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw -10- kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 1000;
 					txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
 					txKylinMsg.cbus.gv.c = 0;
@@ -914,7 +914,7 @@ finishGraspBwFlag_PutBox = true;
 					txKylinMsg.cbus.cv.y = 0;
 					txKylinMsg.cbus.cp.z = 0;
 					txKylinMsg.cbus.cv.z = 0;
-					txKylinMsg.cbus.gp.e = GraspBw -10- kylinMsg.cbus.gp.e;//(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
+					txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;//(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
 					txKylinMsg.cbus.gv.e = 0;
 					txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
 					txKylinMsg.cbus.gv.c = 8000;
@@ -1013,7 +1013,9 @@ finishGraspBwFlag_PutBox = true;
 						if(boxNum == 3)
 						{		
                             videoMove_PutBox();
-						}				
+						}	
+						if(boxNum==4)
+				videoMove_PutBox();			
 					}
 						
 	
@@ -1048,6 +1050,10 @@ finishGraspBwFlag_PutBox = true;
 							if(boxNum == 3)
 							{
 								txKylinMsg.cbus.gp.e = GraspBw - 40 - 440;
+							}
+							if(boxNum == 4)
+							{
+								txKylinMsg.cbus.gp.e = GraspTp;
 							}
 							//txKylinMsg.cbus.gp.e = GraspBw - 40;
 							txKylinMsg.cbus.gv.e = 400;
