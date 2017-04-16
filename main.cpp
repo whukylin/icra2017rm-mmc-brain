@@ -5,6 +5,7 @@
 #define BUF_LEN 256
 #define TIMEOUT 30
 #define FRAME_N 20000
+#define ADDSPEED 100
 using namespace cv;
 using namespace std;
 
@@ -80,7 +81,7 @@ volatile bool finishGraspFlag_PutBox2toBox1 = false;
 volatile bool finishSlidFlag_PutBox2toBox1 = false;
 volatile bool finishFixedUltrasonicFlag_PutBox2toBox1 = false;
 volatile bool finishGraspOpFlag_PutBox2toBox1 = false;
-
+volatile bool finish_PutBox2toBox1 = false;
 volatile int GraspBwCout = 0;
 volatile int GraspTpCout = 0;
 volatile int absoluteDistanceCout = 0;
@@ -438,7 +439,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             if (abs(tx) < 20) //number of pixels
             {
                 finishDetectCentroidFlag = true;
-                if(coutLogicFlag == INT_MAX)
+                if(coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
                 {
                     finishDetectCentroidFlag_PutBox2toBox1 = true;
                 }
@@ -725,7 +726,7 @@ int main(int argc, char **argv)
 
         if ((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
         {
-            if (sr04maf[SR04_IDX_M].avg < 65)
+            if (sr04maf[SR04_IDX_M].avg < 22)
             {
                 finishMobleUltrasonicFlag = true;
             }
@@ -787,7 +788,7 @@ int main(int argc, char **argv)
             //PutBox2toBox1
             if (coutLogicFlag == INT_MAX)
             {
-                if (sr04maf[SR04_IDX_F].avg > 550)
+                if (sr04maf[SR04_IDX_F].avg > 550 && coutLogicFlag_PutBox2toBox1 == 10.1)
                 {
                     finishBackMoveFlag_PutBox2toBox1 = true;
                 }
@@ -799,15 +800,15 @@ int main(int argc, char **argv)
                 {
                     finish_LR_UltrasonicFlag_PutBox2toBox1 = true;
                 }
-                if (sr04maf[SR04_IDX_M].avg < 65)
+                if (sr04maf[SR04_IDX_M].avg < 22 && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
                 {
                     finishMobleUltrasonicFlag_PutBox2toBox1 = true;
                 }
-                if (kylinMsg.cbus.gp.c == GraspCl)
+                if (kylinMsg.cbus.gp.c == GraspCl && finishMobleUltrasonicFlag_PutBox2toBox1 == true)
                 {
                     finishGraspFlag_PutBox2toBox1 = true;
                 }
-                if (kylinMsg.cbus.gp.e <= GraspTp)
+                if (kylinMsg.cbus.gp.e <= GraspTp+5 && finishGraspFlag_PutBox2toBox1 == true)
                 {
                     finishSlidFlag_PutBox2toBox1 = true;
                 }
@@ -824,12 +825,13 @@ int main(int argc, char **argv)
 
 
 
+	//workState = 10;
+	//coutLogicFlag = INT_MAX;
+        //videoMove_PutBox2toBox1();
 
 
 
-
-
-
+	//boxNum = 6;
         //workStateFlagPrint(); //打印当前状态
         switch (workState)
         {
@@ -843,9 +845,9 @@ int main(int argc, char **argv)
             txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
             txKylinMsg.cbus.cv.y = 0;
             txKylinMsg.cbus.cp.z = -1572 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
-            txKylinMsg.cbus.cv.z = 1000 * genRmp();
+            txKylinMsg.cbus.cv.z = (1000+ADDSPEED) * genRmp();
             txKylinMsg.cbus.gp.e = GraspBw - 70; //+ kylinOdomCalib.cbus.gp.e;
-            txKylinMsg.cbus.gv.e = 1000;
+            txKylinMsg.cbus.gv.e = 1200;
             txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
             txKylinMsg.cbus.gv.c = 8000;
             //absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
@@ -880,9 +882,9 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
 
                 txKylinMsg.cbus.cp.x = tx - 60;
-                txKylinMsg.cbus.cv.x = 500 * genRmp();
+                txKylinMsg.cbus.cv.x = (500+ADDSPEED) * genRmp();
                 txKylinMsg.cbus.cp.y = tz;
-                txKylinMsg.cbus.cv.y = 800 * genRmp();
+                txKylinMsg.cbus.cv.y = (800+ADDSPEED) * genRmp();
                 ;
                 txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
                 txKylinMsg.cbus.cv.z = 0;
@@ -923,7 +925,7 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
                 txKylinMsg.cbus.gp.e = GraspBw - 10 - kylinMsg.cbus.gp.e;
-                txKylinMsg.cbus.gv.e = 1000;
+                txKylinMsg.cbus.gv.e = 1200;
                 txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
                 txKylinMsg.cbus.gv.c = 0;
             }
@@ -940,8 +942,8 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.y = 0;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
-                txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;
-                txKylinMsg.cbus.gv.e = 0;
+                txKylinMsg.cbus.gp.e = GraspBw - 70 - kylinMsg.cbus.gp.e;
+                txKylinMsg.cbus.gv.e = 1200;
                 txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
                 txKylinMsg.cbus.gv.c = 0;
             }
@@ -956,11 +958,11 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cp.x = 0;
                 txKylinMsg.cbus.cv.x = 0;
                 txKylinMsg.cbus.cp.y = sr04maf[SR04_IDX_M].avg;
-                txKylinMsg.cbus.cv.y = 300;
+                txKylinMsg.cbus.cv.y = 600;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
                 txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;
-                txKylinMsg.cbus.gv.e = 1000;
+                txKylinMsg.cbus.gv.e = 1200;
                 txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
                 txKylinMsg.cbus.gv.c = 0;
             }
@@ -995,8 +997,8 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.y = 0;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
-                txKylinMsg.cbus.gp.e = (GraspBw + GraspTp) / 2.0 - 10 - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)  //10: unstable control
-                txKylinMsg.cbus.gv.e = 800;
+                txKylinMsg.cbus.gp.e = (GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)  //10: unstable control
+                txKylinMsg.cbus.gv.e = 1200;
                 txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
                 txKylinMsg.cbus.gv.c = 0;
             }
@@ -1019,9 +1021,9 @@ int main(int argc, char **argv)
             detection_mode = 0;             //关闭视觉
             txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
             txKylinMsg.cbus.cp.x = -50 + kylinOdomCalib.cbus.cp.x;
-            txKylinMsg.cbus.cv.x = 800 * genRmp();
+            txKylinMsg.cbus.cv.x = (800+ADDSPEED) * genRmp();
             txKylinMsg.cbus.cp.y = -100 + kylinOdomCalib.cbus.cp.y;
-            txKylinMsg.cbus.cv.y = 700 * genRmp();
+            txKylinMsg.cbus.cv.y = (700+ADDSPEED) * genRmp();
             if (absoluteDistance < 10)
             {
                 txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
@@ -1060,9 +1062,9 @@ int main(int argc, char **argv)
                     detection_mode = 0;             //关闭视觉
                     txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
                     txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
-                    txKylinMsg.cbus.cv.x = 800 * genRmp();
+                    txKylinMsg.cbus.cv.x = (800+ADDSPEED) * genRmp();
                     txKylinMsg.cbus.cp.y = 2000 + kylinOdomCalib.cbus.cp.y; //3485 + kylinOdomCalib.cbus.cp.y;//3485 + kylinOdomCalib.cbus.cp.y;
-                    txKylinMsg.cbus.cv.y = 800 * genRmp();
+                    txKylinMsg.cbus.cv.y = (800+ADDSPEED) * genRmp();
                     txKylinMsg.cbus.cp.z = 0;
                     txKylinMsg.cbus.cv.z = 0;
                     txKylinMsg.cbus.gp.e = 0;
@@ -1161,7 +1163,9 @@ int main(int argc, char **argv)
                     coutLogicFlag = INT_MAX;
                     videoMove_PutBox2toBox1();
                 }
-                lastWs = workState;
+	    if(finish_PutBox2toBox1 == true || boxNum != 6)
+	    {
+		lastWs = workState;
                 rstRmp();
                 workState = 4; //进入下一阶段
                 txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
@@ -1169,8 +1173,11 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
                 txKylinMsg.cbus.cv.y = 10;
                 txKylinMsg.cbus.gp.e = GraspTp;
-                txKylinMsg.cbus.gv.e = 500;
+                txKylinMsg.cbus.gv.e = 600;
+	    }
+                
             }
+	
 
             break;
         case 4:
@@ -1187,12 +1194,12 @@ int main(int argc, char **argv)
                     txKylinMsg.cbus.cv.x = 0;
                 else
                 {
-                    txKylinMsg.cbus.cv.x = 600 * genRmp();
+                    txKylinMsg.cbus.cv.x = (600+ADDSPEED) * genRmp();
                 }
                 txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
-                txKylinMsg.cbus.cv.y = 600 * genRmp();
+                txKylinMsg.cbus.cv.y = (600+ADDSPEED) * genRmp();
                 txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z;
-                txKylinMsg.cbus.cv.z = 200;
+                txKylinMsg.cbus.cv.z = (200+ADDSPEED);
                 txKylinMsg.cbus.gp.e = GraspBw;
                 txKylinMsg.cbus.gv.e = 0;
                 txKylinMsg.cbus.gp.c = GraspOp;
@@ -1274,7 +1281,7 @@ void videoMove_PutBox()
         txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = (GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e;
-        txKylinMsg.cbus.gv.e = 1000;
+        txKylinMsg.cbus.gv.e = 1200;
         txKylinMsg.cbus.gp.c = GraspCl;
         txKylinMsg.cbus.gv.c = 0;
     }
@@ -1291,7 +1298,7 @@ void videoMove_PutBox()
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = (GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e;
-        txKylinMsg.cbus.gv.e = 800;
+        txKylinMsg.cbus.gv.e = 1200;
         txKylinMsg.cbus.gp.c = GraspCl;
         txKylinMsg.cbus.gv.c = 0;
     }
@@ -1309,7 +1316,7 @@ void videoMove_PutBox()
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = GraspBw - 30 - kylinMsg.cbus.gp.e;
-        txKylinMsg.cbus.gv.e = 800;
+        txKylinMsg.cbus.gv.e = 1200;
         txKylinMsg.cbus.gp.c = GraspCl; //抓子张开
         txKylinMsg.cbus.gv.c = 0;
     }
@@ -1325,7 +1332,7 @@ void videoMove_PutBox()
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = GraspBw - 30 - kylinMsg.cbus.gp.e;
-        txKylinMsg.cbus.gv.e = 800;
+        txKylinMsg.cbus.gv.e = 1200;
         txKylinMsg.cbus.gp.c = GraspCl; //抓子张开
         txKylinMsg.cbus.gv.c = 0;
     }
@@ -1344,7 +1351,7 @@ void videoMove_PutBox()
             txKylinMsg.cbus.cp.z = 0;
             txKylinMsg.cbus.cv.z = 0;
             txKylinMsg.cbus.gp.e = GraspTp - kylinMsg.cbus.gp.e;
-            txKylinMsg.cbus.gv.e = 1000;    //1000;
+            txKylinMsg.cbus.gv.e = 1200;    //1000;
             txKylinMsg.cbus.gp.c = GraspCl; //抓子张开
             txKylinMsg.cbus.gv.c = 0;
         }
@@ -1356,7 +1363,7 @@ void videoMove_PutBox()
             txKylinMsg.cbus.cp.x = 0;
             txKylinMsg.cbus.cv.x = 0;
             txKylinMsg.cbus.cp.y = sr04maf[SR04_IDX_F].avg;
-            txKylinMsg.cbus.cv.y = 400;
+            txKylinMsg.cbus.cv.y = 600;
             txKylinMsg.cbus.cp.z = 0;
             txKylinMsg.cbus.cv.z = 0;
             txKylinMsg.cbus.gp.e = GraspTp - kylinMsg.cbus.gp.e;
@@ -1390,20 +1397,20 @@ void videoMove_PutBox2toBox1()
     if (finishBackMoveFlag_PutBox2toBox1 == false)
     {
         coutLogicFlag_PutBox2toBox1 = 10.1;
-        detection_mode = 0; //打开视觉,检测矩形
+        detection_mode = 0; 
         //cout<<"detection_mode"<<(int)detection_mode<<endl;
         txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
 
-        txKylinMsg.cbus.cp.x = -100;
-        txKylinMsg.cbus.cv.x = 300 * genRmp();
-        txKylinMsg.cbus.cp.y = 0;
-        txKylinMsg.cbus.cv.y = 0;
+        txKylinMsg.cbus.cp.x = 0;
+        txKylinMsg.cbus.cv.x = 0;
+        txKylinMsg.cbus.cp.y = -100;
+        txKylinMsg.cbus.cv.y = 300;
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = 0;
         txKylinMsg.cbus.gv.e = 0;
         txKylinMsg.cbus.gp.c = GraspOp;
-        txKylinMsg.cbus.gv.c = 1000;
+        txKylinMsg.cbus.gv.c = 8000;
     }
     //降下抓子
     if (finishBackMoveFlag_PutBox2toBox1 == true && finishGraspBwFlag_PutBox2toBox1 == false)
@@ -1418,7 +1425,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = GraspBw - 10 - kylinMsg.cbus.gp.e;
-        txKylinMsg.cbus.gv.e = 800;
+        txKylinMsg.cbus.gv.e = 1200;
         txKylinMsg.cbus.gp.c = 0; //抓子张开
         txKylinMsg.cbus.gv.c = 0;
     }
@@ -1435,7 +1442,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = GraspBw - 30 - kylinMsg.cbus.gp.e;
-        txKylinMsg.cbus.gv.e = 800;
+        txKylinMsg.cbus.gv.e = 1200;
         txKylinMsg.cbus.gp.c = 0; //抓子张开
         txKylinMsg.cbus.gv.c = 0;
     }
@@ -1453,8 +1460,8 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.cv.y = 0;
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
-        txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e;
-        txKylinMsg.cbus.gv.e = 0;
+        txKylinMsg.cbus.gp.e = GraspBw -70 - kylinMsg.cbus.gp.e;
+        txKylinMsg.cbus.gv.e = 1200;
         txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
         txKylinMsg.cbus.gv.c = 0;
     }
@@ -1467,7 +1474,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.cp.x = 0;
         txKylinMsg.cbus.cv.x = 0;
         txKylinMsg.cbus.cp.y = sr04maf[SR04_IDX_M].avg;
-        txKylinMsg.cbus.cv.y = 400;
+        txKylinMsg.cbus.cv.y = 600;
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = 0;
@@ -1509,7 +1516,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = GraspTp - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)  //10: unstable control
-        txKylinMsg.cbus.gv.e = 800;
+        txKylinMsg.cbus.gv.e = 1000;
         txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
         txKylinMsg.cbus.gv.c = 0;
     }
@@ -1521,7 +1528,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.cp.x = 0;
         txKylinMsg.cbus.cv.x = 0;
         txKylinMsg.cbus.cp.y = sr04maf[SR04_IDX_F].avg; // - kylinMsg.cbus.cp.y;
-        txKylinMsg.cbus.cv.y = 200;
+        txKylinMsg.cbus.cv.y = 500;
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = 0;
@@ -1543,8 +1550,12 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.cv.z = 0;
         txKylinMsg.cbus.gp.e = GraspBw - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f - kylinMsg.cbus.gp.e;
         txKylinMsg.cbus.gv.e = 0;
-        txKylinMsg.cbus.gp.c = GraspOp; //抓子合拢
+        txKylinMsg.cbus.gp.c = GraspOp - kylinMsg.cbus.gp.c; //抓子合拢
         txKylinMsg.cbus.gv.c = 8000;
+    }
+    if(finishGraspOpFlag_PutBox2toBox1 == true)
+    {
+	finish_PutBox2toBox1 = true;
     }
 }
 
