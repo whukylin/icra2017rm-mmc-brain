@@ -10,7 +10,7 @@
 #define YSPEED 1000 //forward speed
 #define XSPEED 500
 #define ZSPEED 1000
-#define GRASPSPEED 1200
+#define GRASPSPEED 1000
 
 using namespace cv;
 using namespace std;
@@ -97,7 +97,6 @@ int GraspTp;
 int GraspBw;
 int GraspOp;
 int GraspCl;
-int GraspPosition = 0;
 volatile double coutLogicFlag_PutBox = 0;
 volatile double coutLogicFlag_PutBox2toBox1 = 0;
 void videoMove_PutBox2toBox1();
@@ -693,30 +692,6 @@ int main(int argc, char **argv)
         //cout << "ws: " << workState << endl;
         updateOdomError();
 
-        if (boxNum == 1)
-        {
-            GraspPosition = GraspBw - 30;
-        }
-        if (boxNum == 2)
-        {
-            GraspPosition = GraspBw - 30 - 210;
-        }
-        if (boxNum == 3)
-        {
-            GraspPosition = GraspBw - 30 - 420;
-        }
-        if (boxNum == 4)
-        {
-            GraspPosition = GraspBw - 30;
-        }
-        if (boxNum == 5)
-        {
-            GraspPosition = GraspBw - 30 - 210;
-        }
-        if (boxNum == 6)
-        {
-            GraspPosition = GraspBw - 30 - 420;
-        }
         //如果当前处于绝对位置控制模式,进入判断条件
         if (txKylinMsg.cbus.fs & (1u << 30)) //0xFF == 1111 1111   0x80000000
         {
@@ -784,7 +759,7 @@ int main(int argc, char **argv)
                 finish_LR_UltrasonicFlag_PutBox = true;
                 moveDistance = 0;
             }
-            if (coutLogicFlag == 9 && kylinMsg.cbus.gp.e <= GraspPosition + 20 && finish_LR_UltrasonicFlag_PutBox == true)
+            if (coutLogicFlag == 9 && kylinMsg.cbus.gp.e <= GraspTp + 20 && finish_LR_UltrasonicFlag_PutBox == true)
             {
                 finishSlidTpFlag_PutBox = true;
             }
@@ -1025,9 +1000,9 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.y = 0;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
-                txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0f - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)  //10: unstable control
+                txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0 - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)  //10: unstable control
                 txKylinMsg.cbus.gv.e = GRASPSPEED;
-                txKylinMsg.cbus.gp.c = GraspCl; //抓子合拢
+                txKylinMsg.cbus.gp.c = 0; //抓子合拢
                 txKylinMsg.cbus.gv.c = 0;
             }
             //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
@@ -1393,7 +1368,20 @@ void videoMove_PutBox()
             txKylinMsg.cbus.cv.y = 0;
             txKylinMsg.cbus.cp.z = 0;
             txKylinMsg.cbus.cv.z = 0;
-            txKylinMsg.cbus.gp.e = GraspPosition - kylinMsg.cbus.gp.e;
+            // int GraspPosition = (GraspTp + GraspBw)/2.0;
+            // if(boxNum == 1 || boxNum == 4)
+            // {
+            //     GraspPosition = GraspBw - 30;
+            // }
+            // if (boxNum == 2 || boxNum == 5)
+            // {
+            //     GraspPosition = GraspBw - 30 - 210;
+            // }
+            // if (boxNum == 3 || boxNum == 6)
+            // {
+            //     GraspPosition = GraspBw - 30 - 420;
+            // }
+            txKylinMsg.cbus.gp.e = GraspTp - kylinMsg.cbus.gp.e;
             txKylinMsg.cbus.gv.e = GRASPSPEED; //1000;
             txKylinMsg.cbus.gp.c = 0;          //抓子张开
             txKylinMsg.cbus.gv.c = 0;
