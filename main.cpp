@@ -1223,7 +1223,7 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.gp.c = GraspOp;
                 txKylinMsg.cbus.gv.c = 8000;
             }
-            if (finishBackMoveFlag == true &&　finishAbsoluteMoveFlag_BackOrigin == false)
+            if(finishBackMoveFlag == true &&　finishAbsoluteMoveFlag_BackOrigin == false)
             {
                 workState4_Num++;
                 lineflag++;
