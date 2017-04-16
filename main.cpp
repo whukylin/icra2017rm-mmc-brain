@@ -7,7 +7,7 @@
 #define FRAME_N 20000
 #define ADDSPEED 100
 
-#define YSPEED 1000     //forward speed
+#define YSPEED 1000 //forward speed
 #define XSPEED 500
 #define ZSPEED 1000
 #define GRASPSPEED 1200
@@ -789,7 +789,7 @@ int main(int argc, char **argv)
             {
                 moveDistance = -100;
             }
-            if(workState == 4 && sr04maf[SR04_IDX_F].avg > 400)
+            if (workState == 4 && sr04maf[SR04_IDX_F].avg > 400)
             {
                 finishBackMoveFlag = true;
             }
@@ -1208,7 +1208,7 @@ int main(int argc, char **argv)
             break;
         case 4:
             //先后退
-            if(finishBackMoveFlag == false)
+            if (finishBackMoveFlag == false)
             {
                 detection_mode = 0;
                 txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
@@ -1393,8 +1393,8 @@ void videoMove_PutBox()
             txKylinMsg.cbus.cp.z = 0;
             txKylinMsg.cbus.cv.z = 0;
             txKylinMsg.cbus.gp.e = GraspPosition - kylinMsg.cbus.gp.e;
-            txKylinMsg.cbus.gv.e = GRASPSPEED;    //1000;
-            txKylinMsg.cbus.gp.c = 0; //抓子张开
+            txKylinMsg.cbus.gv.e = GRASPSPEED; //1000;
+            txKylinMsg.cbus.gp.c = 0;          //抓子张开
             txKylinMsg.cbus.gv.c = 0;
         }
         if (finishSlidTpFlag_PutBox == true && finishFixedUltrasonicFlag_2_PutBox == false)
