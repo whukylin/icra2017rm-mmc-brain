@@ -651,23 +651,23 @@ int main(int argc, char **argv)
     // kylinMsg.cbus.gv.e
     // kylinMsg.cbus.gv.c
     /* 经验值
-	 *        txKylinMsg.cbus.cp.x = tx;
-	 *        txKylinMsg.cbus.cv.x = 500;
-	 *        txKylinMsg.cbus.cp.y = tz;
-	 *        txKylinMsg.cbus.cv.y = 800;
-	 *        txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-	 *        txKylinMsg.cbus.cv.z = 500;
-	 *        txKylinMsg.cbus.gp.e = ty;
-	 *        txKylinMsg.cbus.gv.e = 0;
-	 */
+     *        txKylinMsg.cbus.cp.x = tx;
+     *        txKylinMsg.cbus.cv.x = 500;
+     *        txKylinMsg.cbus.cp.y = tz;
+     *        txKylinMsg.cbus.cv.y = 800;
+     *        txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+     *        txKylinMsg.cbus.cv.z = 500;
+     *        txKylinMsg.cbus.gp.e = ty;
+     *        txKylinMsg.cbus.gv.e = 0;
+     */
     /*Flag变量汇总:
-	 *    finishAbsoluteMoveFlag      完成绝对位置移动
-	 *    finishDetectBoxFlag         完成检测盒子(小车到了检测不到盒子的位置)
-	 *    finishDetectCentroidFlag    完成质心检测
-	 *    finishMobleUltrasonicFlag   超声波到达极限距离
-	 *    finishGraspFlag             抓子是否合拢
-	 *    finishSlidFlag              滑台是否达到指定高度
-	 */
+     *    finishAbsoluteMoveFlag      完成绝对位置移动
+     *    finishDetectBoxFlag         完成检测盒子(小车到了检测不到盒子的位置)
+     *    finishDetectCentroidFlag    完成质心检测
+     *    finishMobleUltrasonicFlag   超声波到达极限距离
+     *    finishGraspFlag             抓子是否合拢
+     *    finishSlidFlag              滑台是否达到指定高度
+     */
     updateOdomCalib();
     //cout << "w111s: " << workState << endl;
     logicInit(); //逻辑控制初始化
