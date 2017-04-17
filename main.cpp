@@ -799,7 +799,7 @@ int main(int argc, char **argv)
                 finish_LR_UltrasonicFlag_PutBox = true;
                 moveDistance = 0;
             }
-            if (coutLogicFlag == 9 && kylinMsg.cbus.gp.e <= GraspBw - 30 - 210*(boxNum % 3-1) + 10 && finish_LR_UltrasonicFlag_PutBox == true)
+            if (coutLogicFlag == 9 && kylinMsg.cbus.gp.e <= GraspBw - 30 - 210*(boxNum % 3-1) && finish_LR_UltrasonicFlag_PutBox == true)
             {
                 finishSlidTpFlag_PutBox = true;
             }
@@ -1190,7 +1190,7 @@ int main(int argc, char **argv)
             if (finishSlidBwFlag == true && finishGraspOpFlag == false)
             {
                 calibPx();
-		calibPz();
+		        calibPz();
                 coutLogicFlag = 11;
                 txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
                 txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
@@ -1429,15 +1429,15 @@ void videoMove_PutBox()
             // int GraspPosition = (GraspTp + GraspBw)/2.0;
             if(boxNum == 1 || boxNum == 4)
             {
-                txKylinMsg.cbus.gp.e = GraspBw - 30 - kylinMsg.cbus.gp.e;
+                txKylinMsg.cbus.gp.e = GraspBw - 30 - 20 - kylinMsg.cbus.gp.e;
             }
             if (boxNum == 2 || boxNum == 5)
             {
-                txKylinMsg.cbus.gp.e = GraspBw - 30 - 210 - kylinMsg.cbus.gp.e;
+                txKylinMsg.cbus.gp.e = GraspBw - 30 - 230 - kylinMsg.cbus.gp.e;
             }
             if (boxNum == 3 || boxNum == 6)
             {
-                txKylinMsg.cbus.gp.e = GraspBw - 30 - 420 - kylinMsg.cbus.gp.e;
+                txKylinMsg.cbus.gp.e = GraspBw - 30 - 450 - kylinMsg.cbus.gp.e;
             }
             // txKylinMsg.cbus.gp.e = GraspTp - kylinMsg.cbus.gp.e
             txKylinMsg.cbus.gv.e = GRASPSPEED; //1000;
