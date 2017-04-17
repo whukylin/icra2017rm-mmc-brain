@@ -8,7 +8,7 @@
 #define FRAME_N 20000
 #define ADDSPEED 100
 
-#define YSPEED 1200 //forward speed
+#define YSPEED 1100 //forward speed
 #define XSPEED 400
 #define ZSPEED 1600
 #define ZSPEED_VISION 400
@@ -105,6 +105,7 @@ volatile bool finishBackMoveFlag = false;
 volatile int GraspBwCout = 0;
 volatile int GraspTpCout = 0;
 volatile int absoluteDistanceCout = 0;
+volatile bool finishGraspBeforeCentroidFlag = false;
 int boxNum = 1; //the num of the box
 int GraspTp;
 int GraspBw;
@@ -457,11 +458,11 @@ cout<<"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         case 2: //detect green area
             //cout << "detection_mode=" << (int)detection_mode << endl;
             fflage=Color_detect(src, dif_x, dif_y);
-            if(fflage) CountVframe++;
+            if(fflage==0) CountVframe++;
             tx = 2 * (dif_x - DIF_CEN);
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout<<"tx="<<tx<<endl;
-            if (abs(tx) < 50) //number of pixels
+            if (abs(tx) < 30&&(CountVframe>20||fflage)) //number of pixels
             {
 		CountVframe=0;
                 finishDetectCentroidFlag = true;
@@ -767,11 +768,6 @@ int main(int argc, char **argv)
             {
                 finishAbsoluteMoveFlag_BackOrigin = true;
             }
-	    if (coutLogicFlag == 7 && absuluteAngle < 5.0f * PI / 2.0f) //(GraspTp + GraspBw) / 2.f)
-            //if(coutLogicFlag == 7 && abs(txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e) < 20)
-            {
-                finishSlidFlag = true;
-            }
         }
 
         if ((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
@@ -787,7 +783,11 @@ int main(int argc, char **argv)
             }
             //Graps OpenfinishAbsoluteMoveFlag
 
-            
+            if (coutLogicFlag == 7 && kylinMsg.cbus.gp.e <= (GraspBw + GraspTp) / 2.0 + 50) //(GraspTp + GraspBw) / 2.f)
+            //if(coutLogicFlag == 7 && abs(txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e) < 20)
+            {
+                finishSlidFlag = true;
+            }
             //Put box by video
 
             if (coutLogicFlag == 9 && sr04maf[SR04_IDX_F].avg < 500 && finishDetectBoxFlag_PutBox == true)
@@ -823,11 +823,15 @@ int main(int argc, char **argv)
                 finish_LR_UltrasonicFlag = true;
                 moveDistance = 0;
             }
-            if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 200)
+	    if(finish_LR_UltrasonicFlag == true && kylinMsg.cbus.gp.e <= GraspBw - 70)
+	    {
+			finishGraspBeforeCentroidFlag = true;
+	    }
+            if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 300)
             {
                 moveDistance = 100;
             }
-            if (sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 500)
+            if (sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 300)
             {
                 moveDistance = -100;
             }
@@ -871,6 +875,7 @@ int main(int argc, char **argv)
                     finishGraspOpFlag_PutBox2toBox1 = true;
                 }
             }
+		
         }
 
         //workState = 10;
@@ -977,7 +982,24 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.gv.c = 0;
             }
             //squares detection finished, begin detect green area
-            if (finish_LR_UltrasonicFlag == true && finishDetectCentroidFlag == false)
+	    if (finish_LR_UltrasonicFlag == true && finishGraspBeforeCentroidFlag == false)
+	    {
+		//finishFixedUltrasonicFlag = false;
+              
+                detection_mode = 0;                //打开视觉,检测质心
+                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+                txKylinMsg.cbus.cp.x = 0;
+                txKylinMsg.cbus.cv.x = 0;
+                txKylinMsg.cbus.cp.y = 0;
+                txKylinMsg.cbus.cv.y = 0;
+                txKylinMsg.cbus.cp.z = 0;
+                txKylinMsg.cbus.cv.z = 0;
+                txKylinMsg.cbus.gp.e = GraspBw - 80 - kylinMsg.cbus.gp.e;
+                txKylinMsg.cbus.gv.e = GRASPSPEED;
+                txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
+                txKylinMsg.cbus.gv.c = 0;
+	    }
+            if (finishGraspBeforeCentroidFlag == true && finishDetectCentroidFlag == false)
             {
                 //finishFixedUltrasonicFlag = false;
                 coutLogicFlag = 4;
@@ -1038,14 +1060,14 @@ int main(int argc, char **argv)
                 coutLogicFlag = 7;
                 //finishMobleUltrasonicFlag = false;
                 detection_mode = 0; //关闭视觉
-                txKylinMsg.cbus.fs |= (1u << 30);
+                txKylinMsg.cbus.fs &= ~(1u << 30);
                 txKylinMsg.cbus.cp.x = 0;
                 txKylinMsg.cbus.cv.x = 0;
                 txKylinMsg.cbus.cp.y = 0;
                 txKylinMsg.cbus.cv.y = 0;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
-                txKylinMsg.cbus.gp.e = GraspBw - 300; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)  //10: unstable control
+                txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0 - kylinMsg.cbus.gp.e; //(posCalibMsg.data.el + posCalibMsg.data.eh) / 2.f; // - kylinMsg.cbus.gp.e; //滑台升高到 30cm (相对位置控制模式，要做一个反馈)  //10: unstable control
                 txKylinMsg.cbus.gv.e = 600;
                 txKylinMsg.cbus.gp.c = 0; //抓子合拢
                 txKylinMsg.cbus.gv.c = 0;
@@ -1308,6 +1330,7 @@ int main(int argc, char **argv)
                 finishFixedUltrasonicFlag_2_PutBox = false;
                 finishSlidTpFlag_PutBox = false;
                 finishBackMoveFlag = false;
+		finishGraspBeforeCentroidFlag = false;
                 workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
                 //coutLogicFlag = 0;
                 boxNum++;
