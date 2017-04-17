@@ -1427,19 +1427,19 @@ void videoMove_PutBox()
             txKylinMsg.cbus.cp.z = 0;
             txKylinMsg.cbus.cv.z = 0;
             // int GraspPosition = (GraspTp + GraspBw)/2.0;
-            // if(boxNum == 1 || boxNum == 4)
-            // {
-            //     GraspPosition = GraspBw - 30;
-            // }
-            // if (boxNum == 2 || boxNum == 5)
-            // {
-            //     GraspPosition = GraspBw - 30 - 210;
-            // }
-            // if (boxNum == 3 || boxNum == 6)
-            // {
-            //     GraspPosition = GraspBw - 30 - 420;
-            // }
-            txKylinMsg.cbus.gp.e = GraspTp - kylinMsg.cbus.gp.e;
+            if(boxNum == 1 || boxNum == 4)
+            {
+                txKylinMsg.cbus.gp.e = GraspBw - 30 - kylinMsg.cbus.gp.e;
+            }
+            if (boxNum == 2 || boxNum == 5)
+            {
+                txKylinMsg.cbus.gp.e = GraspBw - 30 - 210 - kylinMsg.cbus.gp.e;
+            }
+            if (boxNum == 3 || boxNum == 6)
+            {
+                txKylinMsg.cbus.gp.e = GraspBw - 30 - 420 - kylinMsg.cbus.gp.e;
+            }
+            // txKylinMsg.cbus.gp.e = GraspTp - kylinMsg.cbus.gp.e
             txKylinMsg.cbus.gv.e = GRASPSPEED; //1000;
             txKylinMsg.cbus.gp.c = 0;          //抓子张开
             txKylinMsg.cbus.gv.c = 0;
