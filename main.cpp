@@ -799,7 +799,7 @@ int main(int argc, char **argv)
                 finish_LR_UltrasonicFlag_PutBox = true;
                 moveDistance = 0;
             }
-            if (coutLogicFlag == 9 && kylinMsg.cbus.gp.e <= GraspBw - 30 - 210*(boxNum % 3-1) && finish_LR_UltrasonicFlag_PutBox == true)
+            if (coutLogicFlag == 9 && kylinMsg.cbus.gp.e <= GraspBw - 30 - 210*((boxNum-1) % 3) && finish_LR_UltrasonicFlag_PutBox == true)
             {
                 finishSlidTpFlag_PutBox = true;
             }
