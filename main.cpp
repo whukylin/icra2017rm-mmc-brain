@@ -8,13 +8,24 @@
 #define FRAME_N 20000
 #define ADDSPEED 100
 
-#define YSPEED 1000 //forward speed
-#define XSPEED 500
-#define ZSPEED 1000
-#define GRASPSPEED 1000
+#define YSPEED 1200 //forward speed
+#define XSPEED 400
+#define ZSPEED 1300
+#define ZSPEED_VISION 400
+#define GRASPSPEED 1200
 
+#define ZROTATION90DEG 1572
+#define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 22
 using namespace cv;
 using namespace std;
+
+double missionStartTimeUs = 0;
+double missionEndTimeUs = 0;
+
+double currentTimeUs()
+{
+    return cvGetTickCount() / cvGetTickFrequency();
+}
 
 extern double ry, rz, rx;
 extern double tx, ty, tz;
@@ -103,6 +114,7 @@ volatile double coutLogicFlag_PutBox2toBox1 = 0;
 void videoMove_PutBox2toBox1();
 int moveDistance = 0;
 int numDelay = 100000000;
+float coutAngle = 0;
 static void Dnl_ProcZGyroMsg(const ZGyroMsg_t *zgyroMsg)
 {
     //printf("*************************************ZGYRO********************************************\n");
@@ -373,6 +385,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         //cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         //cout << "finishDetectBoxFlag_PutBox: " << finishDetectBoxFlag_PutBox << endl;
 	cout << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
+
         switch (detection_mode)
         {
         case 0: //do nothing
@@ -385,7 +398,9 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             findSquares(src, frame, squares);
             LocationMarkes(squares);
             drawSquares(frame, squares);
-
+	cout<<"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
+cout<<"angle: "<<coutAngle<<"    squares.size(): "<<squares.size()<<endl;
+cout<<"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
             if (squares.size() > 0)
             {
                 lostCount = 0;
@@ -592,6 +607,16 @@ void calibPy()
     kylinOdomCalib.cbus.cp.y = kylinMsg.cbus.cp.y;
 }
 
+void calibPz()
+{
+    kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z;
+}
+
+void calibPz90()
+{
+    kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z + ZROTATION90DEG;
+}
+
 KylinMsg_t kylinOdomError;
 uint8_t updateOdomError()
 {
@@ -616,6 +641,7 @@ void videoMove_PutBox();
 float Ultrasonic2Angle();
 int main(int argc, char **argv)
 {
+    missionStartTimeUs = currentTimeUs();
     if (!setcamera())
     {
         cout << "Setup camera failure. Won't do anything." << endl;
@@ -742,7 +768,7 @@ int main(int argc, char **argv)
 
         if ((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
         {
-            if (sr04maf[SR04_IDX_M].avg < 25)
+            if (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE)
             {
                 finishMobleUltrasonicFlag = true;
             }
@@ -820,7 +846,7 @@ int main(int argc, char **argv)
                 {
                     finish_LR_UltrasonicFlag_PutBox2toBox1 = true;
                 }
-                if (sr04maf[SR04_IDX_M].avg < 25 && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+                if (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
                 {
                     finishMobleUltrasonicFlag_PutBox2toBox1 = true;
                 }
@@ -849,12 +875,7 @@ int main(int argc, char **argv)
 
         //boxNum = 6;
         //workStateFlagPrint(); //打印当前状态
-        while(true)
-        {
-            txKylinMsg.cbus.fs &= ~(1u << 30);
-            txKylinMsg.cbus.cp.z = Ultrasonic2Angle() * 1000 - kylinMsg.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
-            txKylinMsg.cbus.cv.z = ZSPEED;
-        }
+
         switch (workState)
         {
         case 0:
@@ -866,7 +887,7 @@ int main(int argc, char **argv)
             txKylinMsg.cbus.cv.x = 0;
             txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
             txKylinMsg.cbus.cv.y = 0;
-            txKylinMsg.cbus.cp.z = -1572 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
+            txKylinMsg.cbus.cp.z = -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
             txKylinMsg.cbus.cv.z = ZSPEED * genRmp();
             txKylinMsg.cbus.gp.e = GraspBw - 70; //+ kylinOdomCalib.cbus.gp.e;
             txKylinMsg.cbus.gv.e = GRASPSPEED;
@@ -908,8 +929,8 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cp.y = tz;
                 txKylinMsg.cbus.cv.y = YSPEED * ramp;
                 ;
-                txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-                txKylinMsg.cbus.cv.z = ZSPEED;
+                txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180.0;
+                txKylinMsg.cbus.cv.z = ZSPEED_VISION;
                 txKylinMsg.cbus.gp.e = 0;
                 txKylinMsg.cbus.gv.e = 0;
                 txKylinMsg.cbus.gp.c = 0; //抓子张开
@@ -973,6 +994,7 @@ int main(int argc, char **argv)
             if (finishDetectCentroidFlag == true && finishMobleUltrasonicFlag == false)
             {
                 calibPx();
+		calibPz90();
                 coutLogicFlag = 5;
                 //finish_LR_UltrasonicFlag = false;
                 detection_mode = 0;                //关闭视觉
@@ -1137,7 +1159,7 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.z = 0;
                 if (boxNum == 1)
                 {
-                    txKylinMsg.cbus.gp.e = GraspBw - 30;
+                    txKylinMsg.cbus.gp.e = GraspBw - 15;
                 }
                 if (boxNum == 2)
                 {
@@ -1149,7 +1171,7 @@ int main(int argc, char **argv)
                 }
                 if (boxNum == 4)
                 {
-                    txKylinMsg.cbus.gp.e = GraspBw - 30;
+                    txKylinMsg.cbus.gp.e = GraspBw - 15;
                 }
                 if (boxNum == 5)
                 {
@@ -1168,6 +1190,7 @@ int main(int argc, char **argv)
             if (finishSlidBwFlag == true && finishGraspOpFlag == false)
             {
                 calibPx();
+		calibPz();
                 coutLogicFlag = 11;
                 txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
                 txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
@@ -1291,6 +1314,8 @@ int main(int argc, char **argv)
         }
         if (boxNum == 7)
         {
+            missionEndTimeUs = currentTimeUs();
+            cout << "mission time cost:" << (missionEndTimeUs - missionStartTimeUs)*1e-6 << endl;
             break;
         }
         //int c = waitKey(1);
@@ -1304,6 +1329,7 @@ int main(int argc, char **argv)
     capture.closeStream();
     disconnect_serial();
     cout << "function done!" << endl;
+    
     return 0;
 }
 /*
@@ -1329,7 +1355,7 @@ void videoMove_PutBox()
         txKylinMsg.cbus.cp.y = tz;
         txKylinMsg.cbus.cv.y = YSPEED * ramp;
         txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-        txKylinMsg.cbus.cv.z = ZSPEED;
+        txKylinMsg.cbus.cv.z = ZSPEED_VISION;
         txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0 - kylinMsg.cbus.gp.e;
         txKylinMsg.cbus.gv.e = 0;
         txKylinMsg.cbus.gp.c = GraspCl;
@@ -1624,5 +1650,6 @@ float Ultrasonic2Angle()
     float frontDis = 150;
     float lrDis = 130;
     angle = atan((sr04maf[SR04_IDX_M].avg - sr04maf[SR04_IDX_R].avg - frontDis)/(lrDis));
+    //coutAngle = angle*180/3.14;
     return angle;
 }

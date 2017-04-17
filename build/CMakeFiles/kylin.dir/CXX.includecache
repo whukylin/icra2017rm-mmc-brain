@@ -219,6 +219,8 @@ iostream
 /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/main.cpp
 main.h
 /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/main.h
+math.h
+-
 RMVideoCapture.hpp
 /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/RMVideoCapture.hpp
 Markdetection.h
