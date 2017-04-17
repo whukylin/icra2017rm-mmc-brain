@@ -1,4 +1,5 @@
 #include "main.h"
+#include <math.h>
 #include "RMVideoCapture.hpp"
 #include "Markdetection.h"
 #define COM_PORT 1 //"COM7"
@@ -46,7 +47,7 @@ PosCalibMsg_t posCalibMsg;
 #define SR04_IDX_L 2
 #define SR04_IDX_R 3
 
-#define SR04_MAF_LEN 10
+#define SR04_MAF_LEN 5
 Maf_t sr04maf[SR04_NUM];
 float sr04buf[SR04_NUM][SR04_MAF_LEN];
 
@@ -415,7 +416,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
                     rz = 0;
                 }
             }
-            if (sr04maf[SR04_IDX_M].avg < 400 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
+            if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
             { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
                 finishDetectBoxFlag = true;
 
@@ -612,6 +613,7 @@ uint8_t updateOdomError()
 float ramp = 0;
 int lastWs = 0;
 void videoMove_PutBox();
+float Ultrasonic2Angle();
 int main(int argc, char **argv)
 {
     if (!setcamera())
@@ -703,7 +705,7 @@ int main(int argc, char **argv)
     {
         //cout << "ws: " << workState << endl;
         updateOdomError();
-
+        
         //如果当前处于绝对位置控制模式,进入判断条件
         if (txKylinMsg.cbus.fs & (1u << 30)) //0xFF == 1111 1111   0x80000000
         {
@@ -740,7 +742,7 @@ int main(int argc, char **argv)
 
         if ((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
         {
-            if (sr04maf[SR04_IDX_M].avg < 28)
+            if (sr04maf[SR04_IDX_M].avg < 25)
             {
                 finishMobleUltrasonicFlag = true;
             }
@@ -758,7 +760,7 @@ int main(int argc, char **argv)
             }
             //Put box by video
 
-            if (coutLogicFlag == 9 && sr04maf[SR04_IDX_F].avg < 650 && finishDetectBoxFlag_PutBox == true)
+            if (coutLogicFlag == 9 && sr04maf[SR04_IDX_F].avg < 500 && finishDetectBoxFlag_PutBox == true)
             {
                 finishFixedUltrasonicFlag_1_PutBox = true;
             }
@@ -847,7 +849,12 @@ int main(int argc, char **argv)
 
         //boxNum = 6;
         //workStateFlagPrint(); //打印当前状态
-        
+        while(true)
+        {
+            txKylinMsg.cbus.fs |= (1u << 30);
+            txKylinMsg.cbus.cp.z = Ultrasonic2Angle() + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
+            txKylinMsg.cbus.cv.z = ZSPEED;
+        }
         switch (workState)
         {
         case 0:
@@ -902,7 +909,7 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.y = YSPEED * ramp;
                 ;
                 txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-                txKylinMsg.cbus.cv.z = 0;
+                txKylinMsg.cbus.cv.z = ZSPEED;
                 txKylinMsg.cbus.gp.e = 0;
                 txKylinMsg.cbus.gv.e = 0;
                 txKylinMsg.cbus.gp.c = 0; //抓子张开
@@ -1322,7 +1329,7 @@ void videoMove_PutBox()
         txKylinMsg.cbus.cp.y = tz;
         txKylinMsg.cbus.cv.y = YSPEED * ramp;
         txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-        txKylinMsg.cbus.cv.z = 0;
+        txKylinMsg.cbus.cv.z = ZSPEED;
         txKylinMsg.cbus.gp.e = (GraspBw + GraspTp)/2.0 - kylinMsg.cbus.gp.e;
         txKylinMsg.cbus.gv.e = 0;
         txKylinMsg.cbus.gp.c = GraspCl;
@@ -1609,4 +1616,13 @@ void videoMove_PutBox2toBox1()
     {
         finish_PutBox2toBox1 = true;
     }
+}
+
+float Ultrasonic2Angle()
+{
+    float angle = 0;
+    float frontDis = 150;
+    float lrDis = 130;
+    angle = atan((sr04maf[SR04_IDX_M].avg - sr04maf[SR04_IDX_R].avg - frontDis)/(lrDis));
+    return angle;
 }
