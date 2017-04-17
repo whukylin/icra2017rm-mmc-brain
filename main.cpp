@@ -851,8 +851,8 @@ int main(int argc, char **argv)
         //workStateFlagPrint(); //打印当前状态
         while(true)
         {
-            txKylinMsg.cbus.fs |= (1u << 30);
-            txKylinMsg.cbus.cp.z = Ultrasonic2Angle() + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
+            txKylinMsg.cbus.fs &= ~(1u << 30);
+            txKylinMsg.cbus.cp.z = Ultrasonic2Angle() * 1000 - kylinMsg.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
             txKylinMsg.cbus.cv.z = ZSPEED;
         }
         switch (workState)
