@@ -41,7 +41,7 @@ Mat distCoeffs=(Mat_<double>(1,4)<<-0.4513,0.1492,-0.0030,0.0043);
 #endif
 
 const int ARROW_AREA_MIN=2800;//variable
-const int ARROW_AREA_MAX=40000;
+const int ARROW_AREA_MAX=15000;
 Mat pro_after;
 int cx=343;   //To change to calibration parameter.
 int cy=320;   //the same with cameraMatrix.cx,cy
@@ -489,8 +489,8 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     cvtColor(frame, HSVImage, CV_BGR2HSV);
     split(HSVImage,HSVSplit);
     //Hgreen=HSVSplit[0]>lower&&HSVSplit[0]<up , mask, threshold can be fine tuned.
-    inRange(HSVSplit[0], Scalar(90), Scalar(120), HGreen);
-	inRange(HSVSplit[1], Scalar(114), Scalar(210), SGreen);
+    inRange(HSVSplit[0], Scalar(80), Scalar(120), HGreen);
+	inRange(HSVSplit[1], Scalar(80), Scalar(255), SGreen);
     //threshold(HSVSplit[1], SGreen, 80, 255, THRESH_BINARY);    //S channal intensity
     //bitwise conjunction
     cv::bitwise_and(HGreen, SGreen, out);
@@ -517,6 +517,7 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     if(max_tmp.area()<ARROW_AREA_MIN||max_tmp.area()>ARROW_AREA_MAX)
 	{
 		diff_x=DIF_CEN;
+                cout<<"area...."<<endl;
 		diff_y=0;
         return 0;
 	}
@@ -537,6 +538,7 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
 	
     center.x=mt.m10/mt.m00+max_tmp.tl().x;
     center.y=mt.m01/mt.m00+max_tmp.tl().y;
+    cout<<"width="<<mt.m10/mt.m00<<"  height="<<mt.m01/mt.m00<<endl;
     diff_x=center.x-cx;
     diff_y=center.y-cy;
     cout<<"diff x: "<<diff_x<<endl;
