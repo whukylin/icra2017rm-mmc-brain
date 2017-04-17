@@ -40,7 +40,7 @@ Mat cameraMatrix=(Mat_<double>(3,3)<<1079.2096,0,342.5224,0,1075.3261,353.0309,0
 Mat distCoeffs=(Mat_<double>(1,4)<<-0.4513,0.1492,-0.0030,0.0043);
 #endif
 
-const int ARROW_AREA_MIN=2800;//variable
+const int ARROW_AREA_MIN=2000;//variable
 const int ARROW_AREA_MAX=15000;
 Mat pro_after;
 int cx=343;   //To change to calibration parameter.
