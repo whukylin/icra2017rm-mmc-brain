@@ -10,12 +10,12 @@
 
 #define YSPEED 1100 //forward speed
 #define XSPEED 400
-#define ZSPEED 1600
+#define ZSPEED 1000
 #define ZSPEED_VISION 400
 #define GRASPSPEED 1200
 
 #define ZROTATION90DEG 1572
-#define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 26
+#define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 30
 
 using namespace cv;
 using namespace std;
@@ -365,7 +365,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
     printf("exit_flag=%d\n", exit_flag);
     int lostCount = 0;
     int CountVframe = 0;
-    int fflage = 0;
+    int fflage = -1;
     while (exit_flag == 0) //&&(capture.read(frame)))
     {
         squares.clear();
@@ -388,8 +388,9 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         //cout << "finishDetectBoxFlag_PutBox: " << finishDetectBoxFlag_PutBox << endl;
         cout << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
-        cout << "Grasp: " << kylinMsg.cbus.gp.e << endl;
-        switch (detection_mode)
+        cout << "Grasp: " << kylinMsg.cbus.gp.c << endl;
+	cout << "fflage: "<<fflags<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;        
+	switch (detection_mode)
         {
         case 0: //do nothing
             //TODO:
@@ -460,7 +461,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             tx = 2 * (dif_x - DIF_CEN);
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout << "tx=" << tx << endl;
-            if (abs(tx) < 30 && (CountVframe > 20 || fflage)) //number of pixels
+            if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
@@ -1558,9 +1559,10 @@ void videoMove_PutBox2toBox1()
     //squares detection finished, begin detect green area
     if (finish_LR_UltrasonicFlag_PutBox2toBox1 == true && finishDetectCentroidFlag_PutBox2toBox1 == false)
     {
+	finishDetectCentroidFlag_PutBox2toBox1 = true;	//close DetectCentroid
         //finishFixedUltrasonicFlag = false;
         coutLogicFlag_PutBox2toBox1 = 10.4;
-        detection_mode = 2;                //打开视觉,检测质心
+        detection_mode = 0;                //打开视觉,检测质心
         txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
         txKylinMsg.cbus.cp.x = tx;
         txKylinMsg.cbus.cv.x = 100;
