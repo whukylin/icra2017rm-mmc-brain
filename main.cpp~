@@ -1678,7 +1678,7 @@ void videoMove_PutBox2toBox1()
         coutLogicFlag_PutBox2toBox1 = 10.8;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
-	if(sr04maf[SR04_IDX_F].avg > 350)
+	if(sr04maf[SR04_IDX_F].avg > 400)
 	{
 		txKylinMsg.cbus.cp.x = -200;
 		txKylinMsg.cbus.cv.x = 150;
