@@ -40,8 +40,8 @@ Mat cameraMatrix=(Mat_<double>(3,3)<<1079.2096,0,342.5224,0,1075.3261,353.0309,0
 Mat distCoeffs=(Mat_<double>(1,4)<<-0.4513,0.1492,-0.0030,0.0043);
 #endif
 
-const int ARROW_AREA_MIN=2800;//variable
-const int ARROW_AREA_MAX=15000;
+const int ARROW_AREA_MIN=2000;//variable
+const int ARROW_AREA_MAX=20000;
 Mat pro_after;
 int cx=343;   //To change to calibration parameter.
 int cy=320;   //the same with cameraMatrix.cx,cy
@@ -485,13 +485,14 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     Mat SGreen;
     Rect r;
     Rect max_tmp;
-
+    resize(frame,frame,Size(640,480));
+    //imshow("src",frame);
     cvtColor(frame, HSVImage, CV_BGR2HSV);
     split(HSVImage,HSVSplit);
     //Hgreen=HSVSplit[0]>lower&&HSVSplit[0]<up , mask, threshold can be fine tuned.
-    inRange(HSVSplit[0], Scalar(70), Scalar(130), HGreen);
-	inRange(HSVSplit[1], Scalar(80), Scalar(255), SGreen);
-    //threshold(HSVSplit[1], SGreen, 80, 255, THRESH_BINARY);    //S channal intensity
+    inRange(HSVSplit[0], Scalar(80), Scalar(120), HGreen);
+	//inRange(HSVSplit[1], Scalar(80), Scalar(255), SGreen);
+    threshold(HSVSplit[1], SGreen, 80, 255, THRESH_BINARY);    //S channal intensity
     //bitwise conjunction
     cv::bitwise_and(HGreen, SGreen, out);
     morphologyEx(out, out, MORPH_OPEN, element);//open operator,remove isolated noise points.
@@ -514,6 +515,8 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
         r = boundingRect(Mat(contours[i]));
         max_tmp=(r.area()>max_tmp.area())?r:max_tmp;
     }
+
+    cout<<"area "<<max_tmp.area()<<endl;
     if(max_tmp.area()<ARROW_AREA_MIN||max_tmp.area()>ARROW_AREA_MAX)
 	{
 		diff_x=DIF_CEN;
@@ -525,7 +528,7 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     solid(max_tmp).copyTo(pro);
     pro_after=pro.clone();
     rectangle(result, max_tmp, Scalar(255), 2);
-    cout<<"area "<<max_tmp.area()<<endl;
+    
 //#ifdef _SHOW_PHOTO
     imshow("result",result);
 //#endif
@@ -539,8 +542,8 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     center.x=mt.m10/mt.m00+max_tmp.tl().x;
     center.y=mt.m01/mt.m00+max_tmp.tl().y;
     cout<<"width="<<mt.m10/mt.m00<<"  height="<<mt.m01/mt.m00<<endl;
-    diff_x=center.x-cx;
-    diff_y=center.y-cy;
+    diff_x=center.x*800/640-cx;
+    diff_y=center.y*600/480-cy;
     cout<<"diff x: "<<diff_x<<endl;
     cout<<"diff y: "<<diff_y<<endl;
     return 1;
