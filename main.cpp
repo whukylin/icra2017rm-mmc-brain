@@ -391,6 +391,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "Grasp: " << kylinMsg.cbus.gp.c << endl;
 	cout << "fflage: "<<fflags<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;        
 	switch (detection_mode)
+
         {
         case 0: //do nothing
             //TODO:

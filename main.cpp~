@@ -10,7 +10,7 @@
 
 #define YSPEED 1100 //forward speed
 #define XSPEED 400
-#define ZSPEED 1600
+#define ZSPEED 1000
 #define ZSPEED_VISION 400
 #define GRASPSPEED 1200
 
@@ -391,6 +391,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "Grasp: " << kylinMsg.cbus.gp.c << endl;
 	cout << "fflage: "<<fflags<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;        
 	switch (detection_mode)
+
         {
         case 0: //do nothing
             //TODO:
@@ -461,7 +462,11 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             tx = 2 * (dif_x - DIF_CEN);
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout << "tx=" << tx << endl;
+<<<<<<< HEAD
             if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
+=======
+            if (abs(tx) < 30 && (CountVframe > 20 || fflage)) //number of pixels
+>>>>>>> e50c6979436894d5d60a2bdd503790ad1ee12be3
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
