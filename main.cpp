@@ -385,10 +385,10 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         //cout << "GraspBwCout: " << GraspBwCout << " GraspTpCout: " << GraspTpCout << endl;
         //cout<<"GraspOp:"<<GraspOp<<"GraspCl"<<GraspCl<<endl;
         //cout << "kylinMsg.cbus.gp.e" << kylinMsg.cbus.gp.e << "  " << kylinMsg.cbus.gp.c << endl;
-        //cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         //cout << "finishDetectBoxFlag_PutBox: " << finishDetectBoxFlag_PutBox << endl;
         cout << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
-
+        cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
+        cout << "Grasp: " << kylinMsg.cbus.gp.e << endl;
         switch (detection_mode)
         {
         case 0: //do nothing
@@ -401,9 +401,6 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             findSquares(src, frame, squares);
             LocationMarkes(squares);
             drawSquares(frame, squares);
-            cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
-            cout << "angle: " << coutAngle << "    squares.size(): " << squares.size() << endl;
-            cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
             if (squares.size() > 0)
             {
                 lostCount = 0;
