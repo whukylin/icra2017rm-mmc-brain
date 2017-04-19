@@ -954,7 +954,7 @@ int main(int argc, char **argv)
                 coutLogicFlag = 2;
                 detection_mode = 0;
                 txKylinMsg.cbus.fs &= ~(1u << 30);
-		if(sr04maf[0].avg > 650)
+		if(sr04maf[SR04_IDX_F].avg > 900)
 		{
 			txKylinMsg.cbus.cp.x = -200;
 				txKylinMsg.cbus.cv.x = 200;
@@ -1112,7 +1112,7 @@ int main(int argc, char **argv)
             txKylinMsg.cbus.cp.x = kylinOdomCalib.cbus.cp.x;
             txKylinMsg.cbus.cv.x = 600 * ramp;
             txKylinMsg.cbus.cp.y = kylinOdomCalib.cbus.cp.y;
-            txKylinMsg.cbus.cv.y = YSPEED * ramp;
+            txKylinMsg.cbus.cv.y = 700 * ramp;
             if (absoluteDistance < 10)
             {
                 txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
@@ -1309,10 +1309,10 @@ int main(int argc, char **argv)
                     txKylinMsg.cbus.cv.x = 0;
                 else
                 {
-                    txKylinMsg.cbus.cv.x = XSPEED * ramp;
+                    txKylinMsg.cbus.cv.x = 600 * ramp;
                 }
                 txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
-                txKylinMsg.cbus.cv.y = YSPEED * ramp;
+                txKylinMsg.cbus.cv.y = 700 * ramp;
                 txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z;
                 txKylinMsg.cbus.cv.z = ZSPEED;
                 txKylinMsg.cbus.gp.e = GraspBw - 70 - kylinMsg.cbus.gp.e;
