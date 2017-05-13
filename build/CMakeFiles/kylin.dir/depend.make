@@ -92,8 +92,52 @@ CMakeFiles/kylin.dir/asp/src/rmp.c.o: ../asp/src/rmp.c
 CMakeFiles/kylin.dir/asp/src/stack.c.o: ../asp/inc/stack.h
 CMakeFiles/kylin.dir/asp/src/stack.c.o: ../asp/src/stack.c
 
+CMakeFiles/kylin.dir/CMT.cpp.o: ../CMT.cpp
+CMakeFiles/kylin.dir/CMT.cpp.o: ../CMT.h
+CMakeFiles/kylin.dir/CMT.cpp.o: ../Consensus.h
+CMakeFiles/kylin.dir/CMT.cpp.o: ../Fusion.h
+CMakeFiles/kylin.dir/CMT.cpp.o: ../Matcher.h
+CMakeFiles/kylin.dir/CMT.cpp.o: ../Tracker.h
+CMakeFiles/kylin.dir/CMT.cpp.o: ../common.h
+CMakeFiles/kylin.dir/CMT.cpp.o: ../logging/log.h
+
+CMakeFiles/kylin.dir/Consensus.cpp.o: ../Consensus.cpp
+CMakeFiles/kylin.dir/Consensus.cpp.o: ../Consensus.h
+CMakeFiles/kylin.dir/Consensus.cpp.o: ../common.h
+CMakeFiles/kylin.dir/Consensus.cpp.o: ../fastcluster/fastcluster.h
+CMakeFiles/kylin.dir/Consensus.cpp.o: ../logging/log.h
+
+CMakeFiles/kylin.dir/Fusion.cpp.o: ../Fusion.cpp
+CMakeFiles/kylin.dir/Fusion.cpp.o: ../Fusion.h
+CMakeFiles/kylin.dir/Fusion.cpp.o: ../common.h
+CMakeFiles/kylin.dir/Fusion.cpp.o: ../logging/log.h
+
 CMakeFiles/kylin.dir/Markdetection.cpp.o: ../Markdetection.cpp
 CMakeFiles/kylin.dir/Markdetection.cpp.o: ../Markdetection.h
+
+CMakeFiles/kylin.dir/Matcher.cpp.o: ../Matcher.cpp
+CMakeFiles/kylin.dir/Matcher.cpp.o: ../Matcher.h
+CMakeFiles/kylin.dir/Matcher.cpp.o: ../common.h
+CMakeFiles/kylin.dir/Matcher.cpp.o: ../logging/log.h
+
+CMakeFiles/kylin.dir/Tracker.cpp.o: ../Tracker.cpp
+CMakeFiles/kylin.dir/Tracker.cpp.o: ../Tracker.h
+CMakeFiles/kylin.dir/Tracker.cpp.o: ../common.h
+CMakeFiles/kylin.dir/Tracker.cpp.o: ../logging/log.h
+
+CMakeFiles/kylin.dir/common.cpp.o: ../common.cpp
+CMakeFiles/kylin.dir/common.cpp.o: ../common.h
+CMakeFiles/kylin.dir/common.cpp.o: ../logging/log.h
+
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o: ../common.h
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o: ../fastcluster/fastcluster.cpp
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o: ../fastcluster/fastcluster.h
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o: ../logging/log.h
+
+CMakeFiles/kylin.dir/gui.cpp.o: ../common.h
+CMakeFiles/kylin.dir/gui.cpp.o: ../gui.cpp
+CMakeFiles/kylin.dir/gui.cpp.o: ../gui.h
+CMakeFiles/kylin.dir/gui.cpp.o: ../logging/log.h
 
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/ahrs.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/asp.h
@@ -119,8 +163,16 @@ CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/rcp.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/rmp.h
 CMakeFiles/kylin.dir/main.cpp.o: ../asp/inc/stack.h
 CMakeFiles/kylin.dir/main.cpp.o: ../uart/linux/serial.h
+CMakeFiles/kylin.dir/main.cpp.o: ../CMT.h
+CMakeFiles/kylin.dir/main.cpp.o: ../Consensus.h
+CMakeFiles/kylin.dir/main.cpp.o: ../Fusion.h
 CMakeFiles/kylin.dir/main.cpp.o: ../Markdetection.h
+CMakeFiles/kylin.dir/main.cpp.o: ../Matcher.h
 CMakeFiles/kylin.dir/main.cpp.o: ../RMVideoCapture.hpp
+CMakeFiles/kylin.dir/main.cpp.o: ../Tracker.h
+CMakeFiles/kylin.dir/main.cpp.o: ../common.h
+CMakeFiles/kylin.dir/main.cpp.o: ../gui.h
+CMakeFiles/kylin.dir/main.cpp.o: ../logging/log.h
 CMakeFiles/kylin.dir/main.cpp.o: ../main.cpp
 CMakeFiles/kylin.dir/main.cpp.o: ../main.h
 CMakeFiles/kylin.dir/main.cpp.o: ../mythread.hpp

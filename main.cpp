@@ -2,6 +2,9 @@
 #include <math.h>
 #include "RMVideoCapture.hpp"
 #include "Markdetection.h"
+#include "CMT.h"
+#include "gui.h"
+
 #define COM_PORT 1 //"COM7"
 #define BUF_LEN 256
 #define TIMEOUT 30
@@ -22,7 +25,7 @@
 #define DIFFCONST 50
 using namespace cv;
 using namespace std;
-
+using cmt::CMT;
 double missionStartTimeUs = 0;
 double missionEndTimeUs = 0;
 
@@ -34,7 +37,8 @@ double currentTimeUs()
 extern double ry, rz, rx;
 extern double tx, ty, tz;
 extern const char *wndname;
-
+ //Create a CMT object
+CMT cmt0;
 RMVideoCapture capture("/dev/video0", 3);
 //VideoCapture capture;
 int exp_time = 62;
@@ -358,6 +362,32 @@ float genRmp()
     return Rmp_Calc(&rmp);
 }
 
+int CMT_temdetect(Mat frame, int &diff_x, int &diff_y)
+{
+	Mat im_gray;
+
+    cvtColor(frame, im_gray, CV_BGR2GRAY);
+
+     //Let CMT process the frame
+     cmt0.processFrame(im_gray);
+	 Point2f vertices[4];
+     cmt0.bb_rot.points(vertices);
+	 Point center;
+	 center.x=(vertices[0].x+vertices[1].x+vertices[2].x+vertices[3].x)/4;
+	 center.y=(vertices[0].y+vertices[1].y+vertices[2].y+vertices[3].y)/4;
+	 diff_x=center.x-CX;
+	 diff_y=center.y-CY;
+	 cout<<"diff x: "<<diff_x<<endl;
+     cout<<"diff y: "<<diff_y<<endl;
+	 for (int i = 0; i < 4; i++)
+    {
+        line(frame, vertices[i], vertices[(i+1)%4], Scalar(255,0,0));
+    }
+
+    imshow(wndname, frame);
+     return 1;
+}
+
 void *KylinBotMarkDetecThreadFunc(void *param)
 {
     Mat frame;
@@ -394,104 +424,105 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "Grasp: " << kylinMsg.cbus.gp.c << endl;
 	cout << "fflage: "<<fflage<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;        
 	switch (detection_mode)
-
-        {
-        case 0: //do nothing
-            //TODO:
-            //imshow("IM",frame);
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            break;
-        case 1: //detect squares
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            findSquares(src, frame, squares);
-            LocationMarkes(squares);
-            drawSquares(frame, squares);
-            if (squares.size() > 0)
-            {
-                lostCount = 0;
-                lostFlag = false;
-                CountVframe++;
-                // txKylinMsg.cbus.cp.x = tx;
-                // txKylinMsg.cbus.cv.x = 500;
-                // txKylinMsg.cbus.cp.y = tz;
-                // txKylinMsg.cbus.cv.y = 800;
-                // txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-                // txKylinMsg.cbus.cv.z = 500;
-                // txKylinMsg.cbus.gp.e = ty;
-                // txKylinMsg.cbus.gv.e = 0;
-            }
-            if (squares.size() == 0)
-            {
-                lostCount++;
-                if (lostCount >= 3)
-                {
-                    printf("lost frame\n");
-                    lostCount = 0;
-                    lostFlag = true;
-                    tx = DIFFCONST;
-                    ty = 0;
-                    tz = 0;
-                    rx = 0;
-                    ry = 0;
-                    rz = 0;
-		    rstRmp();
-                }
-            }
-            if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
-            { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
-                finishDetectBoxFlag = true;
-
-                CountVframe = 0;
-            }
-            else
-            {
-                finishDetectBoxFlag = false;
-            }
-            if (coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
-            {
-                finishDetectBoxFlag_PutBox = true;
-                CountVframe = 0;
-            }
-            else
-            {
-                finishDetectBoxFlag_PutBox = false;
-            }
-            printf("tz=%lf\n", tz);
-            break;
-        case 2: //detect green area
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            fflage = Color_detect(src, dif_x, dif_y);
-            if (fflage == 0)
-                CountVframe++;
-            tx = 2 * (dif_x - DIF_CEN);
-            // txKylinMsg.cbus.cp.x = 10 * dif_x;
-            cout << "tx=" << tx << endl;
-            if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
-            {
-                CountVframe = 0;
-                finishDetectCentroidFlag = true;
-                if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
-                {
-                    finishDetectCentroidFlag_PutBox2toBox1 = true;
-                }
-            }
-            break;
-        case 3: //follow line
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            break;
-        case 4: //follow line
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            break;
-        case 5: //follow line
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-
-            //TODO:
-            break;
-        default:
-            break;
-        }
-        int c = waitKey(1);
-
+		
+	{
+		case 0: //do nothing
+			//TODO:
+			//imshow("IM",frame);
+			//cout << "detection_mode=" << (int)detection_mode << endl;
+			break;
+		case 1: //detect squares
+			//cout << "detection_mode=" << (int)detection_mode << endl;
+			findSquares(src, frame, squares);
+			LocationMarkes(squares);
+			drawSquares(frame, squares);
+			if (squares.size() > 0)
+			{
+				lostCount = 0;
+				lostFlag = false;
+				CountVframe++;
+				// txKylinMsg.cbus.cp.x = tx;
+				// txKylinMsg.cbus.cv.x = 500;
+				// txKylinMsg.cbus.cp.y = tz;
+				// txKylinMsg.cbus.cv.y = 800;
+				// txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+				// txKylinMsg.cbus.cv.z = 500;
+				// txKylinMsg.cbus.gp.e = ty;
+				// txKylinMsg.cbus.gv.e = 0;
+			}
+			if (squares.size() == 0)
+			{
+				lostCount++;
+				if (lostCount >= 3)
+				{
+					printf("lost frame\n");
+					lostCount = 0;
+					lostFlag = true;
+					tx = DIFFCONST;
+					ty = 0;
+					tz = 0;
+					rx = 0;
+					ry = 0;
+					rz = 0;
+					rstRmp();
+				}
+			}
+			if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
+			{ //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
+				finishDetectBoxFlag = true;
+				
+				CountVframe = 0;
+			}
+			else
+			{
+				finishDetectBoxFlag = false;
+			}
+			if (coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
+			{
+				finishDetectBoxFlag_PutBox = true;
+				CountVframe = 0;
+			}
+			else
+			{
+				finishDetectBoxFlag_PutBox = false;
+			}
+			printf("tz=%lf\n", tz);
+			break;
+			case 2: //detect green area
+				//cout << "detection_mode=" << (int)detection_mode << endl;
+				
+				fflage = CMT_temdetect(src, dif_x, dif_y);
+				if (fflage == 0)
+					CountVframe++;
+				tx = 2 * (dif_x - DIF_CEN);
+				// txKylinMsg.cbus.cp.x = 10 * dif_x;
+				cout << "tx=" << tx << endl;
+				if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
+				{
+					CountVframe = 0;
+					finishDetectCentroidFlag = true;
+					if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+					{
+						finishDetectCentroidFlag_PutBox2toBox1 = true;
+					}
+				}
+				break;
+			case 3: //follow line
+				//cout << "detection_mode=" << (int)detection_mode << endl;
+				break;
+			case 4: //follow line
+				//cout << "detection_mode=" << (int)detection_mode << endl;
+				break;
+			case 5: //follow line
+				//cout << "detection_mode=" << (int)detection_mode << endl;
+				
+				//TODO:
+				break;
+			default:
+				break;
+	}
+	int c = waitKey(1);
+	
         if ((char)c == 'q')
             break;
     }
@@ -669,6 +700,23 @@ int main(int argc, char **argv)
         printf("serial open error!\n");
         return -1;
     }
+    
+    //set CMT
+    Mat im0_src;
+    //Initialization bounding box
+    Rect rect;
+    im0_src = imread("../arrow/arrow1.jpg");
+    if(im0_src.empty())
+    {
+        cout<<"load template image error"<<endl;
+	    return 0;
+    }
+    rect = Rect(362,201,110,135);  //TODO: Justify
+    //Convert im0 to grayscale
+    Mat im0_gray;
+    cvtColor(im0_src, im0_gray, CV_BGR2GRAY);
+    //Initialize CMT
+    cmt0.initialize(im0_gray, rect);
 
     MyThread kylibotMsgPullerTread;
     MyThread kylibotMsgPusherTread;
@@ -734,7 +782,7 @@ int main(int argc, char **argv)
     double absuluteGraspOpCl = 100;
     double absuluteGrasp = 100;
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-
+    
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
         //cout << "ws: " << workState << endl;

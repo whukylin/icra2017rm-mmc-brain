@@ -624,9 +624,101 @@ CMakeFiles/kylin.dir/uart/linux/serial.cpp.o.provides: CMakeFiles/kylin.dir/uart
 
 CMakeFiles/kylin.dir/uart/linux/serial.cpp.o.provides.build: CMakeFiles/kylin.dir/uart/linux/serial.cpp.o
 
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o: CMakeFiles/kylin.dir/flags.make
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o: ../fastcluster/fastcluster.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_26)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/fastcluster/fastcluster.cpp
+
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/fastcluster/fastcluster.cpp > CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.i
+
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/fastcluster/fastcluster.cpp -o CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.s
+
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o.requires:
+.PHONY : CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o.requires
+
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o.provides: CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o.requires
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o.provides.build
+.PHONY : CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o.provides
+
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o.provides.build: CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o
+
+CMakeFiles/kylin.dir/CMT.cpp.o: CMakeFiles/kylin.dir/flags.make
+CMakeFiles/kylin.dir/CMT.cpp.o: ../CMT.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_27)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/CMT.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/CMT.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/CMT.cpp
+
+CMakeFiles/kylin.dir/CMT.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/CMT.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/CMT.cpp > CMakeFiles/kylin.dir/CMT.cpp.i
+
+CMakeFiles/kylin.dir/CMT.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/CMT.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/CMT.cpp -o CMakeFiles/kylin.dir/CMT.cpp.s
+
+CMakeFiles/kylin.dir/CMT.cpp.o.requires:
+.PHONY : CMakeFiles/kylin.dir/CMT.cpp.o.requires
+
+CMakeFiles/kylin.dir/CMT.cpp.o.provides: CMakeFiles/kylin.dir/CMT.cpp.o.requires
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/CMT.cpp.o.provides.build
+.PHONY : CMakeFiles/kylin.dir/CMT.cpp.o.provides
+
+CMakeFiles/kylin.dir/CMT.cpp.o.provides.build: CMakeFiles/kylin.dir/CMT.cpp.o
+
+CMakeFiles/kylin.dir/gui.cpp.o: CMakeFiles/kylin.dir/flags.make
+CMakeFiles/kylin.dir/gui.cpp.o: ../gui.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_28)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/gui.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/gui.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/gui.cpp
+
+CMakeFiles/kylin.dir/gui.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/gui.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/gui.cpp > CMakeFiles/kylin.dir/gui.cpp.i
+
+CMakeFiles/kylin.dir/gui.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/gui.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/gui.cpp -o CMakeFiles/kylin.dir/gui.cpp.s
+
+CMakeFiles/kylin.dir/gui.cpp.o.requires:
+.PHONY : CMakeFiles/kylin.dir/gui.cpp.o.requires
+
+CMakeFiles/kylin.dir/gui.cpp.o.provides: CMakeFiles/kylin.dir/gui.cpp.o.requires
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/gui.cpp.o.provides.build
+.PHONY : CMakeFiles/kylin.dir/gui.cpp.o.provides
+
+CMakeFiles/kylin.dir/gui.cpp.o.provides.build: CMakeFiles/kylin.dir/gui.cpp.o
+
+CMakeFiles/kylin.dir/Fusion.cpp.o: CMakeFiles/kylin.dir/flags.make
+CMakeFiles/kylin.dir/Fusion.cpp.o: ../Fusion.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_29)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/Fusion.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/Fusion.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Fusion.cpp
+
+CMakeFiles/kylin.dir/Fusion.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/Fusion.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Fusion.cpp > CMakeFiles/kylin.dir/Fusion.cpp.i
+
+CMakeFiles/kylin.dir/Fusion.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/Fusion.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Fusion.cpp -o CMakeFiles/kylin.dir/Fusion.cpp.s
+
+CMakeFiles/kylin.dir/Fusion.cpp.o.requires:
+.PHONY : CMakeFiles/kylin.dir/Fusion.cpp.o.requires
+
+CMakeFiles/kylin.dir/Fusion.cpp.o.provides: CMakeFiles/kylin.dir/Fusion.cpp.o.requires
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Fusion.cpp.o.provides.build
+.PHONY : CMakeFiles/kylin.dir/Fusion.cpp.o.provides
+
+CMakeFiles/kylin.dir/Fusion.cpp.o.provides.build: CMakeFiles/kylin.dir/Fusion.cpp.o
+
 CMakeFiles/kylin.dir/main.cpp.o: CMakeFiles/kylin.dir/flags.make
 CMakeFiles/kylin.dir/main.cpp.o: ../main.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_26)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_30)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/main.cpp.o"
 	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/main.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/main.cpp
 
@@ -649,7 +741,7 @@ CMakeFiles/kylin.dir/main.cpp.o.provides.build: CMakeFiles/kylin.dir/main.cpp.o
 
 CMakeFiles/kylin.dir/serial.cpp.o: CMakeFiles/kylin.dir/flags.make
 CMakeFiles/kylin.dir/serial.cpp.o: ../serial.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_27)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_31)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/serial.cpp.o"
 	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/serial.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/serial.cpp
 
@@ -670,9 +762,32 @@ CMakeFiles/kylin.dir/serial.cpp.o.provides: CMakeFiles/kylin.dir/serial.cpp.o.re
 
 CMakeFiles/kylin.dir/serial.cpp.o.provides.build: CMakeFiles/kylin.dir/serial.cpp.o
 
+CMakeFiles/kylin.dir/common.cpp.o: CMakeFiles/kylin.dir/flags.make
+CMakeFiles/kylin.dir/common.cpp.o: ../common.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_32)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/common.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/common.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.cpp
+
+CMakeFiles/kylin.dir/common.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/common.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.cpp > CMakeFiles/kylin.dir/common.cpp.i
+
+CMakeFiles/kylin.dir/common.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/common.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.cpp -o CMakeFiles/kylin.dir/common.cpp.s
+
+CMakeFiles/kylin.dir/common.cpp.o.requires:
+.PHONY : CMakeFiles/kylin.dir/common.cpp.o.requires
+
+CMakeFiles/kylin.dir/common.cpp.o.provides: CMakeFiles/kylin.dir/common.cpp.o.requires
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/common.cpp.o.provides.build
+.PHONY : CMakeFiles/kylin.dir/common.cpp.o.provides
+
+CMakeFiles/kylin.dir/common.cpp.o.provides.build: CMakeFiles/kylin.dir/common.cpp.o
+
 CMakeFiles/kylin.dir/mythread.cpp.o: CMakeFiles/kylin.dir/flags.make
 CMakeFiles/kylin.dir/mythread.cpp.o: ../mythread.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_28)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_33)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/mythread.cpp.o"
 	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/mythread.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/mythread.cpp
 
@@ -693,9 +808,55 @@ CMakeFiles/kylin.dir/mythread.cpp.o.provides: CMakeFiles/kylin.dir/mythread.cpp.
 
 CMakeFiles/kylin.dir/mythread.cpp.o.provides.build: CMakeFiles/kylin.dir/mythread.cpp.o
 
+CMakeFiles/kylin.dir/Tracker.cpp.o: CMakeFiles/kylin.dir/flags.make
+CMakeFiles/kylin.dir/Tracker.cpp.o: ../Tracker.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_34)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/Tracker.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/Tracker.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Tracker.cpp
+
+CMakeFiles/kylin.dir/Tracker.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/Tracker.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Tracker.cpp > CMakeFiles/kylin.dir/Tracker.cpp.i
+
+CMakeFiles/kylin.dir/Tracker.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/Tracker.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Tracker.cpp -o CMakeFiles/kylin.dir/Tracker.cpp.s
+
+CMakeFiles/kylin.dir/Tracker.cpp.o.requires:
+.PHONY : CMakeFiles/kylin.dir/Tracker.cpp.o.requires
+
+CMakeFiles/kylin.dir/Tracker.cpp.o.provides: CMakeFiles/kylin.dir/Tracker.cpp.o.requires
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Tracker.cpp.o.provides.build
+.PHONY : CMakeFiles/kylin.dir/Tracker.cpp.o.provides
+
+CMakeFiles/kylin.dir/Tracker.cpp.o.provides.build: CMakeFiles/kylin.dir/Tracker.cpp.o
+
+CMakeFiles/kylin.dir/Matcher.cpp.o: CMakeFiles/kylin.dir/flags.make
+CMakeFiles/kylin.dir/Matcher.cpp.o: ../Matcher.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_35)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/Matcher.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/Matcher.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Matcher.cpp
+
+CMakeFiles/kylin.dir/Matcher.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/Matcher.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Matcher.cpp > CMakeFiles/kylin.dir/Matcher.cpp.i
+
+CMakeFiles/kylin.dir/Matcher.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/Matcher.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Matcher.cpp -o CMakeFiles/kylin.dir/Matcher.cpp.s
+
+CMakeFiles/kylin.dir/Matcher.cpp.o.requires:
+.PHONY : CMakeFiles/kylin.dir/Matcher.cpp.o.requires
+
+CMakeFiles/kylin.dir/Matcher.cpp.o.provides: CMakeFiles/kylin.dir/Matcher.cpp.o.requires
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Matcher.cpp.o.provides.build
+.PHONY : CMakeFiles/kylin.dir/Matcher.cpp.o.provides
+
+CMakeFiles/kylin.dir/Matcher.cpp.o.provides.build: CMakeFiles/kylin.dir/Matcher.cpp.o
+
 CMakeFiles/kylin.dir/Markdetection.cpp.o: CMakeFiles/kylin.dir/flags.make
 CMakeFiles/kylin.dir/Markdetection.cpp.o: ../Markdetection.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_29)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_36)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/Markdetection.cpp.o"
 	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/Markdetection.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Markdetection.cpp
 
@@ -715,6 +876,29 @@ CMakeFiles/kylin.dir/Markdetection.cpp.o.provides: CMakeFiles/kylin.dir/Markdete
 .PHONY : CMakeFiles/kylin.dir/Markdetection.cpp.o.provides
 
 CMakeFiles/kylin.dir/Markdetection.cpp.o.provides.build: CMakeFiles/kylin.dir/Markdetection.cpp.o
+
+CMakeFiles/kylin.dir/Consensus.cpp.o: CMakeFiles/kylin.dir/flags.make
+CMakeFiles/kylin.dir/Consensus.cpp.o: ../Consensus.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/build/CMakeFiles $(CMAKE_PROGRESS_37)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/kylin.dir/Consensus.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/kylin.dir/Consensus.cpp.o -c /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Consensus.cpp
+
+CMakeFiles/kylin.dir/Consensus.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kylin.dir/Consensus.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Consensus.cpp > CMakeFiles/kylin.dir/Consensus.cpp.i
+
+CMakeFiles/kylin.dir/Consensus.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kylin.dir/Consensus.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Consensus.cpp -o CMakeFiles/kylin.dir/Consensus.cpp.s
+
+CMakeFiles/kylin.dir/Consensus.cpp.o.requires:
+.PHONY : CMakeFiles/kylin.dir/Consensus.cpp.o.requires
+
+CMakeFiles/kylin.dir/Consensus.cpp.o.provides: CMakeFiles/kylin.dir/Consensus.cpp.o.requires
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Consensus.cpp.o.provides.build
+.PHONY : CMakeFiles/kylin.dir/Consensus.cpp.o.provides
+
+CMakeFiles/kylin.dir/Consensus.cpp.o.provides.build: CMakeFiles/kylin.dir/Consensus.cpp.o
 
 # Object files for target kylin
 kylin_OBJECTS = \
@@ -743,10 +927,18 @@ kylin_OBJECTS = \
 "CMakeFiles/kylin.dir/asp/src/ahrs.c.o" \
 "CMakeFiles/kylin.dir/asp/src/hcf.c.o" \
 "CMakeFiles/kylin.dir/uart/linux/serial.cpp.o" \
+"CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o" \
+"CMakeFiles/kylin.dir/CMT.cpp.o" \
+"CMakeFiles/kylin.dir/gui.cpp.o" \
+"CMakeFiles/kylin.dir/Fusion.cpp.o" \
 "CMakeFiles/kylin.dir/main.cpp.o" \
 "CMakeFiles/kylin.dir/serial.cpp.o" \
+"CMakeFiles/kylin.dir/common.cpp.o" \
 "CMakeFiles/kylin.dir/mythread.cpp.o" \
-"CMakeFiles/kylin.dir/Markdetection.cpp.o"
+"CMakeFiles/kylin.dir/Tracker.cpp.o" \
+"CMakeFiles/kylin.dir/Matcher.cpp.o" \
+"CMakeFiles/kylin.dir/Markdetection.cpp.o" \
+"CMakeFiles/kylin.dir/Consensus.cpp.o"
 
 # External object files for target kylin
 kylin_EXTERNAL_OBJECTS =
@@ -776,10 +968,18 @@ kylin: CMakeFiles/kylin.dir/asp/src/hcp.c.o
 kylin: CMakeFiles/kylin.dir/asp/src/ahrs.c.o
 kylin: CMakeFiles/kylin.dir/asp/src/hcf.c.o
 kylin: CMakeFiles/kylin.dir/uart/linux/serial.cpp.o
+kylin: CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o
+kylin: CMakeFiles/kylin.dir/CMT.cpp.o
+kylin: CMakeFiles/kylin.dir/gui.cpp.o
+kylin: CMakeFiles/kylin.dir/Fusion.cpp.o
 kylin: CMakeFiles/kylin.dir/main.cpp.o
 kylin: CMakeFiles/kylin.dir/serial.cpp.o
+kylin: CMakeFiles/kylin.dir/common.cpp.o
 kylin: CMakeFiles/kylin.dir/mythread.cpp.o
+kylin: CMakeFiles/kylin.dir/Tracker.cpp.o
+kylin: CMakeFiles/kylin.dir/Matcher.cpp.o
 kylin: CMakeFiles/kylin.dir/Markdetection.cpp.o
+kylin: CMakeFiles/kylin.dir/Consensus.cpp.o
 kylin: CMakeFiles/kylin.dir/build.make
 kylin: /usr/lib/arm-linux-gnueabihf/libopencv_videostab.so.2.4.8
 kylin: /usr/lib/arm-linux-gnueabihf/libopencv_video.so.2.4.8
@@ -843,10 +1043,18 @@ CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/asp/src/hcp.c.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/asp/src/ahrs.c.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/asp/src/hcf.c.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/uart/linux/serial.cpp.o.requires
+CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o.requires
+CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/CMT.cpp.o.requires
+CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/gui.cpp.o.requires
+CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/Fusion.cpp.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/main.cpp.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/serial.cpp.o.requires
+CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/common.cpp.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/mythread.cpp.o.requires
+CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/Tracker.cpp.o.requires
+CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/Matcher.cpp.o.requires
 CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/Markdetection.cpp.o.requires
+CMakeFiles/kylin.dir/requires: CMakeFiles/kylin.dir/Consensus.cpp.o.requires
 .PHONY : CMakeFiles/kylin.dir/requires
 
 CMakeFiles/kylin.dir/clean:

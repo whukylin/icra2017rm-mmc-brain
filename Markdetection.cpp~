@@ -548,3 +548,7 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     cout<<"diff y: "<<diff_y<<endl;
     return 1;
 }
+
+int CMT_temdetect(Mat frame, int &diff_x, int &diff_y)
+
+

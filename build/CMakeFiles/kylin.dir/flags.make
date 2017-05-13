@@ -3,11 +3,11 @@
 
 # compile C with /usr/bin/cc
 # compile CXX with /usr/bin/c++
-C_FLAGS = -I/usr/include/opencv -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/asp/inc -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/uart/linux    -O0
+C_FLAGS = -I/usr/include/opencv -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/asp/inc -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/uart/linux -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/fastcluster -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging    -O0
 
 C_DEFINES = 
 
-CXX_FLAGS =  -std=c++11 -I/usr/include/opencv -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/asp/inc -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/uart/linux    -O0
+CXX_FLAGS =  -std=c++11 -I/usr/include/opencv -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/asp/inc -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/uart/linux -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/fastcluster -I/home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging    -O0
 
 CXX_DEFINES = 
 

@@ -43,8 +43,7 @@ Mat distCoeffs=(Mat_<double>(1,4)<<-0.4513,0.1492,-0.0030,0.0043);
 const int ARROW_AREA_MIN=2000;//variable
 const int ARROW_AREA_MAX=20000;
 Mat pro_after;
-int cx=343;   //To change to calibration parameter.
-int cy=320;   //the same with cameraMatrix.cx,cy
+
 
 Point3f world_pnt_tl(-65,-85,0);   //unit: mm
 Point3f world_pnt_tr(65,-85,0);
@@ -542,9 +541,12 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     center.x=mt.m10/mt.m00+max_tmp.tl().x;
     center.y=mt.m01/mt.m00+max_tmp.tl().y;
     cout<<"width="<<mt.m10/mt.m00<<"  height="<<mt.m01/mt.m00<<endl;
-    diff_x=center.x*800/640-cx;
-    diff_y=center.y*600/480-cy;
+    diff_x=center.x*800/640-CX;
+    diff_y=center.y*600/480-CY;
     cout<<"diff x: "<<diff_x<<endl;
     cout<<"diff y: "<<diff_y<<endl;
     return 1;
 }
+
+
+

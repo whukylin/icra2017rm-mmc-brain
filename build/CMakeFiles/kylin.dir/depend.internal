@@ -92,9 +92,53 @@ CMakeFiles/kylin.dir/asp/src/rmp.c.o
 CMakeFiles/kylin.dir/asp/src/stack.c.o
  ../asp/inc/stack.h
  /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/asp/src/stack.c
+CMakeFiles/kylin.dir/CMT.cpp.o
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/CMT.cpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/CMT.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Consensus.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Fusion.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Matcher.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Tracker.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
+CMakeFiles/kylin.dir/Consensus.cpp.o
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Consensus.cpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Consensus.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/fastcluster/fastcluster.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
+CMakeFiles/kylin.dir/Fusion.cpp.o
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Fusion.cpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Fusion.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
 CMakeFiles/kylin.dir/Markdetection.cpp.o
  /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Markdetection.cpp
  /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Markdetection.h
+CMakeFiles/kylin.dir/Matcher.cpp.o
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Matcher.cpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Matcher.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
+CMakeFiles/kylin.dir/Tracker.cpp.o
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Tracker.cpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Tracker.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
+CMakeFiles/kylin.dir/common.cpp.o
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.cpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
+CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/fastcluster/fastcluster.cpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/fastcluster/fastcluster.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
+CMakeFiles/kylin.dir/gui.cpp.o
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/gui.cpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/gui.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
 CMakeFiles/kylin.dir/main.cpp.o
  ../asp/inc/ahrs.h
  ../asp/inc/asp.h
@@ -120,8 +164,16 @@ CMakeFiles/kylin.dir/main.cpp.o
  ../asp/inc/rmp.h
  ../asp/inc/stack.h
  ../uart/linux/serial.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/CMT.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Consensus.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Fusion.h
  /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Markdetection.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Matcher.h
  /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/RMVideoCapture.hpp
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/Tracker.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/common.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/gui.h
+ /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/logging/log.h
  /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/main.cpp
  /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/main.h
  /home/ubuntu/workspace/jwwangchn/kylin_whukylin/icra2017rm-mmc-brain/mythread.hpp

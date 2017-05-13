@@ -111,6 +111,78 @@ kylin/fast:
 	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/build
 .PHONY : kylin/fast
 
+CMT.o: CMT.cpp.o
+.PHONY : CMT.o
+
+# target to build an object file
+CMT.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/CMT.cpp.o
+.PHONY : CMT.cpp.o
+
+CMT.i: CMT.cpp.i
+.PHONY : CMT.i
+
+# target to preprocess a source file
+CMT.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/CMT.cpp.i
+.PHONY : CMT.cpp.i
+
+CMT.s: CMT.cpp.s
+.PHONY : CMT.s
+
+# target to generate assembly for a file
+CMT.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/CMT.cpp.s
+.PHONY : CMT.cpp.s
+
+Consensus.o: Consensus.cpp.o
+.PHONY : Consensus.o
+
+# target to build an object file
+Consensus.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Consensus.cpp.o
+.PHONY : Consensus.cpp.o
+
+Consensus.i: Consensus.cpp.i
+.PHONY : Consensus.i
+
+# target to preprocess a source file
+Consensus.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Consensus.cpp.i
+.PHONY : Consensus.cpp.i
+
+Consensus.s: Consensus.cpp.s
+.PHONY : Consensus.s
+
+# target to generate assembly for a file
+Consensus.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Consensus.cpp.s
+.PHONY : Consensus.cpp.s
+
+Fusion.o: Fusion.cpp.o
+.PHONY : Fusion.o
+
+# target to build an object file
+Fusion.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Fusion.cpp.o
+.PHONY : Fusion.cpp.o
+
+Fusion.i: Fusion.cpp.i
+.PHONY : Fusion.i
+
+# target to preprocess a source file
+Fusion.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Fusion.cpp.i
+.PHONY : Fusion.cpp.i
+
+Fusion.s: Fusion.cpp.s
+.PHONY : Fusion.s
+
+# target to generate assembly for a file
+Fusion.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Fusion.cpp.s
+.PHONY : Fusion.cpp.s
+
 Markdetection.o: Markdetection.cpp.o
 .PHONY : Markdetection.o
 
@@ -134,6 +206,54 @@ Markdetection.s: Markdetection.cpp.s
 Markdetection.cpp.s:
 	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Markdetection.cpp.s
 .PHONY : Markdetection.cpp.s
+
+Matcher.o: Matcher.cpp.o
+.PHONY : Matcher.o
+
+# target to build an object file
+Matcher.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Matcher.cpp.o
+.PHONY : Matcher.cpp.o
+
+Matcher.i: Matcher.cpp.i
+.PHONY : Matcher.i
+
+# target to preprocess a source file
+Matcher.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Matcher.cpp.i
+.PHONY : Matcher.cpp.i
+
+Matcher.s: Matcher.cpp.s
+.PHONY : Matcher.s
+
+# target to generate assembly for a file
+Matcher.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Matcher.cpp.s
+.PHONY : Matcher.cpp.s
+
+Tracker.o: Tracker.cpp.o
+.PHONY : Tracker.o
+
+# target to build an object file
+Tracker.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Tracker.cpp.o
+.PHONY : Tracker.cpp.o
+
+Tracker.i: Tracker.cpp.i
+.PHONY : Tracker.i
+
+# target to preprocess a source file
+Tracker.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Tracker.cpp.i
+.PHONY : Tracker.cpp.i
+
+Tracker.s: Tracker.cpp.s
+.PHONY : Tracker.s
+
+# target to generate assembly for a file
+Tracker.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/Tracker.cpp.s
+.PHONY : Tracker.cpp.s
 
 asp/src/ahrs.o: asp/src/ahrs.c.o
 .PHONY : asp/src/ahrs.o
@@ -711,6 +831,78 @@ asp/src/stack.c.s:
 	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/asp/src/stack.c.s
 .PHONY : asp/src/stack.c.s
 
+common.o: common.cpp.o
+.PHONY : common.o
+
+# target to build an object file
+common.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/common.cpp.o
+.PHONY : common.cpp.o
+
+common.i: common.cpp.i
+.PHONY : common.i
+
+# target to preprocess a source file
+common.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/common.cpp.i
+.PHONY : common.cpp.i
+
+common.s: common.cpp.s
+.PHONY : common.s
+
+# target to generate assembly for a file
+common.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/common.cpp.s
+.PHONY : common.cpp.s
+
+fastcluster/fastcluster.o: fastcluster/fastcluster.cpp.o
+.PHONY : fastcluster/fastcluster.o
+
+# target to build an object file
+fastcluster/fastcluster.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.o
+.PHONY : fastcluster/fastcluster.cpp.o
+
+fastcluster/fastcluster.i: fastcluster/fastcluster.cpp.i
+.PHONY : fastcluster/fastcluster.i
+
+# target to preprocess a source file
+fastcluster/fastcluster.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.i
+.PHONY : fastcluster/fastcluster.cpp.i
+
+fastcluster/fastcluster.s: fastcluster/fastcluster.cpp.s
+.PHONY : fastcluster/fastcluster.s
+
+# target to generate assembly for a file
+fastcluster/fastcluster.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/fastcluster/fastcluster.cpp.s
+.PHONY : fastcluster/fastcluster.cpp.s
+
+gui.o: gui.cpp.o
+.PHONY : gui.o
+
+# target to build an object file
+gui.cpp.o:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/gui.cpp.o
+.PHONY : gui.cpp.o
+
+gui.i: gui.cpp.i
+.PHONY : gui.i
+
+# target to preprocess a source file
+gui.cpp.i:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/gui.cpp.i
+.PHONY : gui.cpp.i
+
+gui.s: gui.cpp.s
+.PHONY : gui.s
+
+# target to generate assembly for a file
+gui.cpp.s:
+	$(MAKE) -f CMakeFiles/kylin.dir/build.make CMakeFiles/kylin.dir/gui.cpp.s
+.PHONY : gui.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -816,9 +1008,24 @@ help:
 	@echo "... edit_cache"
 	@echo "... kylin"
 	@echo "... rebuild_cache"
+	@echo "... CMT.o"
+	@echo "... CMT.i"
+	@echo "... CMT.s"
+	@echo "... Consensus.o"
+	@echo "... Consensus.i"
+	@echo "... Consensus.s"
+	@echo "... Fusion.o"
+	@echo "... Fusion.i"
+	@echo "... Fusion.s"
 	@echo "... Markdetection.o"
 	@echo "... Markdetection.i"
 	@echo "... Markdetection.s"
+	@echo "... Matcher.o"
+	@echo "... Matcher.i"
+	@echo "... Matcher.s"
+	@echo "... Tracker.o"
+	@echo "... Tracker.i"
+	@echo "... Tracker.s"
 	@echo "... asp/src/ahrs.o"
 	@echo "... asp/src/ahrs.i"
 	@echo "... asp/src/ahrs.s"
@@ -891,6 +1098,15 @@ help:
 	@echo "... asp/src/stack.o"
 	@echo "... asp/src/stack.i"
 	@echo "... asp/src/stack.s"
+	@echo "... common.o"
+	@echo "... common.i"
+	@echo "... common.s"
+	@echo "... fastcluster/fastcluster.o"
+	@echo "... fastcluster/fastcluster.i"
+	@echo "... fastcluster/fastcluster.s"
+	@echo "... gui.o"
+	@echo "... gui.i"
+	@echo "... gui.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
