@@ -645,6 +645,11 @@ uint8_t updateOdomError()
     kylinOdomError.cbus.gv.e = txKylinMsg.cbus.gv.e - kylinMsg.cbus.gv.e; // + kylinOdomCalib.cbus.gv.e;
     kylinOdomError.cbus.gv.c = txKylinMsg.cbus.gv.c - kylinMsg.cbus.gv.c; // + kylinOdomCalib.cbus.gv.c;
 }
+//第二位或者第三位是盒子完全进入抓子的标志位
+bool switchFlagFun()
+{
+    return txKylinMsg.cbus.fs & (1u << 2);
+}
 
 float ramp = 0;
 int lastWs = 0;
@@ -781,7 +786,7 @@ int main(int argc, char **argv)
 
         if ((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
         {
-            if (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE)
+            if (switchFlagFun()) //if (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE)
             {
                 finishMobleUltrasonicFlag = true;
             }
@@ -863,7 +868,7 @@ int main(int argc, char **argv)
                 {
                     finish_LR_UltrasonicFlag_PutBox2toBox1 = true;
                 }
-                if (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+                if (switchFlagFun() && finish_LR_UltrasonicFlag_PutBox2toBox1 == true) //if (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
                 {
                     finishMobleUltrasonicFlag_PutBox2toBox1 = true;
                 }
@@ -1787,4 +1792,11 @@ void txKylinMsgFun(int16_t cpx, int16_t cvx, int16_t cpy, int16_t cvy, int16_t c
     txKylinMsg.cbus.gv.c = gvc;
 }
 
-//第二位或者第三位是盒子完全进入抓子的标志位
+// 1. 求平均值的
+// 因为要考虑溢出，所以不能全部求和再求平均，只能是来一位，求一次平均值。具体说就是现求前 N 个数的平均值，
+// 再用这个平均值加上 N/(N+1)*num(N+1) 就求出了 N+1 个数的平均值。
+
+// 2. 进制转换
+// 10 -> 36: 用 10 进制的数除以 36 看余数和商，然后将余数转换为相应的字母(注意用字母的 ASCII 值进行转换, A 是 0X65 Z 是 0X90)
+
+// 36 -> 10: 用 36 进制的数乘以 36 看结果，一位一位的乘。
