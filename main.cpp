@@ -425,7 +425,6 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         cout << "Grasp: " << kylinMsg.cbus.gp.c << endl;
-<<<<<<< HEAD
 	cout << "fflage: "<<fflage<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;        
 	switch (detection_mode)
 		
