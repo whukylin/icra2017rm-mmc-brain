@@ -5,6 +5,18 @@
 #include "CMT.h"
 #include "gui.h"
 
+// TODO: 滑台上升速度和下降速度(测试阶段，降低下降速度, 全局速度)
+#define GRASP_UP_SPEED 0
+#define GRASP_DOWN_SPEED 0
+
+//TODO: 抓子夹有盒子时, 滑台上升和下降速度(普遍降低)
+#define GRASP_UP_SPEED_HAVE_BOX 0
+#define GRASP_DOWN_SPEED_HAVE_BOX 0
+
+
+
+
+
 #define COM_PORT 1 //"COM7"
 #define BUF_LEN 256
 #define TIMEOUT 30
@@ -37,7 +49,7 @@ double currentTimeUs()
 extern double ry, rz, rx;
 extern double tx, ty, tz;
 extern const char *wndname;
- //Create a CMT object
+//Create a CMT object
 CMT cmt0;
 RMVideoCapture capture("/dev/video0", 3);
 //VideoCapture capture;
@@ -367,28 +379,28 @@ float genRmp()
 
 int CMT_temdetect(Mat frame, int &diff_x, int &diff_y)
 {
-	Mat im_gray;
+    Mat im_gray;
 
     cvtColor(frame, im_gray, CV_BGR2GRAY);
 
-     //Let CMT process the frame
-     cmt0.processFrame(im_gray);
-	 Point2f vertices[4];
-     cmt0.bb_rot.points(vertices);
-	 Point center;
-	 center.x=(vertices[0].x+vertices[1].x+vertices[2].x+vertices[3].x)/4;
-	 center.y=(vertices[0].y+vertices[1].y+vertices[2].y+vertices[3].y)/4;
-	 diff_x=center.x-CX;
-	 diff_y=center.y-CY;
-	 cout<<"diff x: "<<diff_x<<endl;
-     cout<<"diff y: "<<diff_y<<endl;
-	 for (int i = 0; i < 4; i++)
+    //Let CMT process the frame
+    cmt0.processFrame(im_gray);
+    Point2f vertices[4];
+    cmt0.bb_rot.points(vertices);
+    Point center;
+    center.x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) / 4;
+    center.y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) / 4;
+    diff_x = center.x - CX;
+    diff_y = center.y - CY;
+    cout << "diff x: " << diff_x << endl;
+    cout << "diff y: " << diff_y << endl;
+    for (int i = 0; i < 4; i++)
     {
-        line(frame, vertices[i], vertices[(i+1)%4], Scalar(255,0,0));
+        line(frame, vertices[i], vertices[(i + 1) % 4], Scalar(255, 0, 0));
     }
 
     imshow(wndname, frame);
-     return 1;
+    return 1;
 }
 
 void *KylinBotMarkDetecThreadFunc(void *param)
@@ -426,106 +438,106 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         cout << "Grasp: " << kylinMsg.cbus.gp.c << endl;
 <<<<<<< HEAD
-	cout << "fflage: "<<fflage<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;        
-	switch (detection_mode)
-		
-	{
-		case 0: //do nothing
-			//TODO:
-			//imshow("IM",frame);
-			//cout << "detection_mode=" << (int)detection_mode << endl;
-			break;
-		case 1: //detect squares
-			//cout << "detection_mode=" << (int)detection_mode << endl;
-			findSquares(src, frame, squares);
-			LocationMarkes(squares);
-			drawSquares(frame, squares);
-			if (squares.size() > 0)
-			{
-				lostCount = 0;
-				lostFlag = false;
-				CountVframe++;
-				// txKylinMsg.cbus.cp.x = tx;
-				// txKylinMsg.cbus.cv.x = 500;
-				// txKylinMsg.cbus.cp.y = tz;
-				// txKylinMsg.cbus.cv.y = 800;
-				// txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-				// txKylinMsg.cbus.cv.z = 500;
-				// txKylinMsg.cbus.gp.e = ty;
-				// txKylinMsg.cbus.gv.e = 0;
-			}
-			if (squares.size() == 0)
-			{
-				lostCount++;
-				if (lostCount >= 3)
-				{
-					printf("lost frame\n");
-					lostCount = 0;
-					lostFlag = true;
-					tx = DIFFCONST;
-					ty = 0;
-					tz = 0;
-					rx = 0;
-					ry = 0;
-					rz = 0;
-					rstRmp();
-				}
-			}
-			if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
-			{ //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
-				finishDetectBoxFlag = true;
-				
-				CountVframe = 0;
-			}
-			else
-			{
-				finishDetectBoxFlag = false;
-			}
-			if (coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
-			{
-				finishDetectBoxFlag_PutBox = true;
-				CountVframe = 0;
-			}
-			else
-			{
-				finishDetectBoxFlag_PutBox = false;
-			}
-			printf("tz=%lf\n", tz);
-			break;
-			case 2: //detect green area
-				//cout << "detection_mode=" << (int)detection_mode << endl;
-				
-				fflage = CMT_temdetect(src, dif_x, dif_y);
-				if (fflage == 0)
-					CountVframe++;
-				tx = 2 * (dif_x - DIF_CEN);
-				// txKylinMsg.cbus.cp.x = 10 * dif_x;
-				cout << "tx=" << tx << endl;
-				if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
-				{
-					CountVframe = 0;
-					finishDetectCentroidFlag = true;
-					if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
-					{
-						finishDetectCentroidFlag_PutBox2toBox1 = true;
-					}
-				}
-				break;
-			case 3: //follow line
-				//cout << "detection_mode=" << (int)detection_mode << endl;
-				break;
-			case 4: //follow line
-				//cout << "detection_mode=" << (int)detection_mode << endl;
-				break;
-			case 5: //follow line
-				//cout << "detection_mode=" << (int)detection_mode << endl;
-				
-				//TODO:
-				break;
-			default:
-				break;
-	}
-	int c = waitKey(1);
+        cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
+        switch (detection_mode)
+
+        {
+        case 0: //do nothing
+            //TODO:
+            //imshow("IM",frame);
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+            break;
+        case 1: //detect squares
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+            findSquares(src, frame, squares);
+            LocationMarkes(squares);
+            drawSquares(frame, squares);
+            if (squares.size() > 0)
+            {
+                lostCount = 0;
+                lostFlag = false;
+                CountVframe++;
+                // txKylinMsg.cbus.cp.x = tx;
+                // txKylinMsg.cbus.cv.x = 500;
+                // txKylinMsg.cbus.cp.y = tz;
+                // txKylinMsg.cbus.cv.y = 800;
+                // txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+                // txKylinMsg.cbus.cv.z = 500;
+                // txKylinMsg.cbus.gp.e = ty;
+                // txKylinMsg.cbus.gv.e = 0;
+            }
+            if (squares.size() == 0)
+            {
+                lostCount++;
+                if (lostCount >= 3)
+                {
+                    printf("lost frame\n");
+                    lostCount = 0;
+                    lostFlag = true;
+                    tx = DIFFCONST;
+                    ty = 0;
+                    tz = 0;
+                    rx = 0;
+                    ry = 0;
+                    rz = 0;
+                    rstRmp();
+                }
+            }
+            if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
+            { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
+                finishDetectBoxFlag = true;
+
+                CountVframe = 0;
+            }
+            else
+            {
+                finishDetectBoxFlag = false;
+            }
+            if (coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
+            {
+                finishDetectBoxFlag_PutBox = true;
+                CountVframe = 0;
+            }
+            else
+            {
+                finishDetectBoxFlag_PutBox = false;
+            }
+            printf("tz=%lf\n", tz);
+            break;
+        case 2: //detect green area
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+
+            fflage = CMT_temdetect(src, dif_x, dif_y);
+            if (fflage == 0)
+                CountVframe++;
+            tx = 2 * (dif_x - DIF_CEN);
+            // txKylinMsg.cbus.cp.x = 10 * dif_x;
+            cout << "tx=" << tx << endl;
+            if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
+            {
+                CountVframe = 0;
+                finishDetectCentroidFlag = true;
+                if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+                {
+                    finishDetectCentroidFlag_PutBox2toBox1 = true;
+                }
+            }
+            break;
+        case 3: //follow line
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+            break;
+        case 4: //follow line
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+            break;
+        case 5: //follow line
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+
+            //TODO:
+            break;
+        default:
+            break;
+        }
+        int c = waitKey(1);
         if ((char)c == 'q')
             break;
     }
@@ -614,11 +626,6 @@ void logicInit()
                                        //detection_mode = 0;                //摄像头关闭
                                        //cout << "Logic init finish!!" << endl;
 }
-void workStateFlagPrint()
-{
-    //cout << "workState: " << workState;
-    //cout << " finishAbsoluteMoveFlag:" << finishAbsoluteMoveFlag << endl;
-}
 
 KylinMsg_t kylinOdomCalib;
 static uint32_t frame_cnt = 0;
@@ -686,7 +693,38 @@ float ramp = 0;
 int lastWs = 0;
 void videoMove_PutBox();
 float Ultrasonic2Angle();
-void txKylinMsgFun(int16_t cpx, int16_t cvx, int16_t cpy, int16_t cvy, int16_t cpz, int16_t cvz, int16_t gpe, int16_t gve, int16_t gpc, int16_t gvc);
+
+
+/*************************************************************************
+*  函数名称：txKylinMsg_xyz_Fun
+*  功能说明：xyz 位置参数传递函数
+*  参数说明：cpx cpy cpz 为 x y z 方向的位移(位置) cvx cvy cvz 为 x y z 方向的速度
+*  函数返回：无
+*  修改时间：2017-05-17
+*************************************************************************/
+void txKylinMsg_xyz_Fun(int16_t cpx, int16_t cvx, int16_t cpy, int16_t cvy, int16_t cpz, int16_t cvz)
+{
+    txKylinMsg.cbus.cp.x = cpx;     //x 左右移动
+    txKylinMsg.cbus.cv.x = cvx;
+    txKylinMsg.cbus.cp.y = cpy;     //y 前后移动
+    txKylinMsg.cbus.cv.y = cvy;
+    txKylinMsg.cbus.cp.z = cpz;     //转角 
+    txKylinMsg.cbus.cv.z = cvz;
+}
+/*************************************************************************
+*  函数名称：txKylinMsg_ec_Fun
+*  功能说明：e c 位置参赛传递函数
+*  参数说明：cpe cpc 为 e c 方向的位移(位置) cve cvc 为 e c 的速度
+*  函数返回：无
+*  修改时间：2017-05-17
+*************************************************************************/
+void txKylinMsg_ec_Fun(int16_t gpe, int16_t gve, int16_t gpc, int16_t gvc)
+{
+    txKylinMsg.cbus.gp.e = gpe;     //滑台
+    txKylinMsg.cbus.gv.e = gve;
+    txKylinMsg.cbus.gp.c = gpc;     //抓子 
+    txKylinMsg.cbus.gv.c = gvc;
+}
 
 int main(int argc, char **argv)
 {
@@ -710,18 +748,18 @@ int main(int argc, char **argv)
         printf("serial open error!\n");
         return -1;
     }
-    
+
     //set CMT
     Mat im0_src;
     //Initialization bounding box
     Rect rect;
     im0_src = imread("../arrow/arrow1.jpg");
-    if(im0_src.empty())
+    if (im0_src.empty())
     {
-        cout<<"load template image error"<<endl;
-	    return 0;
+        cout << "load template image error" << endl;
+        return 0;
     }
-    rect = Rect(362,201,110,135);  //TODO: Justify
+    rect = Rect(362, 201, 110, 135); //TODO: Justify
     //Convert im0 to grayscale
     Mat im0_gray;
     cvtColor(im0_src, im0_gray, CV_BGR2GRAY);
@@ -735,25 +773,9 @@ int main(int argc, char **argv)
     kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
     kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
     kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
-    // txKylinMsg.cbus.cp.x = tx;     //小车左右
-    // txKylinMsg.cbus.cv.x = 500;
-    // txKylinMsg.cbus.cp.y = tz;     //小车前后
-    // txKylinMsg.cbus.cv.y = 800;
-    // txKylinMsg.cbus.cp.z = ry;     //小车旋转
-    // txKylinMsg.cbus.cv.z = 500;
     // txKylinMsg.cbus.gp.e = ty;     //抓子高度
     // txKylinMsg.cbus.gv.e = 0;
 
-    // KylinMsg.cbus.cp.x
-    // kylinMsg.cbus.cp.y
-    // kylinMsg.cbus.cp.z
-    // kylinMsg.cbus.gp.e
-    // kylinMsg.cbus.gp.c
-    // kylinMsg.cbus.cv.x
-    // kylinMsg.cbus.cv.y
-    // kylinMsg.cbus.cv.z
-    // kylinMsg.cbus.gv.e
-    // kylinMsg.cbus.gv.c
     /* 经验值
      *        txKylinMsg.cbus.cp.x = tx;
      *        txKylinMsg.cbus.cv.x = 500;
@@ -775,7 +797,7 @@ int main(int argc, char **argv)
     updateOdomCalib();
     //cout << "w111s: " << workState << endl;
     logicInit(); //逻辑控制初始化
-    //workStateFlagPrint(); //打印当前状态
+
     GraspTp = posCalibMsg.data.el;
     GraspBw = posCalibMsg.data.eh;
     GraspOp = posCalibMsg.data.cl;
@@ -792,7 +814,7 @@ int main(int argc, char **argv)
     double absuluteGraspOpCl = 100;
     double absuluteGrasp = 100;
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    
+
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
         //cout << "ws: " << workState << endl;
@@ -953,16 +975,12 @@ int main(int argc, char **argv)
             //关闭视觉检测，小车在原点旋转90度，启动视觉检测（本阶段视觉关）仅仅只是//小车旋转
             detection_mode = 0;               //关闭视觉
             txKylinMsg.cbus.fs |= (1u << 30); //切换到绝对位置控制模式
-            txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
-            txKylinMsg.cbus.cv.x = 0;
-            txKylinMsg.cbus.cp.y = 0 + kylinOdomCalib.cbus.cp.y;
-            txKylinMsg.cbus.cv.y = 0;
-            txKylinMsg.cbus.cp.z = -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
-            txKylinMsg.cbus.cv.z = ZSPEED * genRmp();
-            txKylinMsg.cbus.gp.e = GraspBw - 70; //+ kylinOdomCalib.cbus.gp.e;
-            txKylinMsg.cbus.gv.e = GRASPSPEED;
-            txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
-            txKylinMsg.cbus.gv.c = 8000;
+
+            //在原点旋转 90 度
+            txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, 0, kylinOdomCalib.cbus.cp.y, 0, -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z, ZSPEED * genRmp());
+            //抓子张开
+            txKylinMsg_ec_Fun(GraspBw - 70, GRASPSPEED, GraspOp, 8000);
+
             //absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
             //absuluteAngle = abs(kylinOdomError.cbus.cp.z);
             if (absoluteDistance < 10 && absuluteAngle < 5.0f * PI / 2.0f) // && absuluteGrasp < 10)
@@ -1825,26 +1843,3 @@ float Ultrasonic2Angle()
     //coutAngle = angle*180/3.14;
     return angle;
 }
-
-void txKylinMsgFun(int16_t cpx, int16_t cvx, int16_t cpy, int16_t cvy, int16_t cpz, int16_t cvz, int16_t gpe, int16_t gve, int16_t gpc, int16_t gvc)
-{
-    txKylinMsg.cbus.cp.x = cpx; //x
-    txKylinMsg.cbus.cv.x = cvx;
-    txKylinMsg.cbus.cp.y = cpy; //y
-    txKylinMsg.cbus.cv.y = cvy;
-    txKylinMsg.cbus.cp.z = cpz; //转角
-    txKylinMsg.cbus.cv.z = cvz;
-    txKylinMsg.cbus.gp.e = gpe; //滑台
-    txKylinMsg.cbus.gv.e = gve;
-    txKylinMsg.cbus.gp.c = gpc; //抓子
-    txKylinMsg.cbus.gv.c = gvc;
-}
-
-// 1. 求平均值的
-// 因为要考虑溢出，所以不能全部求和再求平均，只能是来一位，求一次平均值。具体说就是现求前 N 个数的平均值，
-// 再用这个平均值加上 N/(N+1)*num(N+1) 就求出了 N+1 个数的平均值。
-
-// 2. 进制转换
-// 10 -> 36: 用 10 进制的数除以 36 看余数和商，然后将余数转换为相应的字母(注意用字母的 ASCII 值进行转换, A 是 0X65 Z 是 0X90)
-
-// 36 -> 10: 用 36 进制的数乘以 36 看结果，一位一位的乘。
