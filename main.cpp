@@ -875,16 +875,6 @@ int main(int argc, char **argv)
     kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
     kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
 
-    /* 经验值
-     *        txKylinMsg.cbus.cp.x = tx;
-     *        txKylinMsg.cbus.cv.x = 500;
-     *        txKylinMsg.cbus.cp.y = tz;
-     *        txKylinMsg.cbus.cv.y = 800;
-     *        txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-     *        txKylinMsg.cbus.cv.z = 500;
-     *        txKylinMsg.cbus.gp.e = ty;
-     *        txKylinMsg.cbus.gv.e = 0;
-     */
     /*Flag变量汇总:
      *    finishAbsoluteMoveFlag      完成绝对位置移动
      *    finishDetectBoxFlag         完成检测盒子(小车到了检测不到盒子的位置)
@@ -903,10 +893,6 @@ int main(int argc, char **argv)
 
     GraspBwCout = GraspBw;
     GraspTpCout = GraspTp;
-    //sr04maf[1].avg moble
-    //sr04maf[0].avg fixed
-    //sr04maf[2].avg left
-    //sr04maf[3].avg right
     double absoluteDistance = 100;
     double absuluteAngle = 100;
     double absuluteGraspOpCl = 100;
@@ -1369,11 +1355,11 @@ int main(int argc, char **argv)
                 {
                     if (boxNum != 4)
                     {
-                        txKylinMsg_ec_Fun(GraspBw - 15), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                        txKylinMsg_ec_Fun((GraspBw - 15), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
                     else
                     {
-                        txKylinMsg_ec_Fun(GraspBw - 15 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                        txKylinMsg_ec_Fun((GraspBw - 15 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
                 }
                 if(PUTBOX_MODE == 2)
@@ -1554,7 +1540,7 @@ void videoMove_PutBox()
         coutLogicFlag_PutBox = 9.2;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
-
+        
         //如果 fixed 超声波没有打到盒子, 小车向左移动
         if (sr04maf[SR04_IDX_F].avg > 650)
         {
@@ -1600,11 +1586,11 @@ void videoMove_PutBox()
             {
                 if (boxNum != 4)
                 {
-                        txKylinMsg_ec_Fun(GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                        txKylinMsg_ec_Fun((GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
                 }
                 else
                 {
-                        txKylinMsg_ec_Fun(GraspBw - 15 - 20 - 400) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                        txKylinMsg_ec_Fun((GraspBw - 15 - 20 - 400) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
                 }
             }
             if (PUTBOX_MODE == 2)
