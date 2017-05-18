@@ -4,7 +4,7 @@
 #define PROP 1.5
 #define CX   343   //To change to calibration parameter.
 #define CY   320;   //the same with cameraMatrix.cx,cy
-#define _SHOW_PHOTO
+//#define _SHOW_PHOTO
 //#define _SHOW_OUTPUT
 //#define Camera_One
 using namespace cv;

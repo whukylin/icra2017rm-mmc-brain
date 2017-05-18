@@ -50,11 +50,19 @@
 // 堆叠盒子时, 放盒子的时候, fixed 超声波距离阈值
 #define FIXED_ULTRASONIC_PUTBOX2TO1 130
 
-// 最大搬运盒子数量
-#define MAX_BOXNUM 8
-
 // TODO:堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
 #define PUTBOX_MODE 1
+
+// 最大搬运盒子数量
+#if PUTBOX_MODE == 1
+	#define MAX_BOXNUM 4
+#endif
+#if PUTBOX_MODE == 2
+	#define MAX_BOXNUM 5
+#endif
+#if PUTBOX_MODE == 3
+	#define MAX_BOXNUM 8
+#endif
 
 //判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波
 #define BOX_IN_GRASP_MODE 1
@@ -89,7 +97,7 @@
 
 // 阶段 3 : 小车拿着盒子, 到达基地区
 #define X_SPEED_3 400
-#define Y_SPEED_3 1100
+#define Y_SPEED_3 700
 #define Z_SPEED_3 1300
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_3_VISION 400
@@ -522,8 +530,8 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         
 	cout << "fflage: "<<fflage<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;
         detection_mode=1; //for testing        
-        cout << "Grasp: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << endl;
-
+        cout << "Grasp_Ref: " << txKylinMsg.cbus.gp.c << "Grasp_Fdb: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << " kylinMsg.cbus.fs & (1u << 2)): "<<(kylinMsg.cbus.fs & (1u << 2))<<endl;
+	cout << "cl: " << GraspOp << " ch: " << GraspCl << endl;
 	switch (detection_mode)
 		
 	{
@@ -785,7 +793,7 @@ bool switchFlagFun()
 {
     if(BOX_IN_GRASP_MODE == 1)  //使用光电对管
     {
-        return (txKylinMsg.cbus.fs & (1u << 2));
+        return (kylinMsg.cbus.fs & (1u << 2));
     }
     else                        //使用 mobile 超声波
     {
@@ -942,7 +950,7 @@ int main(int argc, char **argv)
     double absuluteGraspOpCl = 100;
     double absuluteGrasp = 100;
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-
+    boxNum = 4;
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
         updateOdomError();
@@ -976,6 +984,21 @@ int main(int argc, char **argv)
             {
                 finishAbsoluteMoveFlag_BackOrigin = true;
             }
+            // 将盒子抬到最高点
+            // TODO: 抬升高度宏定义
+ 	    /*************************************************************************
+            *
+            *  堆叠盒子阶段
+            *
+            *************************************************************************/
+            //TODO: 当前只能进行三堆的堆叠, 以后修改成任意堆, 便于现场应变
+            if (((coutLogicFlag == INT_MAX - 1) && putBoxNum == 1) || ((coutLogicFlag == INT_MAX) && putBoxNum == 2))
+	    {
+		if (kylinMsg.cbus.gp.e <= (GraspBw - 410) && finishGraspFlag_PutBox2toBox1 == true)
+		{
+		    finishSlidFlag_PutBox2toBox1 = true;
+		}
+	    }
         }
 
         if ((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
@@ -1154,12 +1177,6 @@ int main(int argc, char **argv)
                 if (kylinMsg.cbus.gp.c == GraspCl && finishMobleUltrasonicFlag_PutBox2toBox1 == true)
                 {
                     finishGraspFlag_PutBox2toBox1 = true;
-                }
-                // 将盒子抬到最高点
-                // TODO: 抬升高度宏定义
-                if (kylinMsg.cbus.gp.e <= GraspTp + 5 && finishGraspFlag_PutBox2toBox1 == true)
-                {
-                    finishSlidFlag_PutBox2toBox1 = true;
                 }
                 // 当fixed超声波距离小于多少时, 放下盒子
                 if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_PUTBOX2TO1 && finishSlidFlag_PutBox2toBox1 == true)
@@ -1444,7 +1461,7 @@ int main(int argc, char **argv)
             }
             if (finishGraspOpFlag == true)
             {
-                if (boxNum == 8)
+                if (boxNum == MAX_BOXNUM)
                 {
                     coutLogicFlag = INT_MAX - 1;
                     videoMove_PutBox2toBox1();
@@ -1455,7 +1472,7 @@ int main(int argc, char **argv)
                     putBoxNum = 2;
                     videoMove_PutBox2toBox1();
                 }
-                if (finish_PutBox2toBox1_2to1 == true || boxNum != 8)
+                if (finish_PutBox2toBox1_2to1 == true || boxNum != MAX_BOXNUM)
                 {
                     lastWs = workState;
                     rstRmp();
@@ -1778,9 +1795,11 @@ void videoMove_PutBox2toBox1()
         coutLogicFlag_PutBox2toBox1 = 10.7;
         //finishMobleUltrasonicFlag = false;
         detection_mode = 0; //关闭视觉
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+	txKylinMsg.cbus.fs |= (1u << 30);
+        //txKylinMsg.cbus.fs &= ~(1u << 30);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-        txKylinMsg_ec_Fun(GraspTp - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
+	//txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
+        txKylinMsg_ec_Fun(GraspBw - 410, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
     }
     if (finishSlidFlag_PutBox2toBox1 == true && finishFixedUltrasonicFlag_PutBox2toBox1 == false)
     {
