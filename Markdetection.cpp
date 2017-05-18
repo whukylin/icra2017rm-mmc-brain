@@ -63,20 +63,21 @@ void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
 {
     Mat pyr, timg, gray0(image.size(), CV_8U),Src_HSV(image.size(), CV_8U), gray;
 
-    pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
-    pyrUp(pyr, timg, image.size());
+    //pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
+    //pyrUp(pyr, timg, image.size());
     vector<vector<Point> > contours;
 
     int counts=0,counts_2=0,counts_3=0;
-    vector<Point> cand_1,cand_2,cand_3;
+    vector<Point> cand_1,cand_2,cand_3;			
     vector<vector<Point>> rect_2;
     vector<vector<Point>> rect_3;
     vector<vector<Point>> out;
     
 	//cout<<"find squares src.chan="<<src.channels()<<endl;
 	cvtColor( src, gray0, CV_BGR2GRAY);
-    
-            Canny(gray0, gray, 50, 200, 5);
+        normalize(gray0,timg,0,255, NORM_MINMAX,CV_8UC1);
+        // imshow("normal", timg);
+        Canny(timg, gray, 50, 200, 5);
 	    
 #ifdef _SHOW_PHOTO
 	    imshow("Canny", gray);
@@ -368,7 +369,7 @@ void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_
     double thetaz = atan2(r21, r11) / CV_PI * 180;
     double thetay = atan2(-1 * r31, sqrt(r32*r32 + r33*r33)) / CV_PI * 180;
     double thetax = atan2(r32, r33) / CV_PI * 180;
-    ry=thetay;
+    ry=thetay*PROP;
     rz=thetaz;
     rx=thetax;
     tx=tvec.ptr<double>(0)[0];
