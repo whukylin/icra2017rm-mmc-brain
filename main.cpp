@@ -517,98 +517,112 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         //cout << "finishDetectBoxFlag_PutBox: " << finishDetectBoxFlag_PutBox << endl;
         cout << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
-        cout << "Grasp: " << kylinMsg.cbus.gp.c << endl;
-        cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
-        switch (detection_mode)
 
-        {
-        case 0: //do nothing
-            //TODO:
-            //imshow("IM",frame);
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            break;
-        case 1: //detect squares
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            findSquares(src, frame, squares);
-            LocationMarkes(squares);
-            drawSquares(frame, squares);
-            if (squares.size() > 0)
-            {
-                lostCount = 0;
-                lostFlag = false;
-                CountVframe++;
-            }
-            if (squares.size() == 0)
-            {
-                lostCount++;
-                if (lostCount >= 3)
-                {
-                    printf("lost frame\n");
-                    lostCount = 0;
-                    lostFlag = true;
-                    tx = DIFFCONST;
-                    ty = 0;
-                    tz = 0;
-                    rx = 0;
-                    ry = 0;
-                    rz = 0;
-                    rstRmp();
-                }
-            }
+        
+	cout << "fflage: "<<fflage<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;
+        detection_mode=1; //for testing        
+        cout << "Grasp: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << endl;
+	switch (detection_mode)
+		
+	{
+		case 0: //do nothing
+			//TODO:
+			//imshow("IM",frame);
+			//cout << "detection_mode=" << (int)detection_mode << endl;
+			break;
+		case 1: //detect squares
+			//cout << "detection_mode=" << (int)detection_mode << endl;
+			findSquares(src, frame, squares);
+			LocationMarkes(squares);
+			drawSquares(frame, squares);
+			if (squares.size() > 0)
+			{
+				lostCount = 0;
+				lostFlag = false;
+				CountVframe++;
+				// txKylinMsg.cbus.cp.x = tx;
+				// txKylinMsg.cbus.cv.x = 500;
+				// txKylinMsg.cbus.cp.y = tz;
+				// txKylinMsg.cbus.cv.y = 800;
+				// txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+				// txKylinMsg.cbus.cv.z = 500;
+				// txKylinMsg.cbus.gp.e = ty;
+				// txKylinMsg.cbus.gv.e = 0;
+			}
+			if (squares.size() == 0)
+			{
+				lostCount++;
+				if (lostCount >= 3)
+				{
+					printf("lost frame\n");
+					lostCount = 0;
+					lostFlag = true;
+					tx = DIFFCONST;
+					ty = 0;
+					tz = 0;
+					rx = 0;
+					ry = 0;
+					rz = 0;
+					rstRmp();
+				}
+			}
             //TODO: 本 if 语句使用 fixed 还是 mobile 超声波?
             //TODO: 矩形检测 flag 置 true 过程中, 超声波阈值宏定义
-            if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
-            { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
-                finishDetectBoxFlag = true;
-                CountVframe = 0;
-            }
-            else
-            {
-                finishDetectBoxFlag = false;
-            }
-            if (coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
-            {
-                finishDetectBoxFlag_PutBox = true;
-                CountVframe = 0;
-            }
-            else
-            {
-                finishDetectBoxFlag_PutBox = false;
-            }
-            printf("tz=%lf\n", tz);
-            break;
-        case 2: //detect green area
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-
-            fflage = CMT_temdetect(src, dif_x, dif_y);
-            if (fflage == 0)
-                CountVframe++;
-            tx = 2 * (dif_x - DIF_CEN);
-            // txKylinMsg.cbus.cp.x = 10 * dif_x;
-            cout << "tx=" << tx << endl;
-            if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
-            {
-                CountVframe = 0;
-                finishDetectCentroidFlag = true;
-                if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
-                {
-                    finishDetectCentroidFlag_PutBox2toBox1 = true;
-                }
-            }
-            break;
-        case 3: //follow line
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            break;
-        case 4: //follow line
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            break;
-        case 5: //follow line
-            //cout << "detection_mode=" << (int)detection_mode << endl;
-            break;
-        default:
-            break;
-        }
-        int c = waitKey(1);
+			if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
+			{ //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
+				finishDetectBoxFlag = true;
+				
+				CountVframe = 0;
+			}
+			else
+			{
+				finishDetectBoxFlag = false;
+			}
+			if (coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
+			{
+				finishDetectBoxFlag_PutBox = true;
+				CountVframe = 0;
+			}
+			else
+			{
+				finishDetectBoxFlag_PutBox = false;
+			}
+			printf("tz=%lf\n", tz);
+			break;
+			case 2: //detect green area
+				//cout << "detection_mode=" << (int)detection_mode << endl;
+				
+				fflage = CMT_temdetect(src, dif_x, dif_y);
+				if (fflage == 0)
+					CountVframe++;
+				tx = 2 * (dif_x - DIF_CEN);
+				// txKylinMsg.cbus.cp.x = 10 * dif_x;
+				cout << "tx=" << tx << endl;
+				if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
+				{
+					CountVframe = 0;
+					finishDetectCentroidFlag = true;
+					if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+					{
+						finishDetectCentroidFlag_PutBox2toBox1 = true;
+					}
+				}
+				break;
+			case 3: //follow line
+				//cout << "detection_mode=" << (int)detection_mode << endl;
+				break;
+			case 4: //follow line
+				//cout << "detection_mode=" << (int)detection_mode << endl;
+				break;
+			case 5: //follow line
+				//cout << "detection_mode=" << (int)detection_mode << endl;
+				
+				//TODO:
+				break;
+			default:
+				break;
+	}
+	int c = waitKey(1);
         if ((char)c == 'q')
             break;
     }
@@ -754,8 +768,6 @@ uint8_t updateOdomError()
     kylinOdomError.cbus.gv.e = txKylinMsg.cbus.gv.e - kylinMsg.cbus.gv.e; // + kylinOdomCalib.cbus.gv.e;
     kylinOdomError.cbus.gv.c = txKylinMsg.cbus.gv.c - kylinMsg.cbus.gv.c; // + kylinOdomCalib.cbus.gv.c;
 }
-
-
 
 float ramp = 0;
 int lastWs = 0;
@@ -1179,7 +1191,6 @@ int main(int argc, char **argv)
             txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, 0, kylinOdomCalib.cbus.cp.y, 0, -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z, Z_SPEED_1 * genRmp());
             //抓子张开
             txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
-
             if (finishAbsoluteMoveFlag == true)
             {
                 lastWs = workState;
