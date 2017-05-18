@@ -18,6 +18,7 @@
 #define GRASPSPEED 1200
 #define LRSPEED 100
 #define LRDISTANCE 100
+#define GRASPUP 80
 
 #define ZROTATION90DEG 1572
 #define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 22
@@ -424,9 +425,11 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         //cout << "finishDetectBoxFlag_PutBox: " << finishDetectBoxFlag_PutBox << endl;
         cout << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
-        cout << "Grasp: " << kylinMsg.cbus.gp.c << endl;
+
+        
 	cout << "fflage: "<<fflage<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;
         detection_mode=1; //for testing        
+        cout << "Grasp: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << endl;
 	switch (detection_mode)
 		
 	{
@@ -679,7 +682,7 @@ uint8_t updateOdomError()
 //第二位或者第三位是盒子完全进入抓子的标志位
 bool switchFlagFun()
 {
-    return txKylinMsg.cbus.fs & (1u << 2);
+    return (kylinMsg.cbus.fs & (1u << 2));
 }
 
 float ramp = 0;
@@ -885,7 +888,7 @@ int main(int argc, char **argv)
                 finish_LR_UltrasonicFlag = true;
                 moveDistance = 0;
             }
-            if (finish_LR_UltrasonicFlag == true && kylinMsg.cbus.gp.e <= GraspBw - 70)
+            if (finish_LR_UltrasonicFlag == true && kylinMsg.cbus.gp.e <= GraspBw - GRASPUP)
             {
                 finishGraspBeforeCentroidFlag = true;
             }
@@ -959,7 +962,7 @@ int main(int argc, char **argv)
             txKylinMsg.cbus.cv.y = 0;
             txKylinMsg.cbus.cp.z = -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z; //1000 * PI / 2;// + kylinMsg.cbus.cp.z; //旋转90度
             txKylinMsg.cbus.cv.z = ZSPEED * genRmp();
-            txKylinMsg.cbus.gp.e = GraspBw - 70; //+ kylinOdomCalib.cbus.gp.e;
+            txKylinMsg.cbus.gp.e = GraspBw - GRASPUP; //+ kylinOdomCalib.cbus.gp.e;
             txKylinMsg.cbus.gv.e = GRASPSPEED;
             txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
             txKylinMsg.cbus.gv.c = 8000;
@@ -1085,7 +1088,7 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.y = 0;
                 txKylinMsg.cbus.cp.z = 0;
                 txKylinMsg.cbus.cv.z = 0;
-                txKylinMsg.cbus.gp.e = GraspBw - 70 - kylinMsg.cbus.gp.e;
+                txKylinMsg.cbus.gp.e = GraspBw - GRASPUP - kylinMsg.cbus.gp.e;
                 //txKylinMsg.cbus.gv.e = GRASPSPEED;
                 txKylinMsg.cbus.gv.e = 0;
                 txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
@@ -1209,7 +1212,7 @@ int main(int argc, char **argv)
                     txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
                     txKylinMsg.cbus.cp.x = 0 + kylinOdomCalib.cbus.cp.x;
                     txKylinMsg.cbus.cv.x = XSPEED * ramp;
-                    txKylinMsg.cbus.cp.y = 2000 + kylinOdomCalib.cbus.cp.y; //3485 + kylinOdomCalib.cbus.cp.y;//3485 + kylinOdomCalib.cbus.cp.y;
+                    txKylinMsg.cbus.cp.y = 300 + kylinOdomCalib.cbus.cp.y; //3485 + kylinOdomCalib.cbus.cp.y;//3485 + kylinOdomCalib.cbus.cp.y;
                     txKylinMsg.cbus.cv.y = YSPEED * ramp;
                     txKylinMsg.cbus.cp.z = 0;
                     txKylinMsg.cbus.cv.z = 0;
@@ -1394,7 +1397,7 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.cv.y = 700 * ramp;
                 txKylinMsg.cbus.cp.z = 0 + kylinOdomCalib.cbus.cp.z;
                 txKylinMsg.cbus.cv.z = ZSPEED;
-                txKylinMsg.cbus.gp.e = GraspBw - 70 - kylinMsg.cbus.gp.e;
+                txKylinMsg.cbus.gp.e = GraspBw - GRASPUP - kylinMsg.cbus.gp.e;
                 txKylinMsg.cbus.gv.e = GRASPSPEED;
                 txKylinMsg.cbus.gp.c = GraspOp;
                 txKylinMsg.cbus.gv.c = 0;
@@ -1691,7 +1694,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.cv.y = 0;
         txKylinMsg.cbus.cp.z = 0;
         txKylinMsg.cbus.cv.z = 0;
-        txKylinMsg.cbus.gp.e = GraspBw - 70 - kylinMsg.cbus.gp.e;
+        txKylinMsg.cbus.gp.e = GraspBw - GRASPUP - kylinMsg.cbus.gp.e;
         txKylinMsg.cbus.gv.e = GRASPSPEED;
         txKylinMsg.cbus.gp.c = GraspOp; //抓子张开
         txKylinMsg.cbus.gv.c = 0;
