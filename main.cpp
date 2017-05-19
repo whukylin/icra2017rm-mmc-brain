@@ -55,13 +55,13 @@
 
 // 最大搬运盒子数量
 #if PUTBOX_MODE == 1
-	#define MAX_BOXNUM 4
+#define MAX_BOXNUM 4
 #endif
 #if PUTBOX_MODE == 2
-	#define MAX_BOXNUM 5
+#define MAX_BOXNUM 5
 #endif
 #if PUTBOX_MODE == 3
-	#define MAX_BOXNUM 8
+#define MAX_BOXNUM 8
 #endif
 
 //判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波
@@ -107,22 +107,17 @@
 #define Y_SPEED_4 700
 #define Z_SPEED_4 1300
 
-
-
-
 #define YSPEED 1100 //forward speed
 #define XSPEED 400
 #define ZSPEED 1300
 
 #define GRASPSPEED 1200
 
-
 #define COM_PORT 1 //"COM7"
 #define BUF_LEN 256
 #define TIMEOUT 30
 #define FRAME_N 20000
 #define ADDSPEED 100
-
 
 using namespace cv;
 using namespace std;
@@ -526,113 +521,111 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
 
+        cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
+        detection_mode = 1; //for testing
+        cout << "Grasp_Ref: " << txKylinMsg.cbus.gp.c << "Grasp_Fdb: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << " kylinMsg.cbus.fs & (1u << 2)): " << (kylinMsg.cbus.fs & (1u << 2)) << endl;
+        cout << "cl: " << GraspOp << " ch: " << GraspCl << endl;
+        switch (detection_mode)
 
-        
-	cout << "fflage: "<<fflage<<" tx:"<<tx<<" Vframe:"<<CountVframe<<endl;
-        detection_mode=1; //for testing        
-        cout << "Grasp_Ref: " << txKylinMsg.cbus.gp.c << "Grasp_Fdb: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << " kylinMsg.cbus.fs & (1u << 2)): "<<(kylinMsg.cbus.fs & (1u << 2))<<endl;
-	cout << "cl: " << GraspOp << " ch: " << GraspCl << endl;
-	switch (detection_mode)
-		
-	{
-		case 0: //do nothing
-			//TODO:
-			//imshow("IM",frame);
-			//cout << "detection_mode=" << (int)detection_mode << endl;
-			break;
-		case 1: //detect squares
-			//cout << "detection_mode=" << (int)detection_mode << endl;
-			findSquares(src, frame, squares);
-			LocationMarkes(squares);
-			drawSquares(frame, squares);
-			if (squares.size() > 0)
-			{
-				lostCount = 0;
-				lostFlag = false;
-				CountVframe++;
-				// txKylinMsg.cbus.cp.x = tx;
-				// txKylinMsg.cbus.cv.x = 500;
-				// txKylinMsg.cbus.cp.y = tz;
-				// txKylinMsg.cbus.cv.y = 800;
-				// txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
-				// txKylinMsg.cbus.cv.z = 500;
-				// txKylinMsg.cbus.gp.e = ty;
-				// txKylinMsg.cbus.gv.e = 0;
-			}
-			if (squares.size() == 0)
-			{
-				lostCount++;
-				if (lostCount >= 3)
-				{
-					printf("lost frame\n");
-					lostCount = 0;
-					lostFlag = true;
-					tx = DIFFCONST;
-					ty = 0;
-					tz = 0;
-					rx = 0;
-					ry = 0;
-					rz = 0;
-					rstRmp();
-				}
-			}
+        {
+        case 0: //do nothing
+            //TODO:
+            //imshow("IM",frame);
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+            break;
+        case 1: //detect squares
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+            findSquares(src, frame, squares);
+            LocationMarkes(squares);
+            drawSquares(frame, squares);
+            if (squares.size() > 0)
+            {
+                lostCount = 0;
+                lostFlag = false;
+                CountVframe++;
+                // txKylinMsg.cbus.cp.x = tx;
+                // txKylinMsg.cbus.cv.x = 500;
+                // txKylinMsg.cbus.cp.y = tz;
+                // txKylinMsg.cbus.cv.y = 800;
+                // txKylinMsg.cbus.cp.z = ry * 3141.592654f / 180;
+                // txKylinMsg.cbus.cv.z = 500;
+                // txKylinMsg.cbus.gp.e = ty;
+                // txKylinMsg.cbus.gv.e = 0;
+            }
+            if (squares.size() == 0)
+            {
+                lostCount++;
+                if (lostCount >= 3)
+                {
+                    printf("lost frame\n");
+                    lostCount = 0;
+                    lostFlag = true;
+                    tx = DIFFCONST;
+                    ty = 0;
+                    tz = 0;
+                    rx = 0;
+                    ry = 0;
+                    rz = 0;
+                    rstRmp();
+                }
+            }
             //TODO: 本 if 语句使用 fixed 还是 mobile 超声波?
             //TODO: 矩形检测 flag 置 true 过程中, 超声波阈值宏定义
-			if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
-			{ //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
-				finishDetectBoxFlag = true;
-				
-				CountVframe = 0;
-			}
-			else
-			{
-				finishDetectBoxFlag = false;
-			}
-			if (coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
-			{
-				finishDetectBoxFlag_PutBox = true;
-				CountVframe = 0;
-			}
-			else
-			{
-				finishDetectBoxFlag_PutBox = false;
-			}
-			printf("tz=%lf\n", tz);
-			break;
-			case 2: //detect green area
-				//cout << "detection_mode=" << (int)detection_mode << endl;
-				
-				fflage = CMT_temdetect(src, dif_x, dif_y);
-				if (fflage == 0)
-					CountVframe++;
-				tx = 2 * (dif_x - DIF_CEN);
-				// txKylinMsg.cbus.cp.x = 10 * dif_x;
-				cout << "tx=" << tx << endl;
-				if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
-				{
-					CountVframe = 0;
-					finishDetectCentroidFlag = true;
-					if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
-					{
-						finishDetectCentroidFlag_PutBox2toBox1 = true;
-					}
-				}
-				break;
-			case 3: //follow line
-				//cout << "detection_mode=" << (int)detection_mode << endl;
-				break;
-			case 4: //follow line
-				//cout << "detection_mode=" << (int)detection_mode << endl;
-				break;
-			case 5: //follow line
-				//cout << "detection_mode=" << (int)detection_mode << endl;
-				
-				//TODO:
-				break;
-			default:
-				break;
-	}
-	int c = waitKey(1);
+            if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
+            { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
+                finishDetectBoxFlag = true;
+
+                CountVframe = 0;
+            }
+            else
+            {
+                finishDetectBoxFlag = false;
+            }
+            if (coutLogicFlag == 9 && (sr04maf[SR04_IDX_F].avg < 500 || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
+            {
+                finishDetectBoxFlag_PutBox = true;
+                CountVframe = 0;
+            }
+            else
+            {
+                finishDetectBoxFlag_PutBox = false;
+            }
+            printf("tz=%lf\n", tz);
+            break;
+        case 2: //detect green area
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+
+            fflage = CMT_temdetect(src, dif_x, dif_y);
+            if (fflage == 0)
+                CountVframe++;
+            tx = 2 * (dif_x - DIF_CEN);
+            // txKylinMsg.cbus.cp.x = 10 * dif_x;
+            cout << "tx=" << tx << endl;
+            if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
+            {
+                CountVframe = 0;
+                finishDetectCentroidFlag = true;
+                if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+                {
+                    finishDetectCentroidFlag_PutBox2toBox1 = true;
+                }
+            }
+            break;
+        case 3: //follow line
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+            break;
+        case 4: //follow line
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+            break;
+        case 5: //follow line
+            //cout << "detection_mode=" << (int)detection_mode << endl;
+
+            //TODO:
+            break;
+        default:
+            break;
+        }
+        int c = waitKey(1);
         if ((char)c == 'q')
             break;
     }
@@ -791,15 +784,14 @@ void videoMove_PutBox();
 *************************************************************************/
 bool switchFlagFun()
 {
-    if(BOX_IN_GRASP_MODE == 1)  //使用光电对管
+    if (BOX_IN_GRASP_MODE == 1) //使用光电对管
     {
         return (kylinMsg.cbus.fs & (1u << 2));
     }
-    else                        //使用 mobile 超声波
+    else //使用 mobile 超声波
     {
         return (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE);
     }
-    
 }
 
 /*************************************************************************
@@ -811,11 +803,11 @@ bool switchFlagFun()
 *************************************************************************/
 void txKylinMsg_xyz_Fun(int16_t cpx, int16_t cvx, int16_t cpy, int16_t cvy, int16_t cpz, int16_t cvz)
 {
-    txKylinMsg.cbus.cp.x = cpx;     //x 左右移动
+    txKylinMsg.cbus.cp.x = cpx; //x 左右移动
     txKylinMsg.cbus.cv.x = cvx;
-    txKylinMsg.cbus.cp.y = cpy;     //y 前后移动
+    txKylinMsg.cbus.cp.y = cpy; //y 前后移动
     txKylinMsg.cbus.cv.y = cvy;
-    txKylinMsg.cbus.cp.z = cpz;     //转角 
+    txKylinMsg.cbus.cp.z = cpz; //转角
     txKylinMsg.cbus.cv.z = cvz;
 }
 
@@ -828,9 +820,9 @@ void txKylinMsg_xyz_Fun(int16_t cpx, int16_t cvx, int16_t cpy, int16_t cvy, int1
 *************************************************************************/
 void txKylinMsg_ec_Fun(int16_t gpe, int16_t gve, int16_t gpc, int16_t gvc)
 {
-    txKylinMsg.cbus.gp.e = gpe;     //滑台
+    txKylinMsg.cbus.gp.e = gpe; //滑台
     txKylinMsg.cbus.gv.e = gve;
-    txKylinMsg.cbus.gp.c = gpc;     //抓子 
+    txKylinMsg.cbus.gp.c = gpc; //抓子
     txKylinMsg.cbus.gv.c = gvc;
 }
 
@@ -986,19 +978,19 @@ int main(int argc, char **argv)
             }
             // 将盒子抬到最高点
             // TODO: 抬升高度宏定义
- 	    /*************************************************************************
+            /*************************************************************************
             *
             *  堆叠盒子阶段
             *
             *************************************************************************/
             //TODO: 当前只能进行三堆的堆叠, 以后修改成任意堆, 便于现场应变
             if (((coutLogicFlag == INT_MAX - 1) && putBoxNum == 1) || ((coutLogicFlag == INT_MAX) && putBoxNum == 2))
-	    {
-		if (kylinMsg.cbus.gp.e <= (GraspBw - 410) && finishGraspFlag_PutBox2toBox1 == true)
-		{
-		    finishSlidFlag_PutBox2toBox1 = true;
-		}
-	    }
+            {
+                if (kylinMsg.cbus.gp.e <= (GraspBw - 410) && finishGraspFlag_PutBox2toBox1 == true)
+                {
+                    finishSlidFlag_PutBox2toBox1 = true;
+                }
+            }
         }
 
         if ((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
@@ -1100,7 +1092,7 @@ int main(int argc, char **argv)
                     }
                 }
             }
-            if (PUTBOX_MODE == 2)   //2+1+2+1+2
+            if (PUTBOX_MODE == 2) //2+1+2+1+2
             {
                 if (boxNum == 1 || boxNum == 3)
                 {
@@ -1124,7 +1116,7 @@ int main(int argc, char **argv)
                     }
                 }
             }
-            if (PUTBOX_MODE == 3)   //1+1+1+1+1+1+1+1
+            if (PUTBOX_MODE == 3) //1+1+1+1+1+1+1+1
             {
                 if (coutLogicFlag == 9 && kylinMsg.cbus.gp.e <= GraspBw - 15 - 210 * ((boxNum - 1) % 3) && finish_LR_UltrasonicFlag_PutBox == true)
                 {
@@ -1242,7 +1234,7 @@ int main(int argc, char **argv)
                 coutLogicFlag = 2;
                 detection_mode = 0;
                 txKylinMsg.cbus.fs &= ~(1u << 30);
-                
+
                 //如果 fixed 超声波达不到盒子, 则小车向左移动, 如果能够达到盒子, 则向前移动
                 // TODO: 测试 fixed 超声波测到的距离为多少时, 表明超声波无法打到盒子
                 // TODO: 测试小车车身倾斜的情况下, 本判定条件是否会生效
@@ -1310,7 +1302,7 @@ int main(int argc, char **argv)
                 //finish_LR_UltrasonicFlag = false;
                 detection_mode = 0;                //关闭视觉
                 txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
-                
+
                 //mobil 超声波引导小车前进
                 txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_M].avg, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
 
@@ -1325,7 +1317,7 @@ int main(int argc, char **argv)
                 //finishDetectCentroidFlag = false;   //clear the flag
                 detection_mode = 0; //关闭视觉
                 txKylinMsg.cbus.fs &= ~(1u << 30);
-                
+
                 //小车不动
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
 
@@ -1417,7 +1409,7 @@ int main(int argc, char **argv)
                 txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0, 0);
                 //TODO: 不同模式使用不同的放盒子高度
                 //堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
-                if(PUTBOX_MODE == 1)
+                if (PUTBOX_MODE == 1)
                 {
                     if (boxNum != 4)
                     {
@@ -1428,23 +1420,22 @@ int main(int argc, char **argv)
                         txKylinMsg_ec_Fun((GraspBw - 15 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
                 }
-                if(PUTBOX_MODE == 2)
+                if (PUTBOX_MODE == 2)
                 {
-                    if(boxNum == 1 || boxNum == 3)
+                    if (boxNum == 1 || boxNum == 3)
                     {
                         txKylinMsg_ec_Fun(GraspBw - 15, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
-                    else if(boxNum == 2 || boxNum == 4)
+                    else if (boxNum == 2 || boxNum == 4)
                     {
                         txKylinMsg_ec_Fun(GraspBw - 15 - 400, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
-                    else if(boxNum == 5)
+                    else if (boxNum == 5)
                     {
                         txKylinMsg_ec_Fun(GraspBw - 15 - 600, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
-
                 }
-                if(PUTBOX_MODE == 3)
+                if (PUTBOX_MODE == 3)
                 {
                     txKylinMsg_ec_Fun(GraspBw - 15 - 200 * ((boxNum - 1) % 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                 }
@@ -1606,7 +1597,7 @@ void videoMove_PutBox()
         coutLogicFlag_PutBox = 9.2;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
-        
+
         //如果 fixed 超声波没有打到盒子, 小车向左移动
         if (sr04maf[SR04_IDX_F].avg > 650)
         {
@@ -1652,11 +1643,11 @@ void videoMove_PutBox()
             {
                 if (boxNum != 4)
                 {
-                        txKylinMsg_ec_Fun((GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                    txKylinMsg_ec_Fun((GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
                 }
                 else
                 {
-                        txKylinMsg_ec_Fun((GraspBw - 15 - 20 - 400) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                    txKylinMsg_ec_Fun((GraspBw - 15 - 20 - 400) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
                 }
             }
             if (PUTBOX_MODE == 2)
@@ -1795,10 +1786,10 @@ void videoMove_PutBox2toBox1()
         coutLogicFlag_PutBox2toBox1 = 10.7;
         //finishMobleUltrasonicFlag = false;
         detection_mode = 0; //关闭视觉
-	txKylinMsg.cbus.fs |= (1u << 30);
+        txKylinMsg.cbus.fs |= (1u << 30);
         //txKylinMsg.cbus.fs &= ~(1u << 30);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-	//txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
+        //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
         txKylinMsg_ec_Fun(GraspBw - 410, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
     }
     if (finishSlidFlag_PutBox2toBox1 == true && finishFixedUltrasonicFlag_PutBox2toBox1 == false)
