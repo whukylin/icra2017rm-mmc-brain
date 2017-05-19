@@ -13,6 +13,7 @@
 #define GRASP_UP_SPEED_HAVE_BOX 600
 #define GRASP_DOWN_SPEED_HAVE_BOX 600
 #define GRASP_DOWN_SPEED_HAVE_MANY_BOX 400
+#define GRASP_UP_SPEED_HAVE_MANY_BOX 400
 
 //TODO: 检测矩形时, 滑台距离最低点的距离
 #define DETECT_SQUARE_GRASP_POSITION 70
@@ -137,7 +138,7 @@ extern const char *wndname;
 CMT cmt0;
 RMVideoCapture capture("/dev/video0", 3);
 //VideoCapture capture;
-int exp_time = 62;
+int exp_time = 48;
 int gain = 30;
 int brightness_ = 10;
 int whiteness_ = 86;
@@ -986,7 +987,7 @@ int main(int argc, char **argv)
             //TODO: 当前只能进行三堆的堆叠, 以后修改成任意堆, 便于现场应变
             if (((coutLogicFlag == INT_MAX - 1) && putBoxNum == 1) || ((coutLogicFlag == INT_MAX) && putBoxNum == 2))
             {
-                if (kylinMsg.cbus.gp.e <= (GraspBw - 410) && finishGraspFlag_PutBox2toBox1 == true)
+                if (kylinMsg.cbus.gp.e <= (GraspBw - 410 - 30) && finishGraspFlag_PutBox2toBox1 == true)
                 {
                     finishSlidFlag_PutBox2toBox1 = true;
                 }
@@ -1790,7 +1791,7 @@ void videoMove_PutBox2toBox1()
         //txKylinMsg.cbus.fs &= ~(1u << 30);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 410, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
+        txKylinMsg_ec_Fun(GraspBw - 410 - 15 - 10, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
     }
     if (finishSlidFlag_PutBox2toBox1 == true && finishFixedUltrasonicFlag_PutBox2toBox1 == false)
     {
