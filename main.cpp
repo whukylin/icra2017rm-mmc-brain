@@ -591,11 +591,17 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
+
                 //TODO: 更改为switch结构之后, 如果开启质心检测, 需要修改这一部分
                 if (coutLogicFlag == INT_MAX)
                 {
                     finishDetectCentroidFlag_PutBox2toBox1 = true;
                 }
+            }
+            else
+            {
+                finishDetectCentroidFlag = false;
+                finishDetectCentroidFlag_PutBox2toBox1 = false;
             }
             break;
         case 3: //follow line
@@ -1040,6 +1046,7 @@ int main(int argc, char **argv)
                 if(sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
                 {
                     //跳过质心检测
+                    moveDistance = 0;
                     grabBoxState = 5;
                 }
                 break;
@@ -1060,7 +1067,7 @@ int main(int argc, char **argv)
                 break;
             //质心检测
             case 4:
-                finishDetectCentroidFlag = true;
+                //finishDetectCentroidFlag = true;
                 coutLogicFlag = 4;
                 detection_mode = 2;                //打开视觉,检测质心
                 txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
@@ -1115,9 +1122,9 @@ int main(int argc, char **argv)
                 detection_mode = 0; //关闭视觉
                 txKylinMsg.cbus.fs &= ~(1u << 30);
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-                //TODO: 滑台上升位置
                 txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
                 //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
+                //TODO: 滑台上升位置宏定义
                 if(kylinMsg.cbus.gp.e <= (GraspBw + GraspTp) / 2.0 + 50)
                 {
                     txKylinMsg.cbus.gv.e = 0;
@@ -1156,6 +1163,7 @@ int main(int argc, char **argv)
                 workState = 3; //切换到下一阶段
                 //值覆盖
                 txKylinMsg_xyz_Fun(100 + kylinOdomCalib.cbus.cp.x, 1, 1511 + kylinOdomCalib.cbus.cp.y, 1, 0, 0);
+                //放盒子时候的状态位跳变
                 putBoxState = 0;
                 videoMovePutBoxState = 0;
             }
@@ -1184,8 +1192,8 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-                    videoMove_PutBox();
                     //跳变部分在函数体里面
+                    videoMove_PutBox();
                 }
                 
                 break;
@@ -1247,6 +1255,7 @@ int main(int argc, char **argv)
                 {
                     if (boxNum == MAX_BOXNUM)
                     {
+                        coutLogicFlag = INT_MAX;
                         videoMove_PutBox2toBox1();
                     }
                     if (finish_HeapBox == true || boxNum != MAX_BOXNUM)
@@ -1306,6 +1315,7 @@ int main(int argc, char **argv)
                     lineflag = 0;
 
                     txKylinMsg_xyz_Fun(50 + kylinOdomCalib.cbus.cp.x, 1 * ramp, 50 + kylinOdomCalib.cbus.cp.y, 1 * ramp, 0 + kylinOdomCalib.cbus.cp.z, ZSPEED);
+                    
                     finishDetectBoxFlag = false;
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
@@ -1346,9 +1356,10 @@ int main(int argc, char **argv)
 *************************************************************************/
 void videoMove_PutBox()
 {
-    //矩形检测
+    
     switch (videoMovePutBoxState)
     {
+        //矩形检测
     case 0:
         ramp = genRmp();
         coutLogicFlag_PutBox = 9.1;
@@ -1428,9 +1439,10 @@ void videoMove_PutBox()
             {
                 videoMovePutBoxState = 5;
             }
+            moveDistance = 0;
         }
         break;
-    //非每一堆的第一个盒子, 进入此 if 语句
+    //非每一堆的第一个盒子, 进入此 case 语句
     case 4:
         switch (UnFirstBox_PutBoxState)
         {
@@ -1582,6 +1594,7 @@ void videoMove_PutBox2toBox1()
         if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
         {
             //跳过质心检测
+            moveDistance = 0;
             videoMove_PutBox2toBox1State = 3;
         }
         break;
@@ -1593,7 +1606,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
         txKylinMsg_xyz_Fun(tx, 100, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
-        if (finishDetectCentroidFlag_PutBox2toBox1)
+        if (finishDetectCentroidFlag_PutBox2toBox1 == true)
         {
             videoMove_PutBox2toBox1State = 4;
         }
