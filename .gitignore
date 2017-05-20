@@ -1,5 +1,5 @@
 build/
-
+.vscode/
 *.kdev4
 *.vcxproj
 *.vcxproj.filters
