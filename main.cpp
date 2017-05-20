@@ -145,6 +145,11 @@ using cmt::CMT;
 double missionStartTimeUs = 0;
 double missionEndTimeUs = 0;
 
+double absoluteDistance = 100;
+double absuluteAngle = 100;
+double absuluteGraspOpCl = 100;
+double absuluteGrasp = 100;
+
 double currentTimeUs()
 {
     return cvGetTickCount() / cvGetTickFrequency();
@@ -936,10 +941,7 @@ int main(int argc, char **argv)
 
     GraspBwCout = GraspBw;
     GraspTpCout = GraspTp;
-    double absoluteDistance = 100;
-    double absuluteAngle = 100;
-    double absuluteGraspOpCl = 100;
-    double absuluteGrasp = 100;
+
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
     //boxNum = 4;
     while ((!exit_flag)) //&&(capture.read(frame)))
