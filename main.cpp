@@ -1836,3 +1836,14 @@ void videoMove_PutBox2toBox1()
         finish_PutBox2toBox1_2to1 = true;
     }
 }
+
+
+/* 整体工程
+* FIXME:
+* 1. 将标志位结构整体换成 switch case 结构(下一个大版本)
+* 2. 堆叠盒子的高度
+* 3. fixed 超声波无法打到盒子时, 程序流程
+* TODO:
+* 1. 使用直线检测进行校准
+* 2. 纠正抓取时犯的错误(计时器？)
+*/
