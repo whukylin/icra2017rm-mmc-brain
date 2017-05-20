@@ -156,6 +156,7 @@ int workState = 0;
 int grabBoxState;
 int putBoxState;
 int backwardState;
+int graspOpClState;
 int videoMovePutBoxState;
 int UnFirstBox_PutBoxState;
 int videoMove_PutBox2toBox1State;
@@ -1239,20 +1240,30 @@ int main(int argc, char **argv)
                 {
                     putBoxState = 2;
                     videoMove_PutBox2toBox1State = 0;
+                    graspOpClState = 0
                 }
                 break;
-            //松开抓子
+
             case 2:
-                calibPx();
-                calibPz();
-                coutLogicFlag = 11;
-                txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-                txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0 + kylinOdomCalib.cbus.cp.z, 0);
-                txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
-                // TODO: 绝对位置控制模式下, 抓子合拢的阈值
-                // 宏定义
-                if (absuluteGraspOpCl < 250)
+                switch (graspOpClState)
                 {
+                //松开抓子
+                case 0:
+                    calibPx();
+                    calibPz();
+                    coutLogicFlag = 11;
+                    txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+                    txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0 + kylinOdomCalib.cbus.cp.z, 0);
+                    txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
+                    // TODO: 绝对位置控制模式下, 抓子合拢的阈值
+                    // 宏定义
+                    if (absuluteGraspOpCl < 250)
+                    {
+                        graspOpClState = 1;
+                    }
+                    break;
+                //堆叠盒子(主过程)
+                case 1:
                     if (boxNum == MAX_BOXNUM)
                     {
                         coutLogicFlag = INT_MAX;
@@ -1267,6 +1278,9 @@ int main(int argc, char **argv)
                         txKylinMsg_ec_Fun(GraspTp, 10, 0, 0);
                         backwardState = 0;
                     }
+                    break;
+                default:
+                    break;
                 }
                 break;
             default:
@@ -1595,7 +1609,7 @@ void videoMove_PutBox2toBox1()
         {
             //跳过质心检测
             moveDistance = 0;
-            videoMove_PutBox2toBox1State = 3;
+            videoMove_PutBox2toBox1State = 4;
         }
         break;
     //质心对准
@@ -1646,8 +1660,8 @@ void videoMove_PutBox2toBox1()
         //txKylinMsg.cbus.fs &= ~(1u << 30);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 410 - 15 - 10, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-        if (kylinMsg.cbus.gp.e <= (GraspBw - 410 - 30))
+        txKylinMsg_ec_Fun(GraspBw - 410 - 25, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
+        if (kylinMsg.cbus.gp.e <= (GraspBw - 410 - 23))
         {
             videoMove_PutBox2toBox1State = 7;
         }
