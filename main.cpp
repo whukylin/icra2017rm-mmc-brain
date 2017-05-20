@@ -57,14 +57,18 @@
 #define PUTBOX_MODE 1
 
 // 最大搬运盒子数量
+// 盒子全部搬运过去之后, 进行堆叠之前, 总共有几堆盒子
 #if PUTBOX_MODE == 1
 #define MAX_BOXNUM 4
+#define HEAP_NUM 3
 #endif
 #if PUTBOX_MODE == 2
 #define MAX_BOXNUM 5
+#define HEAP_NUM 2
 #endif
 #if PUTBOX_MODE == 3
 #define MAX_BOXNUM 8
+#define HEAP_NUM 3
 #endif
 
 //判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波
@@ -145,15 +149,16 @@ int gain = 30;
 int brightness_ = 10;
 int whiteness_ = 86;
 int saturation_ = 60;
-
+//用于进行堆叠次数计数
+int heapCount = HEAP_NUM - 1;
 int8_t exit_flag = 0;
 int workState = 0;
-string grabBoxState;
-string putBoxState;
-string backwardState;
-string videoMovePutBoxState;
-string UnFirstBox_PutBoxState;
-string videoMove_PutBox2toBox1State;
+int grabBoxState;
+int putBoxState;
+int backwardState;
+int videoMovePutBoxState;
+int UnFirstBox_PutBoxState;
+int videoMove_PutBox2toBox1State;
 volatile int8_t detection_mode = 0;
 volatile bool useUltrasonic = false;
 
@@ -181,44 +186,17 @@ KylinMsg_t txKylinMsg;
 
 volatile int coutLogicFlag = 0;
 int lineflag = 0;
-volatile bool finishAbsoluteMoveFlag = false;    //完成绝对位置移动
 volatile bool finishDetectBoxFlag = false;       //完成检测盒子(小车到了检测不到盒子的位置)
 volatile bool finishDetectCentroidFlag = false;  //完成质心检测
-volatile bool finishMobleUltrasonicFlag = false; //超声波到达极限距离
-volatile bool finishGraspFlag = false;           //抓子是否合拢
-volatile bool finishSlidFlag = false;            //滑台是否达到指定高度
-volatile bool finishGraspOpFlag = false;         //抓子是否合拢
-volatile bool finishSlidBwFlag = false;          //滑台是否达到指定高度
-volatile bool finishAbsoluteMoveFlag_Put = false;
-volatile bool finishFixedUltrasonicFlag = false;
-volatile bool finish_LR_UltrasonicFlag = false;
-volatile bool finish_L_UltrasonicFlag = false;
-volatile bool finish_R_UltrasonicFlag = false;
-volatile bool finishAbsoluteMoveFlag_BackOrigin = false;
-
 volatile bool finishDetectBoxFlag_PutBox = false;
-volatile bool finishFixedUltrasonicFlag_1_PutBox = false;
-volatile bool finish_LR_UltrasonicFlag_PutBox = false;
-volatile bool finishFixedUltrasonicFlag_2_PutBox = false;
-volatile bool finishSlidTpFlag_PutBox = false;
-volatile bool finishGraspBwFlag_PutBox = false;
-
-volatile bool finishBackMoveFlag_PutBox2toBox1 = false; // sr04maf[SR04_IDX_F].avg > 550 => true
-volatile bool finishGraspBwFlag_PutBox2toBox1 = false;
-volatile bool finish_LR_UltrasonicFlag_PutBox2toBox1 = false;
 volatile bool finishDetectCentroidFlag_PutBox2toBox1 = false;
-volatile bool finishMobleUltrasonicFlag_PutBox2toBox1 = false;
-volatile bool finishGraspFlag_PutBox2toBox1 = false;
-volatile bool finishSlidFlag_PutBox2toBox1 = false;
-volatile bool finishFixedUltrasonicFlag_PutBox2toBox1 = false;
-volatile bool finishGraspOpFlag_PutBox2toBox1 = false;
-volatile bool finish_PutBox2toBox1_3to2 = false;
-volatile bool finish_PutBox2toBox1_2to1 = false;
-volatile bool finishBackMoveFlag = false;
+
+
 volatile int GraspBwCout = 0;
 volatile int GraspTpCout = 0;
 volatile int absoluteDistanceCout = 0;
-volatile bool finishGraspBeforeCentroidFlag = false;
+volatile bool finish_HeapBox = false;
+
 
 int putBoxNum = 1;
 int boxNum = 1; //the num of the box
@@ -583,7 +561,6 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             if (sr04maf[SR04_IDX_M].avg < 500 || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
             { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
                 finishDetectBoxFlag = true;
-
                 CountVframe = 0;
             }
             else
@@ -614,7 +591,8 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
-                if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+                //TODO: 更改为switch结构之后, 如果开启质心检测, 需要修改这一部分
+                if (coutLogicFlag == INT_MAX)
                 {
                     finishDetectCentroidFlag_PutBox2toBox1 = true;
                 }
@@ -928,14 +906,6 @@ int main(int argc, char **argv)
     kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
     kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
 
-    /*Flag变量汇总:
-     *    finishAbsoluteMoveFlag      完成绝对位置移动
-     *    finishDetectBoxFlag         完成检测盒子(小车到了检测不到盒子的位置)
-     *    finishDetectCentroidFlag    完成质心检测
-     *    finishMobleUltrasonicFlag   超声波到达极限距离
-     *    finishGraspFlag             抓子是否合拢
-     *    finishSlidFlag              滑台是否达到指定高度
-     */
     updateOdomCalib();
     logicInit(); //逻辑控制初始化
 
@@ -958,192 +928,25 @@ int main(int argc, char **argv)
         //如果当前处于绝对位置控制模式,进入判断条件
         if (txKylinMsg.cbus.fs & (1u << 30)) //0xFF == 1111 1111   0x80000000
         {
-
             absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
             absoluteDistanceCout = absoluteDistance;
             absuluteAngle = abs(kylinOdomError.cbus.cp.z);
             absuluteGrasp = abs(kylinOdomError.cbus.gp.e);
             absuluteGraspOpCl = abs(kylinOdomError.cbus.gp.c);
-            if (coutLogicFlag != 12 && absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f) // && absuluteGrasp < 10)
-            {
-                finishAbsoluteMoveFlag = true;
-            }
-            if (coutLogicFlag == 10 && absuluteGrasp < 10) //(GraspTp + GBw) / 2.f)
-            //if(coutLogicFlag == 7 && abs(txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e) < 20)
-            {
-                finishSlidBwFlag = true;
-            }
-            if (coutLogicFlag == 11 && absuluteGraspOpCl < 200) //4.6 bugs 250 about sliding table
-            {
-                finishGraspOpFlag = true;
-            }
-            if () //&& absuluteAngle < 5.0f * PI / 2.0f)
-            {
-                finishAbsoluteMoveFlag_Put = true;
-            }
-            if (coutLogicFlag == 12 && ) // && absuluteGrasp < 10)
-            {
-                finishAbsoluteMoveFlag_BackOrigin = true;
-            }
-            // 将盒子抬到最高点
-            // TODO: 抬升高度宏定义
-            /*************************************************************************
-            *
-            *  堆叠盒子阶段
-            *
-            *************************************************************************/
-            //TODO: 当前只能进行三堆的堆叠, 以后修改成任意堆, 便于现场应变
-            if (((coutLogicFlag == INT_MAX - 1) && putBoxNum == 1) || ((coutLogicFlag == INT_MAX) && putBoxNum == 2))
-            {
-                if (kylinMsg.cbus.gp.e <= (GraspBw - 410 - 30) && finishGraspFlag_PutBox2toBox1 == true)
-                {
-                    finishSlidFlag_PutBox2toBox1 = true;
-                }
-            }
         }
 
-        if ((txKylinMsg.cbus.fs & (1u << 30)) == 0x00000000)
+        //进行左右超声波对准的时候, 复用此段代码
+        if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 300)
         {
-            /*************************************************************************
-            *
-            *  复用代码
-            *
-            *************************************************************************/
-            //进行左右超声波对准的时候, 复用此段代码
-            if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 300)
-            {
-                moveDistance = LRDISTANCE;
-            }
-            if (sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 300)
-            {
-                moveDistance = -(LRDISTANCE + 30);
-            }
-
-            /*************************************************************************
-            *
-            *  抓取盒子阶段
-            *
-            *************************************************************************/
-            // 抓取盒子阶段, 矩形检测引导切换到超声波引导 (已完成, 未测试)
-            if ( && finishDetectBoxFlag == true)
-            {
-                finishFixedUltrasonicFlag = true;
-            }
-
-            // 抓取盒子阶段, 左右超声波对准标志位
-            if (coutLogicFlag == 3 && )
-            {
-                finish_LR_UltrasonicFlag = true;
-                moveDistance = 0;
-            }
-
-            //抓取盒子阶段, 完成左右超声波对准, 在进行质心对准之前, 现将滑台升高的标志位
-            if (finish_LR_UltrasonicFlag == true && )
-            {
-                finishGraspBeforeCentroidFlag = true;
-            }
-
-            //抓取盒子阶段, mobile超声波引导小车抓盒子标志位
-            if () //if (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE)
-            {
-                finishMobleUltrasonicFlag = true;
-            }
-            //抓取盒子阶段, 抓子合拢标志位
-            if ()
-            {
-                finishGraspFlag = true;
-            }
-            //Graps OpenfinishAbsoluteMoveFlag
-            //抓取盒子阶段, 滑台上升到滑台中心标志位
-            if (coutLogicFlag == 7 && ) //(GraspTp + GraspBw) / 2.f)
-            //if(coutLogicFlag == 7 && abs(txKylinMsg.cbus.gp.e - kylinMsg.cbus.gp.e) < 20)
-            {
-                finishSlidFlag = true;
-            }
-
-            /*************************************************************************
-            *
-            *  放置盒子阶段
-            *
-            *************************************************************************/
-            //放置盒子阶段, fixed 超声波引导小车前进标志位 (每一堆的第一个盒子)
-            if (coutLogicFlag == 9 && sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_1_PUTBOX && finishDetectBoxFlag_PutBox == true)
-            {
-                finishFixedUltrasonicFlag_1_PutBox = true;
-            }
-            //放置盒子阶段, 在进行左右超声波对准之前, 首先将抓子降到最低点
-            if (coutLogicFlag == 9 && finishFixedUltrasonicFlag_1_PutBox == true && kylinMsg.cbus.gp.e >= GraspBw - 60)
-            {
-                
-            }
-            //放置盒子阶段, 左右超声波对准的标志位
-            if (coutLogicFlag == 9 && sr04maf[SR04_IDX_L].avg > 350 && sr04maf[SR04_IDX_R].avg > 350 && finishGraspBwFlag_PutBox == true)
-            {
-                finish_LR_UltrasonicFlag_PutBox = true;
-                moveDistance = 0;
-            }
-            //放置盒子阶段, 判断盒子放置的位置的标志位, 模式不同, 判断条件不同
-            //TODO: 放盒子的时候, 高度宏定义
-            
-
-            //放置盒子阶段, 因为要堆几堆, 每一堆的非第一个盒子放置的位置
-            if (coutLogicFlag == 9 &&  && finishSlidTpFlag_PutBox == true)
-            {
-                finishFixedUltrasonicFlag_2_PutBox = true;
-            }
-
-            //放置盒子阶段, 完成放置任务, 小车直接后退的完成标志位
-            if (workState == 4 && )
-            {
-                finishBackMoveFlag = true;
-            }
-
-            /*************************************************************************
-            *
-            *  堆叠盒子阶段
-            *
-            *************************************************************************/
-            //TODO: 当前只能进行三堆的堆叠, 以后修改成任意堆, 便于现场应变
-            if (((coutLogicFlag == INT_MAX - 1) && putBoxNum == 1) || ((coutLogicFlag == INT_MAX) && putBoxNum == 2))
-            {
-                //放下所有盒子之后, 先后退, 后退的完成的标志位
-                if ( && coutLogicFlag_PutBox2toBox1 == 10.1)
-                {
-                    finishBackMoveFlag_PutBox2toBox1 = true;
-                }
-                //超声波对准之前, 先将抓子降到最低点的标志位
-                if ( && finishBackMoveFlag_PutBox2toBox1 == true)
-                {
-                    finishGraspBwFlag_PutBox2toBox1 = true;
-                }
-                //超声波左右对准
-                if ( && finishGraspBwFlag_PutBox2toBox1 == true)
-                {
-                    finish_LR_UltrasonicFlag_PutBox2toBox1 = true;
-                    moveDistance = 0;
-                }
-                // 盒子完全进入抓子标志位
-                if (switchFlagFun() && finish_LR_UltrasonicFlag_PutBox2toBox1 == true) //if (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
-                {
-                    finishMobleUltrasonicFlag_PutBox2toBox1 = true;
-                }
-                // 抓子完全合拢标志位
-                if (kylinMsg.cbus.gp.c == GraspCl && finishMobleUltrasonicFlag_PutBox2toBox1 == true)
-                {
-                    finishGraspFlag_PutBox2toBox1 = true;
-                }
-                // 当fixed超声波距离小于多少时, 放下盒子
-                if ( && finishSlidFlag_PutBox2toBox1 == true)
-                {
-                    finishFixedUltrasonicFlag_PutBox2toBox1 = true;
-                }
-                // 松开抓子
-                if ( && finishFixedUltrasonicFlag_PutBox2toBox1 == true)
-                {
-                    finishGraspOpFlag_PutBox2toBox1 = true;
-                }
-            }
+            moveDistance = LRDISTANCE;
         }
+        if (sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 300)
+        {
+            moveDistance = -(LRDISTANCE + 30);
+        }
+
+        //放置盒子阶段, 判断盒子放置的位置的标志位, 模式不同, 判断条件不同
+        //TODO: 放盒子的时候, 高度宏定义
 
         //workState = 10;
         //coutLogicFlag = INT_MAX;
@@ -1164,13 +967,14 @@ int main(int argc, char **argv)
             txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, 0, kylinOdomCalib.cbus.cp.y, 0, -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z, Z_SPEED_1 * genRmp());
             //抓子张开
             txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
-            if (finishAbsoluteMoveFlag == true)
+            if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f)
             {
                 lastWs = workState;
                 rstRmp();
+                //主流程下一个状态
                 workState = 1; //完成移动，进入下一阶段
-                finishAbsoluteMoveFlag_BackOrigin = false;
-                finishAbsoluteMoveFlag = false;
+                //抓取盒子流程初始化
+                grabBoxState = 0;
             }
             break;
         case 1:
@@ -1178,7 +982,8 @@ int main(int argc, char **argv)
             //矩形检测
             switch (grabBoxState)
             {
-            case "DetectBox":
+            //检测盒子
+            case 0:
                 ramp = genRmp();
                 coutLogicFlag = 1;
                 //打开视觉,检测矩形
@@ -1189,14 +994,15 @@ int main(int argc, char **argv)
                 txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION);
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
+                //暂时无法修改成不需要标志位
                 if(finishDetectBoxFlag == true)
                 {
-                    grabBoxState = "FixedUltrasonic";
+                    grabBoxState = 1;
                 }
                 break;
             //fixed Ultrasonic
             //fixed 超声波引导
-            case "FixedUltrasonic":
+            case 1:
                 coutLogicFlag = 2;
                 detection_mode = 0;
                 txKylinMsg.cbus.fs &= ~(1u << 30);
@@ -1216,12 +1022,12 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 if(sr04maf[SR04_IDX_F].avg < SQUARE_TO_FIXED_ULTRASONIC_DISTANCE)
                 {
-                    grabBoxState = "LR_Ultrasonic";
+                    grabBoxState = 2;
                 }
                 break;
             //left right Ultrasonic
             //左右超声波对准
-            case "LR_Ultrasonic":
+            case 2:
                 //finishDetectBoxFlag = false;
                 coutLogicFlag = 3;
                 detection_mode = 0;
@@ -1233,14 +1039,13 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
                 if(sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
                 {
-                    grabBoxState = "GraspBeforeCentroid";
+                    //跳过质心检测
+                    grabBoxState = 5;
                 }
                 break;
             //squares detection finished, begin detect green area
             // 质心检测前的滑台位置调整
-            case "GraspBeforeCentroid":
-                //finishFixedUltrasonicFlag = false;
-                finishGraspBeforeCentroidFlag = true;
+            case 3:
                 detection_mode = 0;
                 txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
 
@@ -1250,12 +1055,11 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(GraspBw - 80 - kylinMsg.cbus.gp.e, 0, 0, 0);
                 if(kylinMsg.cbus.gp.e <= GraspBw - DETECT_SQUARE_GRASP_POSITION)
                 {
-                    grabBoxState = "DetectCentroid";
+                    grabBoxState = 4;
                 }
                 break;
             //质心检测
-            case "DetectCentroid":
-                //finishFixedUltrasonicFlag = false;
+            case 4:
                 finishDetectCentroidFlag = true;
                 coutLogicFlag = 4;
                 detection_mode = 2;                //打开视觉,检测质心
@@ -1266,17 +1070,15 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, 0, 0, 0);
                 if(finishDetectCentroidFlag == true)
                 {
-                    grabBoxState = "MobleUltrasonic";
+                    grabBoxState = 5;
                 }
                 break;
             //image detection finished. only go forward
             //mobile 超声波引导小车抓盒子
-            case "MobleUltrasonic":
-
+            case 5:
                 calibPx();
                 calibPz90();
                 coutLogicFlag = 5;
-                //finish_LR_UltrasonicFlag = false;
                 detection_mode = 0;                //关闭视觉
                 txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
                 //mobil 超声波引导小车前进
@@ -1285,12 +1087,12 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
                 if(switchFlagFun())
                 {
-                    grabBoxState = "Grasp";
+                    grabBoxState = 6;
                 }
                 break;
             //begin grasp
             //开始抓盒子
-            case "Grasp":
+            case 6:
                 coutLogicFlag = 6;
                 //finishDetectCentroidFlag = false;   //clear the flag
                 detection_mode = 0; //关闭视觉
@@ -1303,14 +1105,13 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
                 if(kylinMsg.cbus.gp.c == GraspCl)
                 {
-                    grabBoxState = "Slid";
+                    grabBoxState = 7;
                 }
                 break;
             //finish grasp. begin pull up.
             //滑台上升
-            case "Slid":
+            case 7:
                 coutLogicFlag = 7;
-                //finishMobleUltrasonicFlag = false;
                 detection_mode = 0; //关闭视觉
                 txKylinMsg.cbus.fs &= ~(1u << 30);
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
@@ -1323,7 +1124,6 @@ int main(int argc, char **argv)
                     lastWs = workState;
                     rstRmp();
                     workState = 2; //切换到下一阶段
-                    finishAbsoluteMoveFlag = false;
                 }
                 break;
             default:
@@ -1350,23 +1150,22 @@ int main(int argc, char **argv)
             //保持抓子不变
             txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0, 0, GraspCl, 0);
 
-            if (finishAbsoluteMoveFlag == true && workState2_Num != 1) //完成绝对位置控制模式
+            if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f && workState2_Num != 1) //完成绝对位置控制模式
             {
                 rstRmp();
                 workState = 3; //切换到下一阶段
                 //值覆盖
                 txKylinMsg_xyz_Fun(100 + kylinOdomCalib.cbus.cp.x, 1, 1511 + kylinOdomCalib.cbus.cp.y, 1, 0, 0);
-                finishAbsoluteMoveFlag == false;
-                putBoxState = "AbsoluteMove";
-                //finishAbsoluteMoveFlag_Put = false;
+                putBoxState = 0;
+                videoMovePutBoxState = 0;
             }
             break;
         case 3:
             ramp = genRmp();
             switch (putBoxState)
             {
-                //小车从原点达到基地区第一堆盒子的位置, 第一堆盒子的坐标 (0,3485)
-            case "AbsoluteMove":
+            //小车从原点达到基地区第一堆盒子的位置, 第一堆盒子的坐标 (0,3485)
+            case 0:
                 workState3_Num++;
                 coutLogicFlag = 9;
                 if (boxNum == 1)
@@ -1378,165 +1177,146 @@ int main(int argc, char **argv)
                     //基地区坐标为(AXISX, AXISY)
                     txKylinMsg_xyz_Fun(AXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY + kylinOdomCalib.cbus.cp.y, Y_SPEED_3 * ramp, 0, 0);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
+                    if (absoluteDistance < 10)
+                    {
+                        putBoxState = 1;
+                    }
                 }
                 else
                 {
                     videoMove_PutBox();
+                    //跳变部分在函数体里面
                 }
-                if(boxNum == 1 && absoluteDistance < 10)
+                
+                break;
+            //到达指定位置，放下盒子
+            case 1:
+                coutLogicFlag = 10;
+                txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+
+                txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0, 0);
+                //TODO: 不同模式使用不同的放盒子高度
+                //堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
+                if (PUTBOX_MODE == 1)
                 {
-                    putBoxState = "";
+                    if (boxNum != 4)
+                    {
+                        txKylinMsg_ec_Fun((GraspBw - 15), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                    }
+                    else
+                    {
+                        txKylinMsg_ec_Fun((GraspBw - 15 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                    }
+                }
+                if (PUTBOX_MODE == 2)
+                {
+                    if (boxNum == 1 || boxNum == 3)
+                    {
+                        txKylinMsg_ec_Fun(GraspBw - 15, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                    }
+                    else if (boxNum == 2 || boxNum == 4)
+                    {
+                        txKylinMsg_ec_Fun(GraspBw - 15 - 400, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                    }
+                    else if (boxNum == 5)
+                    {
+                        txKylinMsg_ec_Fun(GraspBw - 15 - 600, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                    }
+                }
+                if (PUTBOX_MODE == 3)
+                {
+                    txKylinMsg_ec_Fun(GraspBw - 15 - 200 * ((boxNum - 1) % 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                }
+                if (absuluteGrasp < 10)
+                {
+                    putBoxState = 2;
+                    videoMove_PutBox2toBox1State = 0;
                 }
                 break;
-                //到达指定位置，放下盒子
-                case "SlidBw":
-                    coutLogicFlag = 10;
-                    txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-
-                    txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0, 0);
-                    //TODO: 不同模式使用不同的放盒子高度
-                    //堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
-                    if (PUTBOX_MODE == 1)
+            //松开抓子
+            case 2:
+                calibPx();
+                calibPz();
+                coutLogicFlag = 11;
+                txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+                txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0 + kylinOdomCalib.cbus.cp.z, 0);
+                txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
+                // TODO: 绝对位置控制模式下, 抓子合拢的阈值
+                // 宏定义
+                if (absuluteGraspOpCl < 250)
+                {
+                    if (boxNum == MAX_BOXNUM)
                     {
-                        if (boxNum != 4)
-                        {
-                            txKylinMsg_ec_Fun((GraspBw - 15), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
-                        }
-                        else
-                        {
-                            txKylinMsg_ec_Fun((GraspBw - 15 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
-                        }
+                        videoMove_PutBox2toBox1();
                     }
-                    if (PUTBOX_MODE == 2)
+                    if (finish_HeapBox == true || boxNum != MAX_BOXNUM)
                     {
-                        if (boxNum == 1 || boxNum == 3)
-                        {
-                            txKylinMsg_ec_Fun(GraspBw - 15, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
-                        }
-                        else if (boxNum == 2 || boxNum == 4)
-                        {
-                            txKylinMsg_ec_Fun(GraspBw - 15 - 400, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
-                        }
-                        else if (boxNum == 5)
-                        {
-                            txKylinMsg_ec_Fun(GraspBw - 15 - 600, GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
-                        }
+                        lastWs = workState;
+                        rstRmp();
+                        workState = 4; //进入下一阶段
+                        txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 10, 0 + kylinOdomCalib.cbus.cp.y, 10, 0, 0);
+                        txKylinMsg_ec_Fun(GraspTp, 10, 0, 0);
+                        backwardState = 0;
                     }
-                    if (PUTBOX_MODE == 3)
-                    {
-                        txKylinMsg_ec_Fun(GraspBw - 15 - 200 * ((boxNum - 1) % 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
-                    }
-                    if(absuluteGrasp < 10)
-                    {
-                        putBoxState = "GraspOp";
-                    }
-                    break;
-                //松开抓子
-                case "GraspOp":
-                    calibPx();
-                    calibPz();
-                    coutLogicFlag = 11;
-                    txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-                    txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0 + kylinOdomCalib.cbus.cp.z, 0);
-                    txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
-                    // TODO: 绝对位置控制模式下, 抓子合拢的阈值
-                    // 宏定义
-                    if(absuluteGraspOpCl < 250)
-                    {
-                        if (boxNum == MAX_BOXNUM)
-                        {
-                            coutLogicFlag = INT_MAX - 1;
-                            videoMove_PutBox2toBox1();
-                        }
-                        if (finish_PutBox2toBox1_3to2 == true)
-                        {
-                            coutLogicFlag = INT_MAX;
-                            putBoxNum = 2;
-                            videoMove_PutBox2toBox1();
-                        }
-                        if (finish_PutBox2toBox1_2to1 == true || boxNum != MAX_BOXNUM)
-                        {
-                            lastWs = workState;
-                            rstRmp();
-                            workState = 4; //进入下一阶段
-                            txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 10, 0 + kylinOdomCalib.cbus.cp.y, 10, 0, 0);
-                            txKylinMsg_ec_Fun(GraspTp, 10, 0, 0);
-                        }
-                    }
-                    break;
+                }
+                break;
             default:
                 break;
             }
             break;
         case 4:
             //先后退
-            switch(backwardState)
+            switch (backwardState)
             {
-                case "BackMove":
-                    detection_mode = 0;
-                    txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
-                    //直接后退到某个位置
-                    txKylinMsg_xyz_Fun(0, 0, -200, DIRECT_BACK_MOVE_SPEED, 0, 0);
-                    //因为抓子当前处于最低点, 为了能够时候 fixed 超声波, 现将抓子抬高
-                    if (firstBoxJudgeFun())
-                    {
-                        txKylinMsg_ec_Fun(GraspBw - DIRECT_BACK_MOVE_GRASP_UP_POSITION - kylinMsg.cbus.gp.e, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
-                    }
-                    else
-                    {
-                        txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
-                    }
-                    if(sr04maf[SR04_IDX_F].avg > DIRECT_BACK_MOVE_DISTANCE)
-                    {
-                        backwardState = "AbsoluteMove_BackOrigin";
-                    }
-                    break;
-                case "AbsoluteMove_BackOrigin":
-                    ramp = genRmp();
-                    workState4_Num++;
-                    detection_mode = 0; //关闭视觉
-                    coutLogicFlag = 12;
-                    txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
-                    // 回原点
-                    txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, ZSPEED);
-                    // 滑台升高位置
-                    txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
-                    if (absoluteDistance < 10 && absuluteAngle < 5.0f * PI / 2.0f)
-                    {
-                        lastWs = workState;
-                        rstRmp();
-                        workState = 0; //进入下一阶段
-                        lineflag = 0;
-                        finishAbsoluteMoveFlag = false; //完成本阶段的绝对位置控制
-                        finishDetectBoxFlag = false;
-                        finishDetectCentroidFlag = false;  //完成质心检测
-                        finishMobleUltrasonicFlag = false; //超声波到达极限距离
-                        finishGraspFlag = false;           //抓子是否合拢
-                        finishSlidFlag = false;            //滑台是否达到指定高度
-                        finishGraspOpFlag = false;         //抓子是否合拢
-                        finishSlidBwFlag = false;          //滑台是否达到指定高度
-                        finishAbsoluteMoveFlag_Put = false;
-                        finishFixedUltrasonicFlag = false;
-                        finishGraspBwFlag_PutBox = false;
-                        finish_LR_UltrasonicFlag = false;
-                        finish_L_UltrasonicFlag = false;
-                        finish_R_UltrasonicFlag = false;
-                        finishAbsoluteMoveFlag_BackOrigin = false;
-                        finishDetectBoxFlag_PutBox = false;
-                        finishFixedUltrasonicFlag_1_PutBox = false;
-                        finish_LR_UltrasonicFlag_PutBox = false;
-                        finishFixedUltrasonicFlag_2_PutBox = false;
-                        finishSlidTpFlag_PutBox = false;
-                        finishBackMoveFlag = false;
-                        finishGraspBeforeCentroidFlag = false;
-                        workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
-                        boxNum++;
-                    }
-                    break;
-                default:
-                    break;
+            case 0:
+                detection_mode = 0;
+                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+                //直接后退到某个位置
+                txKylinMsg_xyz_Fun(0, 0, -200, DIRECT_BACK_MOVE_SPEED, 0, 0);
+                //因为抓子当前处于最低点, 为了能够时候 fixed 超声波, 现将抓子抬高
+                if (firstBoxJudgeFun())
+                {
+                    txKylinMsg_ec_Fun(GraspBw - DIRECT_BACK_MOVE_GRASP_UP_POSITION - kylinMsg.cbus.gp.e, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
+                }
+                else
+                {
+                    txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
+                }
+
+                if (sr04maf[SR04_IDX_F].avg > DIRECT_BACK_MOVE_DISTANCE)
+                {
+                    backwardState = 1;
                 }
                 break;
+            case 1:
+                ramp = genRmp();
+                workState4_Num++;
+                detection_mode = 0; //关闭视觉
+                coutLogicFlag = 12;
+                txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+                // 回原点
+                txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, ZSPEED);
+                // 滑台升高位置
+                txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
+                if (absoluteDistance < 10 && absuluteAngle < 5.0f * PI / 2.0f)
+                {
+                    lastWs = workState;
+                    rstRmp();
+                    workState = 0; //进入下一阶段
+                    lineflag = 0;
+
+                    txKylinMsg_xyz_Fun(50 + kylinOdomCalib.cbus.cp.x, 1 * ramp, 50 + kylinOdomCalib.cbus.cp.y, 1 * ramp, 0 + kylinOdomCalib.cbus.cp.z, ZSPEED);
+                    finishDetectBoxFlag = false;
+                    finishDetectCentroidFlag = false; //完成质心检测
+                    finishDetectBoxFlag_PutBox = false;
+                    workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
+                    boxNum++;
+                }
+                break;
+            default:
+                break;
+            }
+            break;
         default:
             break;
         }
@@ -1569,7 +1349,7 @@ void videoMove_PutBox()
     //矩形检测
     switch (videoMovePutBoxState)
     {
-    case "DetectBoxFlag_PutBox":
+    case 0:
         ramp = genRmp();
         coutLogicFlag_PutBox = 9.1;
         detection_mode = 1; //打开视觉,检测矩形
@@ -1580,12 +1360,12 @@ void videoMove_PutBox()
         txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
         if (finishDetectBoxFlag_PutBox == true)
         {
-            videoMovePutBoxState = "FixedUltrasonicFlag_1_PutBox";
+            videoMovePutBoxState = 1;
         }
         break;
     //fixed Ultrasonic
     //fixed 超声波引导检测
-    case "FixedUltrasonicFlag_1_PutBox":
+    case 1:
         coutLogicFlag_PutBox = 9.2;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
@@ -1603,12 +1383,12 @@ void videoMove_PutBox()
         txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
         if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_1_PUTBOX)
         {
-            videoMovePutBoxState = "FixedUltrasonicFlag_1_PutBox";
+            videoMovePutBoxState = 2;
         }
         break;
     //add Grasp Flag
     //抓子下降到最低点
-    case "GraspBwFlag_PutBox":
+    case 2:
         coutLogicFlag_PutBox = 9.21;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
@@ -1616,143 +1396,138 @@ void videoMove_PutBox()
         if (boxNum == 4)
         {
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
+            if (kylinMsg.cbus.gp.e >= GraspBw - 60 - 200)
+            {
+                videoMovePutBoxState = 3;
+            }
         }
         else
         {
             txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
-        }
-        if (boxNum == 4)
-        {
-            if (kylinMsg.cbus.gp.e >= GraspBw - 60 - 200)
-            {
-                videoMovePutBoxState = "LR_UltrasonicFlag_PutBox";
-            }
-        }
-        else
-        {
             if (kylinMsg.cbus.gp.e >= GraspBw - 60)
             {
-                videoMovePutBoxState = "LR_UltrasonicFlag_PutBox";
+                videoMovePutBoxState = 3;
             }
         }
         break;
-        //左右超声波对准盒子
-        case "LR_UltrasonicFlag_PutBox":
-            coutLogicFlag_PutBox = 9.3;
-            detection_mode = 0;
-            txKylinMsg.cbus.fs &= ~(1u << 30);
-            txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
-            txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
-            if(sr04maf[SR04_IDX_L].avg > 350 && sr04maf[SR04_IDX_R].avg > 350)
+    //左右超声波对准盒子
+    case 3:
+        coutLogicFlag_PutBox = 9.3;
+        detection_mode = 0;
+        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
+        txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
+        if (sr04maf[SR04_IDX_L].avg > 350 && sr04maf[SR04_IDX_R].avg > 350)
+        {
+            if (unFirstBoxJudgeFun())
             {
-                if(unFirstBoxJudgeFun())
+                videoMovePutBoxState = 4;
+                UnFirstBox_PutBoxState = 0;
+            }
+            if (firstBoxJudgeFun())
+            {
+                videoMovePutBoxState = 5;
+            }
+        }
+        break;
+    //非每一堆的第一个盒子, 进入此 if 语句
+    case 4:
+        switch (UnFirstBox_PutBoxState)
+        {
+        case 0:
+            coutLogicFlag_PutBox = 9.4;
+            detection_mode = 0;                //关闭视觉
+            txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+
+            txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+            if (PUTBOX_MODE == 1)
+            {
+                if (boxNum != 4)
                 {
-                    videoMovePutBoxState = "UnFirstBox_PutBox";
+                    txKylinMsg_ec_Fun((GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                    if (kylinMsg.cbus.gp.e <= GraspBw - 15)
+                    {
+                        UnFirstBox_PutBoxState = 1;
+                    }
                 }
                 else
                 {
-                    videoMovePutBoxState = "FirstBox_PutBox";
+                    txKylinMsg_ec_Fun((GraspBw - 15 - 20 - 400) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                    if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 420)
+                    {
+                        UnFirstBox_PutBoxState = 1;
+                    }
+                }
+            }
+            if (PUTBOX_MODE == 2)
+            {
+                if (boxNum == 1 || boxNum == 3)
+                {
+                    txKylinMsg_ec_Fun(GraspBw - 15 - 20 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                    if (kylinMsg.cbus.gp.e <= GraspBw - 15)
+                    {
+                        UnFirstBox_PutBoxState = 1;
+                    }
+                }
+                else if (boxNum == 2 || boxNum == 4)
+                {
+                    txKylinMsg_ec_Fun(GraspBw - 15 - 20 - 400 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                    if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 420)
+                    {
+                        UnFirstBox_PutBoxState = 1;
+                    }
+                }
+                else if (boxNum == 5)
+                {
+                    txKylinMsg_ec_Fun(GraspBw - 15 - 20 - 600 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                    if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 620)
+                    {
+                        UnFirstBox_PutBoxState = 1;
+                    }
+                }
+            }
+            if (PUTBOX_MODE == 3)
+            {
+                txKylinMsg_ec_Fun(GraspBw - 15 - 20 - 200 * ((boxNum - 1) % 3) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 210 * ((boxNum - 1) % 3))
+                {
+                    UnFirstBox_PutBoxState = 1;
                 }
             }
             break;
-        //非每一堆的第一个盒子, 进入此 if 语句
-        case "UnFirstBox_PutBox":
-            switch (UnFirstBox_PutBoxState)
+        case 1:
+            coutLogicFlag_PutBox = 9.5;
+            detection_mode = 0;                //关闭视觉
+            txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+            if (sr04maf[SR04_IDX_F].avg > 650)
             {
-            case "SlidTpFlag_PutBox":
-                coutLogicFlag_PutBox = 9.4;
-                detection_mode = 0;                //关闭视觉
-                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
-
-                txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-                if (PUTBOX_MODE == 1)
-                {
-                    if (boxNum != 4)
-                    {
-                        txKylinMsg_ec_Fun((GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
-                        if (kylinMsg.cbus.gp.e <= GraspBw - 15)
-                        {
-                            UnFirstBox_PutBoxState = "FixedUltrasonicFlag_2_PutBox";
-                        }
-                    }
-                    else
-                    {
-                        txKylinMsg_ec_Fun((GraspBw - 15 - 20 - 400) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
-                        if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 420)
-                        {
-                            UnFirstBox_PutBoxState = "FixedUltrasonicFlag_2_PutBox";
-                        }
-                    }
-                }
-                if (PUTBOX_MODE == 2)
-                {
-                    if (boxNum == 1 || boxNum == 3)
-                    {
-                        txKylinMsg_ec_Fun(GraspBw - 15 - 20 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
-                        if (kylinMsg.cbus.gp.e <= GraspBw - 15)
-                        {
-                            UnFirstBox_PutBoxState = "FixedUltrasonicFlag_2_PutBox";
-                        }
-                    }
-                    else if (boxNum == 2 || boxNum == 4)
-                    {
-                        txKylinMsg_ec_Fun(GraspBw - 15 - 20 - 400 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
-                        if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 420)
-                        {
-                            UnFirstBox_PutBoxState = "FixedUltrasonicFlag_2_PutBox";
-                        }
-                    }
-                    else if (boxNum == 5)
-                    {
-                        txKylinMsg_ec_Fun(GraspBw - 15 - 20 - 600 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
-                        if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 620)
-                        {
-                            UnFirstBox_PutBoxState = "FixedUltrasonicFlag_2_PutBox";
-                        }
-                    }
-                }
-                if (PUTBOX_MODE == 3)
-                {
-                    txKylinMsg_ec_Fun(GraspBw - 15 - 20 - 200 * ((boxNum - 1) % 3) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
-                    if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 210 * ((boxNum - 1) % 3))
-                    {
-                        UnFirstBox_PutBoxState = "FixedUltrasonicFlag_2_PutBox";
-                    }
-                }
-                break;
-            case "FixedUltrasonicFlag_2_PutBox":
-                coutLogicFlag_PutBox = 9.5;
-                detection_mode = 0;                //关闭视觉
-                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
-                if (sr04maf[SR04_IDX_F].avg > 650)
-                {
-                    txKylinMsg_xyz_Fun(-200, 150, sr04maf[SR04_IDX_F].avg, 0, 0, 0);
-                }
-                else
-                {
-                    txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_F].avg, FIXED_ULTRASONIC_MOVE_SPEED, 0, 0);
-                }
-                txKylinMsg_ec_Fun(0, 0, 0, 0);
-                if(sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_2_PUTBOX)
-                {
-                    coutLogicFlag_PutBox = 9.6;
-                    finishAbsoluteMoveFlag_Put = true;
-                }
-                break;
-            default:
-                break;
+                txKylinMsg_xyz_Fun(-200, 150, sr04maf[SR04_IDX_F].avg, 0, 0, 0);
             }
-
-            break;
-        case "FirstBox_PutBox":
-            if (finishGraspBwFlag_PutBox == true)
+            else
             {
-                finishAbsoluteMoveFlag_Put = true;
+                txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_F].avg, FIXED_ULTRASONIC_MOVE_SPEED, 0, 0);
+            }
+            txKylinMsg_ec_Fun(0, 0, 0, 0);
+            if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_2_PUTBOX)
+            {
+                coutLogicFlag_PutBox = 9.6;
+                putBoxState = 1;
             }
             break;
         default:
             break;
         }
+        break;
+    case 5:
+        if (kylinMsg.cbus.gp.e >= GraspBw - 60)
+        {
+            //放完盒子跳变到下一个状态
+            putBoxState = 1;
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 /*************************************************************************
@@ -1767,7 +1542,7 @@ void videoMove_PutBox2toBox1()
     switch (videoMove_PutBox2toBox1State)
     {
     //后退到550
-    case "BackMove_PutBox2toBox1":
+    case 0:
         coutLogicFlag_PutBox2toBox1 = 10.1;
         detection_mode = 0;
         //cout<<"detection_mode"<<(int)detection_mode<<endl;
@@ -1779,11 +1554,11 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
         if (sr04maf[SR04_IDX_F].avg > DIRECT_BACK_MOVE_DISTANCE_PUTBOX)
         {
-            videoMove_PutBox2toBox1State = "GraspBw_PutBox2toBox1";
+            videoMove_PutBox2toBox1State = 1;
         }
         break;
     //降下抓子
-    case "GraspBw_PutBox2toBox1":
+    case 1:
         coutLogicFlag_PutBox2toBox1 = 10.2;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
@@ -1794,11 +1569,11 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
         if (kylinMsg.cbus.gp.e >= GraspBw - 10)
         {
-            videoMove_PutBox2toBox1State = "LR_Ultrasonic_PutBox2toBox1";
+            videoMove_PutBox2toBox1State = 2;
         }
         break;
     //左右超声波对准
-    case "LR_Ultrasonic_PutBox2toBox1":
+    case 2:
         coutLogicFlag_PutBox2toBox1 = 10.3;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
@@ -1806,13 +1581,13 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
         if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
         {
-            videoMove_PutBox2toBox1State = "DetectCentroid_PutBox2toBox1";
+            //跳过质心检测
+            videoMove_PutBox2toBox1State = 3;
         }
         break;
     //质心对准
-    case "DetectCentroid_PutBox2toBox1":
+    case 3:
         finishDetectCentroidFlag_PutBox2toBox1 = true; //close DetectCentroid
-        //finishFixedUltrasonicFlag = false;
         coutLogicFlag_PutBox2toBox1 = 10.4;
         detection_mode = 0;                //打开视觉,检测质心
         txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
@@ -1820,19 +1595,23 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
         if (finishDetectCentroidFlag_PutBox2toBox1)
         {
-            videoMove_PutBox2toBox1State = "MobleUltrasonic_PutBox2toBox1";
+            videoMove_PutBox2toBox1State = 4;
         }
         break;
     //moble超声波引导
-    case "MobleUltrasonic_PutBox2toBox1":
+    case 4:
         coutLogicFlag_PutBox2toBox1 = 10.5;
         detection_mode = 0;                //关闭视觉
         txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
         txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_M].avg, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
+        if(switchFlagFun())
+        {
+            videoMove_PutBox2toBox1State = 5;
+        }
         break;
     //合拢抓子
-    case "Grasp_PutBox2toBox1":
+    case 5:
         coutLogicFlag_PutBox2toBox1 = 10.6;
         //finishDetectCentroidFlag = false;   //clear the flag
         detection_mode = 0; //关闭视觉
@@ -1842,29 +1621,26 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
         if (kylinMsg.cbus.gp.c == GraspCl)
         {
-            videoMove_PutBox2toBox1State = "Slid_PutBox2toBox1";
+            videoMove_PutBox2toBox1State = 6;
         }
         break;
     //升高滑台
-    case "Slid_PutBox2toBox1":
+    case 6:
+        //while(numDelay--);
+        coutLogicFlag_PutBox2toBox1 = 10.7;
+        detection_mode = 0; //关闭视觉
+        txKylinMsg.cbus.fs |= (1u << 30);
+        //txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+        //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
+        txKylinMsg_ec_Fun(GraspBw - 410 - 15 - 10, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
         if (kylinMsg.cbus.gp.e <= (GraspBw - 410 - 30))
         {
-            //while(numDelay--);
-            coutLogicFlag_PutBox2toBox1 = 10.7;
-            //finishMobleUltrasonicFlag = false;
-            detection_mode = 0; //关闭视觉
-            txKylinMsg.cbus.fs |= (1u << 30);
-            //txKylinMsg.cbus.fs &= ~(1u << 30);
-            txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-            //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-            txKylinMsg_ec_Fun(GraspBw - 410 - 15 - 10, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-            if ()
-            {
-                videoMove_PutBox2toBox1State = "FixedUltrasonic_PutBox2toBox1";
-            }
+            videoMove_PutBox2toBox1State = 7;
         }
         break;
-    case "FixedUltrasonic_PutBox2toBox1":
+    //fixed 超声波引导
+    case 7:
         coutLogicFlag_PutBox2toBox1 = 10.8;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
@@ -1879,10 +1655,10 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, 0, 0);
         if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_PUTBOX2TO1)
         {
-            videoMove_PutBox2toBox1State = "GraspOp_PutBox2toBox1";
+            videoMove_PutBox2toBox1State = 8;
         }
         break;
-    case "GraspOp_PutBox2toBox1":
+    case 8:
         coutLogicFlag_PutBox2toBox1 = 10.9;
         //finishDetectCentroidFlag = false;   //clear the flag
         detection_mode = 0; //关闭视觉
@@ -1891,23 +1667,15 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, 0, GraspOp - kylinMsg.cbus.gp.c, GRASP_OPEN_SPEED);
         if (kylinMsg.cbus.gp.c == GraspOp)
         {
-            if (putBoxNum == 1)
+            //堆叠次数计数
+            if (heapCount)
             {
-                finish_PutBox2toBox1_3to2 = true;
-                coutLogicFlag = INT_MAX;
-                finishBackMoveFlag_PutBox2toBox1 = false;
-                finishGraspBwFlag_PutBox2toBox1 = false;
-                finish_LR_UltrasonicFlag_PutBox2toBox1 = false;
-                finishDetectCentroidFlag_PutBox2toBox1 = false;
-                finishMobleUltrasonicFlag_PutBox2toBox1 = false;
-                finishGraspFlag_PutBox2toBox1 = false;
-                finishSlidFlag_PutBox2toBox1 = false;
-                finishFixedUltrasonicFlag_PutBox2toBox1 = false;
-                finishGraspOpFlag_PutBox2toBox1 = false;
+                heapCount--;
+                videoMove_PutBox2toBox1State = 0;
             }
-            if (putBoxNum == 2)
+            else
             {
-                finish_PutBox2toBox1_2to1 = true;
+                finish_HeapBox = true;
             }
         }
         break;
