@@ -5,7 +5,7 @@
 #include "CMT.h"
 #include "gui.h"
 #include <string>
-
+#include "kylindef.h"
 
 // 滑台上升速度和下降速度(测试阶段，降低下降速度, 全局速度)
 #define GRASP_UP_SPEED 1200
@@ -724,11 +724,66 @@ bool setcamera()
     return true;
     //RMVideoCapture cap("/dev/video0", 3);
 }
+
+ZGyroMsg_t lastZGyroMsg;
+
+void saveZGyroMsg()
+{
+    memcpy(&lastZGyroMsg, &zgyroMsg, sizeof(ZGyroMsg_t));
+}
+
+void zgyroFusedYawPositionCtrl(float degree)
+{
+    //int zgyroAngle = map(degree, -180, 180, -PI * 1000, PI * 1000);
+    //txKylinMsg
+    //if (zgyroMsg.angle)
+}
+
 void logicInit()
 {
     txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
                                        //detection_mode = 0;                //摄像头关闭
                                        //cout << "Logic init finish!!" << endl;
+}
+
+#define ENABLE_SONAR(N) do { \
+  Flag_Set(&txKylinMsg.cbus.fs, FS_SONAR_##N); \
+} while (0)
+
+void enableSonars()
+{
+  ENABLE_SONAR(F);
+  ENABLE_SONAR(M);
+  ENABLE_SONAR(L);
+  ENABLE_SONAR(R);
+}
+
+#define DISABLE_SONAR(N) do { \
+  Flag_Clr(&txKylinMsg.cbus.fs, FS_SONAR_##N); \
+} while (0)
+
+#define KEEP_SONAR_CTL_FLAG_BITS(N) do { \
+  Flag_Det(&txKylinMsg.cbus.fs, FS_SONAR_##N, Flag_Get(&txKylinMsg.cbus.fs, FS_SONAR_##N)); \
+} while (0)
+
+void keepSonarCtlFlagBits()
+{
+   KEEP_SONAR_CTL_FLAG_BITS(F);
+   KEEP_SONAR_CTL_FLAG_BITS(M);
+   KEEP_SONAR_CTL_FLAG_BITS(L);
+   KEEP_SONAR_CTL_FLAG_BITS(R);
+}
+
+#define IS_SONAR_STATE_SYNCED(N) (Flag_Get(&kylinMsg.cbus.fs, FS_SONAR_##N)==Flag_Get(&txKylinMsg.cbus.fs, FS_SONAR_##N))
+
+bool isSonarStateAllSynced()
+{
+    return IS_SONAR_STATE_SYNCED(F) && IS_SONAR_STATE_SYNCED(M) && IS_SONAR_STATE_SYNCED(L) && IS_SONAR_STATE_SYNCED(R);
+}
+
+void waitForSonarStateSynced()
+{
+    while (!isSonarStateAllSynced());
 }
 
 KylinMsg_t kylinOdomCalib;
@@ -747,6 +802,8 @@ uint8_t updateOdomCalib()
     }
     memcpy(&kylinOdomCalib, &kylinMsg, sizeof(KylinMsg_t));
     //cout << "kylinOdomCalib updated!" << endl;
+    enableSonars();
+    waitForSonarStateSynced();
     return 1;
 }
 
