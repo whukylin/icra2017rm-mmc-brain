@@ -40,7 +40,7 @@
 #define AXISY 2000
 
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
-#define FIXED_ULTRASONIC_2_PUTBOX 130
+#define FIXED_ULTRASONIC_2_PUTBOX 100
 // 放置盒子的时候, 每一堆第一个盒子放置的位置
 #define FIXED_ULTRASONIC_1_PUTBOX 500
 
@@ -138,6 +138,10 @@
 #define TIMEOUT 30
 #define FRAME_N 20000
 #define ADDSPEED 100
+
+// 标志位 fs 宏定义
+#define CONTROL_MODE_BIT 30     //相对位置和绝对位置控制模式对应的位数
+
 
 using namespace cv;
 using namespace std;
@@ -722,7 +726,7 @@ bool setcamera()
 }
 void logicInit()
 {
-    txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+    txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
                                        //detection_mode = 0;                //摄像头关闭
                                        //cout << "Logic init finish!!" << endl;
 }
@@ -948,7 +952,7 @@ int main(int argc, char **argv)
     {
         updateOdomError();
         //如果当前处于绝对位置控制模式,进入判断条件
-        if (txKylinMsg.cbus.fs & (1u << 30)) //0xFF == 1111 1111   0x80000000
+        if (txKylinMsg.cbus.fs & (1u << CONTROL_MODE_BIT)) //0xFF == 1111 1111   0x80000000
         {
             absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
             absoluteDistanceCout = absoluteDistance;
@@ -983,7 +987,7 @@ int main(int argc, char **argv)
             coutLogicFlag = 0;
             //关闭视觉
             detection_mode = 0;
-            txKylinMsg.cbus.fs |= (1u << 30); //切换到绝对位置控制模式
+            txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT); //切换到绝对位置控制模式
             //TODO: 小车移动速度宏定义
             //在原点处旋转 90 度
             txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, 0, kylinOdomCalib.cbus.cp.y, 0, -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z, Z_SPEED_1 * genRmp());
@@ -1010,7 +1014,7 @@ int main(int argc, char **argv)
                 coutLogicFlag = 1;
                 //打开视觉,检测矩形
                 detection_mode = 1;
-                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
 
                 //视觉引导小车前进, 直到小车与盒子之间的距离小于 TODO: 多少厘米 宏定义
                 txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION);
@@ -1027,7 +1031,7 @@ int main(int argc, char **argv)
             case 1:
                 coutLogicFlag = 2;
                 detection_mode = 0;
-                txKylinMsg.cbus.fs &= ~(1u << 30);
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
 
                 //如果 fixed 超声波达不到盒子, 则小车向左移动, 如果能够达到盒子, 则向前移动
                 // TODO: 测试 fixed 超声波测到的距离为多少时, 表明超声波无法打到盒子
@@ -1054,7 +1058,7 @@ int main(int argc, char **argv)
                 coutLogicFlag = 3;
                 detection_mode = 0;
 
-                txKylinMsg.cbus.fs &= ~(1u << 30);
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
                 txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
 
                 //滑台下降到最低点, 便于超声波进行对准
@@ -1070,7 +1074,7 @@ int main(int argc, char **argv)
             // 质心检测前的滑台位置调整
             case 3:
                 detection_mode = 0;
-                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
 
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
 
@@ -1086,7 +1090,7 @@ int main(int argc, char **argv)
                 //finishDetectCentroidFlag = true;
                 coutLogicFlag = 4;
                 detection_mode = 2;                //打开视觉,检测质心
-                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
                 //左右移动
                 txKylinMsg_xyz_Fun(tx, 100, 0, 0, 0, 0);
                 //注意抓子位置
@@ -1103,7 +1107,7 @@ int main(int argc, char **argv)
                 calibPz90();
                 coutLogicFlag = 5;
                 detection_mode = 0;                //关闭视觉
-                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
                 //mobil 超声波引导小车前进
                 txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_M].avg, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
                 //抓子放到在最低点
@@ -1119,7 +1123,7 @@ int main(int argc, char **argv)
                 coutLogicFlag = 6;
                 //finishDetectCentroidFlag = false;   //clear the flag
                 detection_mode = 0; //关闭视觉
-                txKylinMsg.cbus.fs &= ~(1u << 30);
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
 
                 //小车不动
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
@@ -1137,7 +1141,7 @@ int main(int argc, char **argv)
             case 7:
                 coutLogicFlag = 7;
                 detection_mode = 0; //关闭视觉
-                txKylinMsg.cbus.fs |= (1u << 30);
+                txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT);
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
                 txKylinMsg_ec_Fun(GraspBw - 210, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
                 //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
@@ -1161,7 +1165,7 @@ int main(int argc, char **argv)
             workState2_Num++;
             coutLogicFlag = 8;
             detection_mode = 0;             //关闭视觉
-            txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+            txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
             if (absoluteDistance < 10)
             {
@@ -1196,7 +1200,7 @@ int main(int argc, char **argv)
                 if (boxNum == 1)
                 {
                     detection_mode = 0;             //关闭视觉
-                    txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+                    txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
@@ -1217,7 +1221,7 @@ int main(int argc, char **argv)
             //到达指定位置(盒子上方)，放下盒子
             case 1:
                 coutLogicFlag = 10;
-                txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+                txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
                 txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0, 0);
                 //TODO: 不同模式使用不同的放盒子高度
@@ -1268,7 +1272,7 @@ int main(int argc, char **argv)
                     calibPx();
                     calibPz();
                     coutLogicFlag = 11;
-                    txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+                    txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
                     txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, 0 + kylinOdomCalib.cbus.cp.z, 0);
                     txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
                     // TODO: 绝对位置控制模式下, 抓子合拢的阈值
@@ -1309,7 +1313,7 @@ int main(int argc, char **argv)
             {
             case 0:
                 detection_mode = 0;
-                txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
                 //直接后退到某个位置
                 txKylinMsg_xyz_Fun(0, 0, -200, DIRECT_BACK_MOVE_SPEED, 0, 0);
                 //因为抓子当前处于最低点, 为了能够时候 fixed 超声波, 现将抓子抬高
@@ -1332,7 +1336,7 @@ int main(int argc, char **argv)
                 workState4_Num++;
                 detection_mode = 0; //关闭视觉
                 coutLogicFlag = 12;
-                txKylinMsg.cbus.fs |= 1u << 30; //切换到绝对位置控制模式
+                txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
                 // 回原点
                 txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, ZSPEED);
                 // 滑台升高位置
@@ -1394,7 +1398,7 @@ void videoMove_PutBox()
         coutLogicFlag_PutBox = 9.1;
         detection_mode = 1; //打开视觉,检测矩形
         //cout<<"detection_mode"<<(int)detection_mode<<endl;
-        txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
         //矩形检测引导盒子
         txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_3 * ramp, tz, Y_SPEED_3 * ramp, ry * 3141.592654f / 180, Z_SPEED_3_VISION);
         txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
@@ -1408,7 +1412,7 @@ void videoMove_PutBox()
     case 1:
         coutLogicFlag_PutBox = 9.2;
         detection_mode = 0;
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
 
         //如果 fixed 超声波没有打到盒子, 小车向左移动
         if (sr04maf[SR04_IDX_F].avg > 650)
@@ -1431,7 +1435,7 @@ void videoMove_PutBox()
     case 2:
         coutLogicFlag_PutBox = 9.21;
         detection_mode = 0;
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         if (boxNum == 4)
         {
@@ -1454,7 +1458,7 @@ void videoMove_PutBox()
     case 3:
         coutLogicFlag_PutBox = 9.3;
         detection_mode = 0;
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
         if (sr04maf[SR04_IDX_L].avg > 350 && sr04maf[SR04_IDX_R].avg > 350)
@@ -1478,7 +1482,7 @@ void videoMove_PutBox()
         case 0:
             coutLogicFlag_PutBox = 9.4;
             detection_mode = 0;                //关闭视觉
-            txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+            txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
 
             txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
             if (PUTBOX_MODE == 1)
@@ -1540,7 +1544,7 @@ void videoMove_PutBox()
         case 1:
             coutLogicFlag_PutBox = 9.5;
             detection_mode = 0;                //关闭视觉
-            txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+            txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
             if (sr04maf[SR04_IDX_F].avg > 650)
             {
                 txKylinMsg_xyz_Fun(-(FIXED_DISTANCE), FIXED_SPEED, sr04maf[SR04_IDX_F].avg, 0, 0, 0);
@@ -1588,7 +1592,7 @@ void videoMove_PutBox2toBox1()
         coutLogicFlag_PutBox2toBox1 = 10.1;
         detection_mode = 0;
         //cout<<"detection_mode"<<(int)detection_mode<<endl;
-        txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
 
         //后退距离和速度
         txKylinMsg_xyz_Fun(0, 0, -200, DIRECT_BACK_MOVE_SPEED, 0, 0);
@@ -1603,7 +1607,7 @@ void videoMove_PutBox2toBox1()
     case 1:
         coutLogicFlag_PutBox2toBox1 = 10.2;
         detection_mode = 0;
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
 
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
 
@@ -1618,7 +1622,7 @@ void videoMove_PutBox2toBox1()
     case 2:
         coutLogicFlag_PutBox2toBox1 = 10.3;
         detection_mode = 0;
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
         if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
@@ -1633,7 +1637,7 @@ void videoMove_PutBox2toBox1()
         finishDetectCentroidFlag_PutBox2toBox1 = true; //close DetectCentroid
         coutLogicFlag_PutBox2toBox1 = 10.4;
         detection_mode = 0;                //打开视觉,检测质心
-        txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
         txKylinMsg_xyz_Fun(tx, 100, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
         if (finishDetectCentroidFlag_PutBox2toBox1 == true)
@@ -1645,7 +1649,7 @@ void videoMove_PutBox2toBox1()
     case 4:
         coutLogicFlag_PutBox2toBox1 = 10.5;
         detection_mode = 0;                //关闭视觉
-        txKylinMsg.cbus.fs &= ~(1u << 30); //切换到相对位置控制模式
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
         txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_M].avg, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
         if(switchFlagFun())
@@ -1658,7 +1662,7 @@ void videoMove_PutBox2toBox1()
         coutLogicFlag_PutBox2toBox1 = 10.6;
         //finishDetectCentroidFlag = false;   //clear the flag
         detection_mode = 0; //关闭视觉
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
 
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
@@ -1672,8 +1676,8 @@ void videoMove_PutBox2toBox1()
         //while(numDelay--);
         coutLogicFlag_PutBox2toBox1 = 10.7;
         detection_mode = 0; //关闭视觉
-        txKylinMsg.cbus.fs |= (1u << 30);
-        //txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT);
+        //txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
         txKylinMsg_ec_Fun(GraspBw - 400 - 40, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
@@ -1686,7 +1690,7 @@ void videoMove_PutBox2toBox1()
     case 7:
         coutLogicFlag_PutBox2toBox1 = 10.8;
         detection_mode = 0;
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         if (sr04maf[SR04_IDX_F].avg > 500)
         {
             txKylinMsg_xyz_Fun(-(FIXED_DISTANCE), FIXED_SPEED, sr04maf[SR04_IDX_F].avg, 0, 0, 0);
@@ -1705,7 +1709,7 @@ void videoMove_PutBox2toBox1()
     case 8:
         coutLogicFlag_PutBox2toBox1 = 10.9;
         detection_mode = 0; //关闭视觉
-        txKylinMsg.cbus.fs |= (1u << 30);
+        txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - 400 - 15, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
         if (absuluteGrasp < 10)
@@ -1718,7 +1722,7 @@ void videoMove_PutBox2toBox1()
         coutLogicFlag_PutBox2toBox1 = 10.10;
         //finishDetectCentroidFlag = false;   //clear the flag
         detection_mode = 0; //关闭视觉
-        txKylinMsg.cbus.fs &= ~(1u << 30);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, 0, GraspOp - kylinMsg.cbus.gp.c, GRASP_OPEN_SPEED);
         if (kylinMsg.cbus.gp.c == GraspOp)
@@ -1748,6 +1752,6 @@ void videoMove_PutBox2toBox1()
 * 5. 第四个盒子进行超声波对准的时候, 不降到最低点
 * TODO:
 * 1. 使用直线检测进行校准
-* 2. 纠正抓取时犯的错误(计时器？)
+* 2. 纠正抓取时犯的错误(计时器?)
 * 3. 超声波系数修正
 */
