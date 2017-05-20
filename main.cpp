@@ -18,10 +18,10 @@
 #define GRASP_UP_SPEED_HAVE_MANY_BOX 400
 
 // 全局滑台高度宏定义
-#define DETECT_BOX_SLIDE_HEIGHT     //矩形检测时, 滑台高度
-#define GRASP_BOX_SLIDE_HEIGHT      //抓取到盒子之后, 滑台高度
-#define PUT_3_BOX_SLIDE_HEIGHT     //堆叠时, 第三个盒子高度位置的高度
-#define HEAP_3_BOX_SLIDE_HEIGHT     //堆叠时, 第三个盒子高度位置的高度
+#define DETECT_BOX_SLIDE_HEIGHT 0    //矩形检测时, 滑台高度
+#define GRASP_BOX_SLIDE_HEIGHT 0     //抓取到盒子之后, 滑台高度
+#define PUT_3_BOX_SLIDE_HEIGHT 0    //堆叠时, 第三个盒子高度位置的高度
+#define HEAP_3_BOX_SLIDE_HEIGHT 0    //堆叠时, 第三个盒子高度位置的高度
 
 //TODO: 检测矩形时, 滑台距离最低点的距离
 #define DETECT_SQUARE_GRASP_POSITION 70
@@ -1366,7 +1366,6 @@ int main(int argc, char **argv)
             break;
         }
     }
-
     //if(capture.isOpened())
     //	capture.release();
     capture.closeStream();
