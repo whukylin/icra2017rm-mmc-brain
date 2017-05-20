@@ -33,7 +33,7 @@
 #define LEFT_MOVE_DISTANCE 0
 
 //TODO: 抓住盒子之后, 滑台上升位置
-#define GRASP_UP_HAVE_BOX_POSITION 0
+#define GRASP_UP_HAVE_BOX_POSITION 210
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
@@ -57,7 +57,7 @@
 #define DIRECT_BACK_MOVE_DISTANCE_PUTBOX 550
 
 // 堆叠盒子时, 放盒子的时候, fixed 超声波距离阈值
-#define FIXED_ULTRASONIC_PUTBOX2TO1 110
+#define FIXED_ULTRASONIC_PUTBOX2TO1 100
 
 // TODO:堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
 #define PUTBOX_MODE 1
@@ -91,20 +91,19 @@
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
 #define X_SPEED_1 400
-#define Y_SPEED_1 1100
-#define Z_SPEED_1 1300
+#define Y_SPEED_1 800
+#define Z_SPEED_1 1400
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
 // fixed 超声波引导小车前进的速度
 #define FIXED_ULTRASONIC_MOVE_SPEED 200
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
-#define LRDISTANCE 100
-#define LRSPEED 100
+#define LRDISTANCE 100  //100
+#define LRSPEED 200 //200
 
 //fixed 超声波打不到的时候, 小车向左移动的速度和距离
 #define FIXED_DISTANCE 200
 #define FIXED_SPEED 150
-
 
 // mobile 超声波引导小车前进时, 小车移动速度
 #define MOBILE_ULTRASONIC_MOVE_SPEED 300
@@ -112,19 +111,21 @@
 // 阶段 2 : 小车抓取到盒子之后, 回原点的速度
 #define X_SPEED_2 600
 #define Y_SPEED_2 700
-#define Z_SPEED_2 1300
+#define Z_SPEED_2 1400
 
 // 阶段 3 : 小车拿着盒子, 到达基地区
 #define X_SPEED_3 400
-#define Y_SPEED_3 700
-#define Z_SPEED_3 1300
+#define Y_SPEED_3 800
+// First box is special, speed larger
+#define Y_SPEED_3_FIRSTBOX 1000
+#define Z_SPEED_3 1400
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_3_VISION 400
 
 // 阶段 4 : 小车放下盒子, 回原点的速度
 #define X_SPEED_4 600
-#define Y_SPEED_4 700
-#define Z_SPEED_4 1300
+#define Y_SPEED_4 1000
+#define Z_SPEED_4 1400
 
 #define YSPEED 1100 //forward speed
 #define XSPEED 400
@@ -1129,16 +1130,17 @@ int main(int argc, char **argv)
                 }
                 break;
             //finish grasp. begin pull up.
+
             //滑台上升
             case 7:
                 coutLogicFlag = 7;
                 detection_mode = 0; //关闭视觉
-                txKylinMsg.cbus.fs &= ~(1u << 30);
+                txKylinMsg.cbus.fs |= (1u << 30);
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-                txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
+                txKylinMsg_ec_Fun(GraspBw - 210, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
                 //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
                 //TODO: 滑台上升位置宏定义
-                if(kylinMsg.cbus.gp.e <= (GraspBw + GraspTp) / 2.0 + 50)
+                if(kylinMsg.cbus.gp.e <= GraspBw - 200)
                 {
                     txKylinMsg.cbus.gv.e = 0;
                     lastWs = workState;
@@ -1196,7 +1198,7 @@ int main(int argc, char **argv)
 
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
-                    txKylinMsg_xyz_Fun(AXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY + kylinOdomCalib.cbus.cp.y, Y_SPEED_3 * ramp, 0, 0);
+                    txKylinMsg_xyz_Fun(AXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, 0, 0);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
                     if (absoluteDistance < 10)
                     {
@@ -1252,7 +1254,7 @@ int main(int argc, char **argv)
                 {
                     putBoxState = 2;
                     videoMove_PutBox2toBox1State = 0;
-                    graspOpClState = 0
+                    graspOpClState = 0;
                 }
                 break;
 
@@ -1433,7 +1435,7 @@ void videoMove_PutBox()
         if (boxNum == 4)
         {
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
-            if (kylinMsg.cbus.gp.e >= GraspBw - 60 - 200)
+            if (kylinMsg.cbus.gp.e <= GraspBw - 25 - 200)
             {
                 videoMovePutBoxState = 3;
             }
@@ -1441,7 +1443,7 @@ void videoMove_PutBox()
         else
         {
             txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
-            if (kylinMsg.cbus.gp.e >= GraspBw - 60)
+            if (kylinMsg.cbus.gp.e <= GraspBw - 25)
             {
                 videoMovePutBoxState = 3;
             }
@@ -1684,7 +1686,7 @@ void videoMove_PutBox2toBox1()
         coutLogicFlag_PutBox2toBox1 = 10.8;
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << 30);
-        if (sr04maf[SR04_IDX_F].avg > 400)
+        if (sr04maf[SR04_IDX_F].avg > 500)
         {
             txKylinMsg_xyz_Fun(-(FIXED_DISTANCE), FIXED_SPEED, sr04maf[SR04_IDX_F].avg, 0, 0, 0);
         }
@@ -1721,7 +1723,7 @@ void videoMove_PutBox2toBox1()
         if (kylinMsg.cbus.gp.c == GraspOp)
         {
             //堆叠次数计数
-            if (heapCount)
+            if (heapCount > 1)
             {
                 heapCount--;
                 videoMove_PutBox2toBox1State = 0;
