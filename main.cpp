@@ -51,7 +51,7 @@
 #define DIRECT_BACK_MOVE_DISTANCE_PUTBOX 550
 
 // 堆叠盒子时, 放盒子的时候, fixed 超声波距离阈值
-#define FIXED_ULTRASONIC_PUTBOX2TO1 130
+#define FIXED_ULTRASONIC_PUTBOX2TO1 110
 
 // TODO:堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
 #define PUTBOX_MODE 1
@@ -927,7 +927,7 @@ int main(int argc, char **argv)
     double absuluteGraspOpCl = 100;
     double absuluteGrasp = 100;
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    boxNum = 4;
+    //boxNum = 4;
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
         updateOdomError();
