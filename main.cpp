@@ -27,7 +27,7 @@
 #define DETECT_SQUARE_GRASP_POSITION 70
 
 //TODO: 小车与盒子之间的距离小于多少时 从矩形检测引导小车切换到超声波引导
-#define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 420
+#define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 350
 
 //TODO: 判定 fixed 超声波无法打到盒子并向左移动时的阈值
 #define LEFT_MOVE_DISTANCE 0
@@ -957,6 +957,7 @@ bool firstBoxJudgeFun()
 *************************************************************************/
 void enableSonarsFun(int fixed, int mobile, int left, int right)
 {
+    fixed = mobile = left = right = 1;
     if (fixed == 1)
     {
         ENABLE_SONAR(F);
