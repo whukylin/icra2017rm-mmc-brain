@@ -954,7 +954,7 @@ bool firstBoxJudgeFun()
 *  函数返回：无
 *  修改时间：2017-05-21
 *************************************************************************/
-void enableSonars(int fixed, int mobile, int left, int right)
+void enableSonarsFun(int fixed, int mobile, int left, int right)
 {
     if (fixed == 1)
     {
@@ -1053,7 +1053,7 @@ int main(int argc, char **argv)
     //boxNum = 4;
     while(1)
     {
-        enableSonars(1,0,1,0);
+        enableSonarsFun(1,0,1,0);
     }
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
