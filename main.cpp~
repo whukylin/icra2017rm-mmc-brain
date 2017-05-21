@@ -27,7 +27,7 @@
 #define DETECT_SQUARE_GRASP_POSITION 70
 
 //TODO: 小车与盒子之间的距离小于多少时 从矩形检测引导小车切换到超声波引导
-#define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 420
+#define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 500
 
 //TODO: 判定 fixed 超声波无法打到盒子并向左移动时的阈值
 #define LEFT_MOVE_DISTANCE 0
@@ -54,7 +54,7 @@
 #define DIRECT_BACK_MOVE_GRASP_UP_POSITION 100
 
 // 堆叠盒子时, 小车后退的距离
-#define DIRECT_BACK_MOVE_DISTANCE_PUTBOX 550
+#define DIRECT_BACK_MOVE_DISTANCE_PUTBOX 500
 
 // 堆叠盒子时, 放盒子的时候, fixed 超声波距离阈值
 #define FIXED_ULTRASONIC_PUTBOX2TO1 100
@@ -92,11 +92,11 @@
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
 #define X_SPEED_1 400
 #define Y_SPEED_1 800
-#define Z_SPEED_1 1400
+#define Z_SPEED_1 1500
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
 // fixed 超声波引导小车前进的速度
-#define FIXED_ULTRASONIC_MOVE_SPEED 200
+#define FIXED_ULTRASONIC_MOVE_SPEED 300
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
 #define LRDISTANCE 100 //100
 #define LRSPEED 200    //200
@@ -124,10 +124,10 @@
 
 // 阶段 4 : 小车放下盒子, 回原点的速度
 #define X_SPEED_4 600
-#define Y_SPEED_4 1000
+#define Y_SPEED_4 1200
 #define Z_SPEED_4 1400
 
-#define YSPEED 1100 //forward speed
+#define YSPEED 1200 //forward speed
 #define XSPEED 400
 #define ZSPEED 1300
 
@@ -1344,11 +1344,11 @@ int main(int argc, char **argv)
                 {
                     if (boxNum != 4)
                     {
-                        txKylinMsg_ec_Fun((GraspBw - 15), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                        txKylinMsg_ec_Fun((GraspBw - 10), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
                     else
                     {
-                        txKylinMsg_ec_Fun((GraspBw - 15 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                        txKylinMsg_ec_Fun((GraspBw - 10 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
                 }
                 if (PUTBOX_MODE == 2)
