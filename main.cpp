@@ -762,6 +762,9 @@ void enableSonars()
   Flag_Clr(&txKylinMsg.cbus.fs, FS_SONAR_##N); \
 } while (0)
 
+
+
+
 #define KEEP_SONAR_CTL_FLAG_BITS(N) do { \
   Flag_Det(&txKylinMsg.cbus.fs, FS_SONAR_##N, Flag_Get(&txKylinMsg.cbus.fs, FS_SONAR_##N)); \
 } while (0)
@@ -944,6 +947,49 @@ bool firstBoxJudgeFun()
     }
 }
 
+/*************************************************************************
+*  函数名称：enableSonars
+*  功能说明：控制超声波开关的函数
+*  参数说明：fixed, mobille, left, right, 1 开, 0 断
+*  函数返回：无
+*  修改时间：2017-05-21
+*************************************************************************/
+void enableSonars(int fixed, int mobile, int left, int right)
+{
+    if (fixed == 1)
+    {
+        ENABLE_SONAR(F);
+    }
+    else
+    {
+        DISABLE_SONAR(F);
+    }
+    if (mobile == 1)
+    {
+        ENABLE_SONAR(M);
+    }
+    else
+    {
+        DISABLE_SONAR(M);
+    }
+    if (left == 1)
+    {
+        ENABLE_SONAR(L);
+    }
+    else
+    {
+        DISABLE_SONAR(L);
+    }
+    if (right == 1)
+    {
+        ENABLE_SONAR(R);
+    }
+    else
+    {
+        DISABLE_SONAR(R);
+    }
+}
+
 int main(int argc, char **argv)
 {
     missionStartTimeUs = currentTimeUs();
@@ -1005,6 +1051,10 @@ int main(int argc, char **argv)
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
     //boxNum = 4;
+    while(1)
+    {
+        enableSonars(1,0,1,0);
+    }
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
         updateOdomError();
