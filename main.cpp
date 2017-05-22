@@ -1349,7 +1349,7 @@ int main(int argc, char **argv)
             if (absoluteDistance < 10)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
-                zgyroFusedYawPositionCtrl(ZROTATION90DEG);
+                zgyroFusedYawPositionCtrl(-ZROTATION90DEG);
             }
             else
             {
@@ -1359,7 +1359,7 @@ int main(int argc, char **argv)
             //保持抓子不变
             txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0, 0, GraspCl, 0);
 
-            if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f && workState2_Num != 1 && abs(zgyroFusedYawPositionCtrl(ZROTATION90DEG)) <= 5.0f * PI / 2.0f) //完成绝对位置控制模式
+            if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f && workState2_Num != 1 && abs(zgyroFusedYawPositionCtrl(-ZROTATION90DEG)) <= 5.0f * PI / 2.0f) //完成绝对位置控制模式
             {
                 rstRmp();
                 workState = 3; //切换到下一阶段
