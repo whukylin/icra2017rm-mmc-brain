@@ -1833,7 +1833,7 @@ void videoMove_PutBox2toBox1()
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
-        txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
+        txKylinMsg_ec_Fun(GraspBw - 20 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
         if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300 && isSonarStateAllSynced())
         {
             //跳过质心检测
@@ -1894,8 +1894,8 @@ void videoMove_PutBox2toBox1()
         //txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 400 - 30 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-        if (kylinMsg.cbus.gp.e <= GraspBw - 430)
+        txKylinMsg_ec_Fun(GraspBw - 400 - 40 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
+        if (kylinMsg.cbus.gp.e <= GraspBw - 440)
         {
             videoMove_PutBox2toBox1State = 7;
         }
