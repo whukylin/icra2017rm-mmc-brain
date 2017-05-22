@@ -869,6 +869,7 @@ int zgyroFusedYawPositionCtrl(int angle)
     txKylinMsg.cbus.cp.z = kylinMsg.cbus.cp.z + deltaAngle;
     return deltaAngle;
 }
+
 int zgyroFusedYawPositionCtrlOnlyRet(int angle)
 {
     deltaAngle = angle + getZGyroRelativeAngle();
@@ -1017,6 +1018,12 @@ void enableSonarsFun(int fixed, int mobile, int left, int right)
 
 bool isZGyroFusedPositionCtrlStart = false;
 
+void rstYaw()
+{
+   isZGyroFusedPositionCtrlStart = false;
+   saveZGyroMsg();
+}
+
 int main(int argc, char **argv)
 {
     missionStartTimeUs = currentTimeUs();
@@ -1139,6 +1146,7 @@ int main(int argc, char **argv)
             if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f && abs(zgyroFusedYawPositionCtrl(-ZROTATION90DEG)) <= 5.0f * PI / 2.0f)
             {
                 isZGyroFusedPositionCtrlStart = false;
+                saveZGyroMsg();
                 lastWs = workState;
                 rstRmp();
                 //主流程下一个状态
@@ -1179,11 +1187,24 @@ int main(int argc, char **argv)
                 if (finishDetectBoxFlag == true && isSonarStateAllSynced())
                 {
                     grabBoxState = 1;
+                    isZGyroFusedPositionCtrlStart = false;
+                    txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+                    txKylinMsg_ec_Fun(0, 0, 0, 0);
+                    usleep(50000);
+                    saveZGyroMsg();
                 }
                 break;
             //fixed Ultrasonic
             //fixed 超声波引导
             case 1:
+                if (isZGyroFusedPositionCtrlStart == false)
+                {
+                    txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+                    txKylinMsg_ec_Fun(0, 0, 0, 0);
+                    usleep(50000);
+                    saveZGyroMsg();
+                    isZGyroFusedPositionCtrlStart = true;
+                }
                 enableSonarsFun(1, 0, 0, 0); // fixed, mobile, left, mobile
                 coutLogicFlag = 2;
                 workStateCout = "fixed超声波引导";
@@ -1206,6 +1227,11 @@ int main(int argc, char **argv)
                 if (sr04maf[SR04_IDX_F].avg < SQUARE_TO_FIXED_ULTRASONIC_DISTANCE && isSonarStateAllSynced())
                 {
                     grabBoxState = 2;
+                    isZGyroFusedPositionCtrlStart = false;
+                    txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+                    txKylinMsg_ec_Fun(0, 0, 0, 0);
+                    usleep(50000);
+                    saveZGyroMsg();
                 }
                 break;
             //left right Ultrasonic
