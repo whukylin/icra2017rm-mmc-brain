@@ -99,8 +99,8 @@
 // fixed 超声波引导小车前进的速度
 #define FIXED_ULTRASONIC_MOVE_SPEED 300
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
-#define LRDISTANCE 150 //100
-#define LRSPEED 200    //200
+#define LRDISTANCE 100 //100
+#define LRSPEED 100    //200
 
 //fixed 超声波打不到的时候, 小车向左移动的速度和距离
 #define FIXED_DISTANCE 200
@@ -1244,7 +1244,7 @@ int main(int argc, char **argv)
                 detection_mode = 0;
 
                 txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
-                txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, getZGyroRelativeAngle(), Z_SPEED_1);
+                txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, getZGyroRelativeAngle(), 0);
 
                 //滑台下降到最低点, 便于超声波进行对准
                 txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
@@ -1707,7 +1707,7 @@ void videoMove_PutBox()
         workStateCout = "左右超声波对准";
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
-        txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, getZGyroRelativeAngle(), Z_SPEED_3);
+        txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, getZGyroRelativeAngle(), 0);
         txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
         if (sr04maf[SR04_IDX_L].avg > 350 && sr04maf[SR04_IDX_R].avg > 350 && isSonarStateAllSynced())
         {
@@ -1879,7 +1879,7 @@ void videoMove_PutBox2toBox1()
         workStateCout = "左右超声波对准";
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
-        txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, getZGyroRelativeAngle(), Z_SPEED_3);
+        txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, getZGyroRelativeAngle(), 0);
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
         if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300 && isSonarStateAllSynced())
         {
