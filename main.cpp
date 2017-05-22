@@ -1166,7 +1166,7 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
 
                 //视觉引导小车前进, 直到小车与盒子之间的距离小于 TODO: 多少厘米 宏定义
-                txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, getZGyroRelativeAngle(), Z_SPEED_1_VISION); //ry * 3141.592654f / 180.0, 
+                txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, getZGyroRelativeAngle(), Z_SPEED_1_VISION); //ry * 3141.592654f / 180.0,
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 //暂时无法修改成不需要标志位
@@ -1342,8 +1342,8 @@ int main(int argc, char **argv)
             }
             else
             {
-                txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0+kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
-zgyroFusedYawPositionCtrl(0);
+                txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
+                zgyroFusedYawPositionCtrl(0);
             }
             //保持抓子不变
             txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0, 0, GraspCl, 0);
@@ -1384,8 +1384,9 @@ zgyroFusedYawPositionCtrl(0);
 
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
-                    txKylinMsg_xyz_Fun(AXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, zgyroFusedYawPositionCtrlOnlyRet(0), Z_SPEED_3 * ramp);
+                    txKylinMsg_xyz_Fun(AXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
+                    zgyroFusedYawPositionCtrl(0);
                     if (absoluteDistance < 10)
                     {
                         putBoxState = 1;
@@ -1404,7 +1405,8 @@ zgyroFusedYawPositionCtrl(0);
                 workStateCout = "将盒子抬到指定高度";
                 txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
-                txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, zgyroFusedYawPositionCtrlOnlyRet(0), Z_SPEED_3 * ramp);
+                txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, kylinOdomCalib.cbus.cp.z, 0);
+
                 //TODO: 不同模式使用不同的放盒子高度
                 //堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
                 if (PUTBOX_MODE == 1)
@@ -1506,7 +1508,7 @@ zgyroFusedYawPositionCtrl(0);
                 workStateCout = "先直接后退";
                 txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
                 //直接后退到某个位置
-                txKylinMsg_xyz_Fun(0, 0, -200, DIRECT_BACK_MOVE_SPEED,getZGyroRelativeAngle(), Z_SPEED_4);
+                txKylinMsg_xyz_Fun(0, 0, -200, DIRECT_BACK_MOVE_SPEED, getZGyroRelativeAngle(), Z_SPEED_4);
                 //因为抓子当前处于最低点, 为了能够时候 fixed 超声波, 现将抓子抬高
                 if (firstBoxJudgeFun())
                 {
@@ -1597,7 +1599,7 @@ void videoMove_PutBox()
         //cout<<"detection_mode"<<(int)detection_mode<<endl;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
         //矩形检测引导盒子
-        txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_3 * ramp, tz, Y_SPEED_3 * ramp, getZGyroRelativeAngle(), Z_SPEED_3_VISION);//ry * 3141.592654f / 180, Z_SPEED_3_VISION);
+        txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_3 * ramp, tz, Y_SPEED_3 * ramp, getZGyroRelativeAngle(), Z_SPEED_3_VISION); //ry * 3141.592654f / 180, Z_SPEED_3_VISION);
         txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
         if (finishDetectBoxFlag_PutBox == true && isSonarStateAllSynced())
         {
