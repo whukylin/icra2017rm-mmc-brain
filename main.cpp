@@ -232,6 +232,7 @@ int GraspOp;
 int GraspCl;
 volatile double coutLogicFlag_PutBox = 0;
 volatile double coutLogicFlag_PutBox2toBox1 = 0;
+ZGyroMsg_t lastZGyroMsg;
 void videoMove_PutBox2toBox1();
 int moveDistance = 0;
 int numDelay = 100000000;
@@ -529,7 +530,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "2. WorkState: "
              << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "3. State: " << workStageCout << workStateCout << endl;
-        cout << "deltaAngle: " << deltaAngle << endl;
+        cout << "deltaAngle: " << deltaAngle << " zgyroMsg.angle: " << zgyroMsg.angle << " lastZGyroMsg.angle: "<< lastZGyroMsg.angle<< endl;
         cout << "------------------------------------------------------------------------------" << endl;
         // cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         // cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
@@ -852,7 +853,7 @@ void videoMove_PutBox();
 *  修改时间：2017-05-17
 *************************************************************************/
 
-ZGyroMsg_t lastZGyroMsg;
+
 void saveZGyroMsg()
 {
     memcpy(&lastZGyroMsg, &zgyroMsg, sizeof(ZGyroMsg_t));
