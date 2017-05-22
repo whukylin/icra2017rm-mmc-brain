@@ -530,7 +530,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "2. WorkState: "
              << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "3. State: " << workStageCout << workStateCout << endl;
-        //cout << "deltaAngle: " << deltaAngle << " zgyroMsg.angle: " << zgyroMsg.angle << " lastZGyroMsg.angle: "<< lastZGyroMsg.angle<< endl;
+        cout << "deltaAngle: " << deltaAngle << " zgyroMsg.angle: " << zgyroMsg.angle << " lastZGyroMsg.angle: "<< lastZGyroMsg.angle<< endl;
         cout << "------------------------------------------------------------------------------" << endl;
         // cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         // cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
@@ -1354,7 +1354,7 @@ int main(int argc, char **argv)
             else
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, 0);
-                zgyroFusedYawPositionCtrl(0);
+                // zgyroFusedYawPositionCtrl(0);
             }
             //保持抓子不变
             txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0, 0, GraspCl, 0);
