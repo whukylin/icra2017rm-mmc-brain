@@ -804,22 +804,22 @@ uint8_t updateOdomCalib()
 
 void calibPx()
 {
-    kylinOdomCalib.cbus.cp.x = kylinMsg.cbus.cp.x;
+    //kylinOdomCalib.cbus.cp.x = kylinMsg.cbus.cp.x;
 }
 
 void calibPy()
 {
-    kylinOdomCalib.cbus.cp.y = kylinMsg.cbus.cp.y;
+    //kylinOdomCalib.cbus.cp.y = kylinMsg.cbus.cp.y;
 }
 
 void calibPz()
 {
-    kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z;
+    //kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z;
 }
 
 void calibPz90()
 {
-    kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z + ZROTATION90DEG;
+    //kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z + ZROTATION90DEG;
 }
 
 KylinMsg_t kylinOdomError;
@@ -1220,7 +1220,10 @@ int main(int argc, char **argv)
                 {
                     //跳过质心检测
                     moveDistance = 0;
-                    grabBoxState = 5;
+                    if (kylinMsg.cbus.gp.e >= GraspBw - 5)
+                    {
+                        grabBoxState = 5;
+                    }
                 }
                 break;
             //squares detection finished, begin detect green area
@@ -1897,7 +1900,7 @@ void videoMove_PutBox2toBox1()
         //txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 400 - 30, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
+        txKylinMsg_ec_Fun(GraspBw - 400 - 100, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
         if (absuluteGrasp < 10)
         {
             videoMove_PutBox2toBox1State = 7;
