@@ -860,18 +860,18 @@ void saveZGyroMsg()
 
 int getZGyroRelativeAngle()
 {
-    return (zgyroMsg.angle - lastZGyroMsg.angle) * 10 * PI / 180;
+    return (-zgyroMsg.angle + lastZGyroMsg.angle) * 10 * PI / 180;
 }
 
 int zgyroFusedYawPositionCtrl(int angle)
 {
-    deltaAngle = angle - getZGyroRelativeAngle();
+    deltaAngle = angle + getZGyroRelativeAngle();
     txKylinMsg.cbus.cp.z = kylinMsg.cbus.cp.z + deltaAngle;
     return deltaAngle;
 }
 int zgyroFusedYawPositionCtrlOnlyRet(int angle)
 {
-    deltaAngle = angle - getZGyroRelativeAngle();
+    deltaAngle = angle + getZGyroRelativeAngle();
     return deltaAngle;
 }
 
@@ -1342,7 +1342,8 @@ int main(int argc, char **argv)
             }
             else
             {
-                txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, zgyroFusedYawPositionCtrlOnlyRet(0), Z_SPEED_2 * ramp);
+                txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0+kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
+zgyroFusedYawPositionCtrl(0);
             }
             //保持抓子不变
             txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0, 0, GraspCl, 0);
