@@ -27,6 +27,7 @@
 #define DETECT_SQUARE_GRASP_POSITION 70
 
 //TODO: 小车与盒子之间的距离小于多少时 从矩形检测引导小车切换到超声波引导
+
 #define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 500
 
 //TODO: 判定 fixed 超声波无法打到盒子并向左移动时的阈值
@@ -153,6 +154,8 @@ double absuluteAngle = 100;
 double absuluteGraspOpCl = 100;
 double absuluteGrasp = 100;
 
+int deltaAngle = 0;
+
 double currentTimeUs()
 {
     return cvGetTickCount() / cvGetTickFrequency();
@@ -218,8 +221,8 @@ volatile int GraspTpCout = 0;
 volatile int absoluteDistanceCout = 0;
 volatile bool finish_HeapBox = false;
 
-volatile string workStateCout;
-volatile string workStageCout;
+string workStateCout;
+string workStageCout;
 
 int putBoxNum = 1;
 int boxNum = 1; //the num of the box
@@ -522,11 +525,12 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         //cout << "detection_mode=" << (int)detection_mode << endl;
 
         cout << "1. Ultrasonic: "
-             << "Left: " << sr04maf[SR04_IDX_L].avg << "Right: " << sr04maf[SR04_IDX_R].avg << " Fixed: " << sr04maf[SR04_IDX_F].avg << " Mobile: " << sr04maf[SR04_IDX_M].avg << endl;
+             << "Left: " << sr04maf[SR04_IDX_L].avg << "  Right: " << sr04maf[SR04_IDX_R].avg << "  Fixed: " << sr04maf[SR04_IDX_F].avg << "  Mobile: " << sr04maf[SR04_IDX_M].avg << endl;
         cout << "2. WorkState: "
              << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
-        cout << "测试" << endl;
-        cout << "-------------------------------------------------------------------" << endl;
+        cout << "3. State: " << workStageCout << workStateCout << endl;
+	cout << "deltaAngle: "<<deltaAngle<<endl;
+        cout << "------------------------------------------------------------------------------" << endl;
         // cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         // cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
         // cout << "Grasp_Ref: " << txKylinMsg.cbus.gp.c << "Grasp_Fdb: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << " kylinMsg.cbus.fs & (1u << 2)): " << (kylinMsg.cbus.fs & (1u << 2)) << endl;
@@ -730,11 +734,17 @@ void saveZGyroMsg()
     memcpy(&lastZGyroMsg, &zgyroMsg, sizeof(ZGyroMsg_t));
 }
 
-void zgyroFusedYawPositionCtrl(float degree)
+int getZGyroRelativeAngle()
 {
-    //int zgyroAngle = map(degree, -180, 180, -PI * 1000, PI * 1000);
-    //txKylinMsg
-    //if (zgyroMsg.angle)
+    return (zgyroMsg.angle - lastZGyroMsg.angle) * 10 * PI / 180;
+}
+
+
+int zgyroFusedYawPositionCtrl(int angle)
+{
+    deltaAngle = angle - getZGyroRelativeAngle();
+    txKylinMsg.cbus.cp.z = kylinMsg.cbus.cp.z + deltaAngle;
+    return deltaAngle;
 }
 
 void logicInit()
@@ -993,6 +1003,8 @@ void enableSonarsFun(int fixed, int mobile, int left, int right)
     }
 }
 
+bool isZGyroFusedPositionCtrlStart = false;
+
 int main(int argc, char **argv)
 {
     missionStartTimeUs = currentTimeUs();
@@ -1091,6 +1103,10 @@ int main(int argc, char **argv)
         switch (workState)
         {
         case 0:
+	    if (isZGyroFusedPositionCtrlStart == false) {
+		saveZGyroMsg();
+		isZGyroFusedPositionCtrlStart = true;
+	    }
             enableSonarsFun(1, 1, 1, 1); // fixed, mobile, left, mobile
             coutLogicFlag = 0;
             workStageCout = "阶段一: ";
@@ -1101,10 +1117,12 @@ int main(int argc, char **argv)
             //TODO: 小车移动速度宏定义
             //在原点处旋转 90 度
             txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, 0, kylinOdomCalib.cbus.cp.y, 0, -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z, Z_SPEED_1 * genRmp());
+	    zgyroFusedYawPositionCtrl(-ZROTATION90DEG);
             //抓子张开
             txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
-            if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f)
+            if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f && abs(zgyroFusedYawPositionCtrl(-ZROTATION90DEG)) <= 5.0f * PI / 2.0f)
             {
+		isZGyroFusedPositionCtrlStart = false;
                 lastWs = workState;
                 rstRmp();
                 //主流程下一个状态
@@ -1838,7 +1856,7 @@ void videoMove_PutBox2toBox1()
         //txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 400 - 40, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
+        txKylinMsg_ec_Fun(GraspBw - 400 - 30, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
         if (absuluteGrasp < 10)
         {
             videoMove_PutBox2toBox1State = 7;
