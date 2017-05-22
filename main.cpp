@@ -1117,6 +1117,9 @@ int main(int argc, char **argv)
         case 0:
             if (isZGyroFusedPositionCtrlStart == false)
             {
+                txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+                txKylinMsg_ec_Fun(0, 0, 0, 0);
+                usleep(50000);
                 saveZGyroMsg();
                 isZGyroFusedPositionCtrlStart = true;
             }
@@ -1147,6 +1150,9 @@ int main(int argc, char **argv)
         case 1:
             if (isZGyroFusedPositionCtrlStart == false)
             {
+                txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+                txKylinMsg_ec_Fun(0, 0, 0, 0);
+                usleep(50000);
                 saveZGyroMsg();
                 isZGyroFusedPositionCtrlStart = true;
             }
@@ -1326,6 +1332,9 @@ int main(int argc, char **argv)
             //小车回到原点, 车头朝向前方
             if (isZGyroFusedPositionCtrlStart == false)
             {
+                txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+                txKylinMsg_ec_Fun(0, 0, 0, 0);
+                usleep(50000);
                 saveZGyroMsg();
                 isZGyroFusedPositionCtrlStart = true;
             }
@@ -1366,6 +1375,9 @@ int main(int argc, char **argv)
         case 3:
             if (isZGyroFusedPositionCtrlStart == false)
             {
+                txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+                txKylinMsg_ec_Fun(0, 0, 0, 0);
+                usleep(50000);
                 saveZGyroMsg();
                 isZGyroFusedPositionCtrlStart = true;
             }
@@ -1498,6 +1510,9 @@ int main(int argc, char **argv)
         case 4:
             if (isZGyroFusedPositionCtrlStart == false)
             {
+                txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+                txKylinMsg_ec_Fun(0, 0, 0, 0);
+                usleep(50000);
                 saveZGyroMsg();
                 isZGyroFusedPositionCtrlStart = true;
             }
