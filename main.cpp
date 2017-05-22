@@ -1085,7 +1085,7 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    //boxNum = 4;
+    boxNum = 4;
 
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
@@ -1890,12 +1890,12 @@ void videoMove_PutBox2toBox1()
         coutLogicFlag_PutBox2toBox1 = 10.7;
         workStateCout = "升高滑台";
         detection_mode = 0; //关闭视觉
-        txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT);
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
         //txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 400 - 100, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-        if (absuluteGrasp < 10)
+        txKylinMsg_ec_Fun(GraspBw - 400 - 30 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
+        if (kylinMsg.cbus.gp.e <= GraspBw - 430)
         {
             videoMove_PutBox2toBox1State = 7;
         }
