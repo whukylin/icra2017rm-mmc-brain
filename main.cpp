@@ -744,52 +744,52 @@ void logicInit()
                                                      //cout << "Logic init finish!!" << endl;
 }
 
-// #define ENABLE_SONAR(N)                              \
-//     do                                               \
-//     {                                                \
-//         Flag_Set(&txKylinMsg.cbus.fs, FS_SONAR_##N); \
-//     } while (0)
+#define ENABLE_SONAR(N)                              \
+    do                                               \
+    {                                                \
+        Flag_Set(&txKylinMsg.cbus.fs, FS_SONAR_##N); \
+    } while (0)
 
-// void enableSonars()
-// {
-//     ENABLE_SONAR(F);
-//     ENABLE_SONAR(M);
-//     ENABLE_SONAR(L);
-//     ENABLE_SONAR(R);
-// }
+void enableSonars()
+{
+    ENABLE_SONAR(F);
+    ENABLE_SONAR(M);
+    ENABLE_SONAR(L);
+    ENABLE_SONAR(R);
+}
 
-// #define DISABLE_SONAR(N)                             \
-//     do                                               \
-//     {                                                \
-//         Flag_Clr(&txKylinMsg.cbus.fs, FS_SONAR_##N); \
-//     } while (0)
+#define DISABLE_SONAR(N)                             \
+    do                                               \
+    {                                                \
+        Flag_Clr(&txKylinMsg.cbus.fs, FS_SONAR_##N); \
+    } while (0)
 
-// #define KEEP_SONAR_CTL_FLAG_BITS(N)                                                               \
-//     do                                                                                            \
-//     {                                                                                             \
-//         Flag_Det(&txKylinMsg.cbus.fs, FS_SONAR_##N, Flag_Get(&txKylinMsg.cbus.fs, FS_SONAR_##N)); \
-//     } while (0)
+#define KEEP_SONAR_CTL_FLAG_BITS(N)                                                               \
+    do                                                                                            \
+    {                                                                                             \
+        Flag_Det(&txKylinMsg.cbus.fs, FS_SONAR_##N, Flag_Get(&txKylinMsg.cbus.fs, FS_SONAR_##N)); \
+    } while (0)
 
-// void keepSonarCtlFlagBits()
-// {
-//     KEEP_SONAR_CTL_FLAG_BITS(F);
-//     KEEP_SONAR_CTL_FLAG_BITS(M);
-//     KEEP_SONAR_CTL_FLAG_BITS(L);
-//     KEEP_SONAR_CTL_FLAG_BITS(R);
-// }
+void keepSonarCtlFlagBits()
+{
+    KEEP_SONAR_CTL_FLAG_BITS(F);
+    KEEP_SONAR_CTL_FLAG_BITS(M);
+    KEEP_SONAR_CTL_FLAG_BITS(L);
+    KEEP_SONAR_CTL_FLAG_BITS(R);
+}
 
-// #define IS_SONAR_STATE_SYNCED(N) (Flag_Get(&kylinMsg.cbus.fs, FS_SONAR_##N) == Flag_Get(&txKylinMsg.cbus.fs, FS_SONAR_##N))
+#define IS_SONAR_STATE_SYNCED(N) (Flag_Get(&kylinMsg.cbus.fs, FS_SONAR_##N) == Flag_Get(&txKylinMsg.cbus.fs, FS_SONAR_##N))
 
 bool isSonarStateAllSynced()
 {
-    return true;
-    // return IS_SONAR_STATE_SYNCED(F) && IS_SONAR_STATE_SYNCED(M) && IS_SONAR_STATE_SYNCED(L) && IS_SONAR_STATE_SYNCED(R);
+    //return true;
+    return IS_SONAR_STATE_SYNCED(F) && IS_SONAR_STATE_SYNCED(M) && IS_SONAR_STATE_SYNCED(L) && IS_SONAR_STATE_SYNCED(R);
 }
 
-// void waitForSonarStateSynced()
-// {
-//     while (!isSonarStateAllSynced());
-// }
+void waitForSonarStateSynced()
+{
+    while (!isSonarStateAllSynced());
+}
 
 KylinMsg_t kylinOdomCalib;
 static uint32_t frame_cnt = 0;
@@ -807,8 +807,8 @@ uint8_t updateOdomCalib()
     }
     memcpy(&kylinOdomCalib, &kylinMsg, sizeof(KylinMsg_t));
     //cout << "kylinOdomCalib updated!" << endl;
-    //enableSonars();
-    //waitForSonarStateSynced();
+    enableSonars();
+    waitForSonarStateSynced();
     return 1;
 }
 
