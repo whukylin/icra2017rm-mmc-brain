@@ -45,6 +45,11 @@
 // 放置盒子的时候, 每一堆第一个盒子放置的位置
 #define FIXED_ULTRASONIC_1_PUTBOX 500
 
+// 放盒子时, 滑台偏移量(不让盒子挨着或者直接着地的偏移量)
+#define SLIDE_DIFF 30
+// 抓盒子时, 滑台身高位置
+#define GRASP_BOX_POSITION 240
+
 // 抓子松开和合拢速度
 #define GRASP_OPEN_SPEED 10000
 #define GRASP_CLOSE_SPEED 10000
@@ -1310,10 +1315,10 @@ int main(int argc, char **argv)
                 detection_mode = 0; //关闭视觉
                 txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT);
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-                txKylinMsg_ec_Fun(GraspBw - 210, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
+                txKylinMsg_ec_Fun(GraspBw - GRASP_BOX_POSITION, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
                 //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
                 //TODO: 滑台上升位置宏定义
-                if (kylinMsg.cbus.gp.e <= GraspBw - 200)
+                if (kylinMsg.cbus.gp.e <= GraspBw - GRASP_BOX_POSITION)
                 {
                     txKylinMsg.cbus.gv.e = 0;
                     lastWs = workState;
@@ -1407,7 +1412,7 @@ int main(int argc, char **argv)
             //到达指定位置(盒子上方)，放下盒子
             case 1:
                 coutLogicFlag = 10;
-                workStateCout = "将盒子抬到指定高度";
+                workStateCout = "将盒子抬到指定高度, 准备松开抓子, 放下盒子";
                 txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
                 txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 0, 1511, 0, kylinOdomCalib.cbus.cp.z, 0);
@@ -1418,7 +1423,7 @@ int main(int argc, char **argv)
                 {
                     if (boxNum != 4)
                     {
-                        txKylinMsg_ec_Fun((GraspBw - 10), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                        txKylinMsg_ec_Fun((GraspBw - 5), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
                     else
                     {
