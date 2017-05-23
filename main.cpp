@@ -70,18 +70,18 @@
 
 // 最大搬运盒子数量
 // 盒子全部搬运过去之后, 进行堆叠之前, 总共有几堆盒子
-#if PUTBOX_MODE == 1
+// #if PUTBOX_MODE == 1
 #define MAX_BOXNUM 4
 #define HEAP_NUM 3
-#endif
-#if PUTBOX_MODE == 2
-#define MAX_BOXNUM 5
-#define HEAP_NUM 2
-#endif
-#if PUTBOX_MODE == 3
-#define MAX_BOXNUM 8
-#define HEAP_NUM 3
-#endif
+// #endif
+// #if PUTBOX_MODE == 2
+// #define MAX_BOXNUM 5
+// #define HEAP_NUM 2
+// #endif
+// #if PUTBOX_MODE == 3
+// #define MAX_BOXNUM 8
+// #define HEAP_NUM 3
+// #endif
 
 //判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波
 #define BOX_IN_GRASP_MODE 1
@@ -1423,7 +1423,7 @@ int main(int argc, char **argv)
                 {
                     if (boxNum != 4)
                     {
-                        txKylinMsg_ec_Fun((GraspBw - 5), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                        txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
                     else
                     {
