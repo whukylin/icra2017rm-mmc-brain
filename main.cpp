@@ -782,13 +782,13 @@ void keepSonarCtlFlagBits()
 
 bool isSonarStateAllSynced()
 {
+    return true;
     return IS_SONAR_STATE_SYNCED(F) && IS_SONAR_STATE_SYNCED(M) && IS_SONAR_STATE_SYNCED(L) && IS_SONAR_STATE_SYNCED(R);
 }
 
 void waitForSonarStateSynced()
 {
-    while (!isSonarStateAllSynced())
-        ;
+    while (!isSonarStateAllSynced());
 }
 
 KylinMsg_t kylinOdomCalib;
@@ -991,39 +991,39 @@ bool firstBoxJudgeFun()
 *************************************************************************/
 void enableSonarsFun(int fixed, int mobile, int left, int right)
 {
-    fixed = mobile = left = right = 1;
-    if (fixed == 1)
-    {
-        ENABLE_SONAR(F);
-    }
-    else
-    {
-        DISABLE_SONAR(F);
-    }
-    if (mobile == 1)
-    {
-        ENABLE_SONAR(M);
-    }
-    else
-    {
-        DISABLE_SONAR(M);
-    }
-    if (left == 1)
-    {
-        ENABLE_SONAR(L);
-    }
-    else
-    {
-        DISABLE_SONAR(L);
-    }
-    if (right == 1)
-    {
-        ENABLE_SONAR(R);
-    }
-    else
-    {
-        DISABLE_SONAR(R);
-    }
+    // fixed = mobile = left = right = 1;
+    // if (fixed == 1)
+    // {
+    //     ENABLE_SONAR(F);
+    // }
+    // else
+    // {
+    //     DISABLE_SONAR(F);
+    // }
+    // if (mobile == 1)
+    // {
+    //     ENABLE_SONAR(M);
+    // }
+    // else
+    // {
+    //     DISABLE_SONAR(M);
+    // }
+    // if (left == 1)
+    // {
+    //     ENABLE_SONAR(L);
+    // }
+    // else
+    // {
+    //     DISABLE_SONAR(L);
+    // }
+    // if (right == 1)
+    // {
+    //     ENABLE_SONAR(R);
+    // }
+    // else
+    // {
+    //     DISABLE_SONAR(R);
+    // }
 }
 
 bool isZGyroFusedPositionCtrlStart = false;
@@ -1976,8 +1976,8 @@ void videoMove_PutBox2toBox1()
         //txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 400 - 40 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-        if (kylinMsg.cbus.gp.e <= GraspBw - 440)
+        txKylinMsg_ec_Fun(GraspBw - 400 - 50- kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
+        if (kylinMsg.cbus.gp.e <= GraspBw - 450)
         {
             videoMove_PutBox2toBox1State = 8;
         }
