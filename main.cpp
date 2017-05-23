@@ -1091,7 +1091,7 @@ int main(int argc, char **argv)
     {
         updateOdomError();
         //如果当前处于绝对位置控制模式,进入判断条件
-        if (txKylinMsg.cbus.fs & (1u << CONTROL_MODE_BIT)) //0xFF == 1111 1111   0x80000000
+        //if (txKylinMsg.cbus.fs & (1u << CONTROL_MODE_BIT)) //0xFF == 1111 1111   0x80000000
         {
             absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
             absoluteDistanceCout = absoluteDistance;
@@ -1829,7 +1829,7 @@ void videoMove_PutBox2toBox1()
     case 2:
         enableSonarsFun(0, 0, 1, 1); // fixed, mobile, left, mobile
         coutLogicFlag_PutBox2toBox1 = 10.3;
-        workStateCout = "左右超声波对准";
+        workStateCout = "抓盒子时, 左右超声波对准";
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
@@ -1884,10 +1884,25 @@ void videoMove_PutBox2toBox1()
             videoMove_PutBox2toBox1State = 6;
         }
         break;
-    //升高滑台
+        //左右超声波对准
     case 6:
-        //while(numDelay--);
+        enableSonarsFun(0, 0, 1, 1); // fixed, mobile, left, mobile
         coutLogicFlag_PutBox2toBox1 = 10.7;
+        workStateCout = "叠盒子时, 左右超声波对准";
+        detection_mode = 0;
+        txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
+        txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
+        txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
+        if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300 && isSonarStateAllSynced())
+        {
+            moveDistance = 0;
+            videoMove_PutBox2toBox1State = 7;
+        }
+        break;
+    //升高滑台
+    case 7:
+        //while(numDelay--);
+        coutLogicFlag_PutBox2toBox1 = 10.8;
         workStateCout = "升高滑台";
         detection_mode = 0; //关闭视觉
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
@@ -1897,13 +1912,13 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(GraspBw - 400 - 40 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
         if (kylinMsg.cbus.gp.e <= GraspBw - 440)
         {
-            videoMove_PutBox2toBox1State = 7;
+            videoMove_PutBox2toBox1State = 8;
         }
         break;
     //fixed 超声波引导
-    case 7:
+    case 8:
         enableSonarsFun(1, 0, 0, 0); // fixed, mobile, left, mobile
-        coutLogicFlag_PutBox2toBox1 = 10.8;
+        coutLogicFlag_PutBox2toBox1 = 10.9;
         workStateCout = "fixed超声波引导";
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
@@ -1918,12 +1933,12 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, 0, 0);
         if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_PUTBOX2TO1 && isSonarStateAllSynced())
         {
-            videoMove_PutBox2toBox1State = 8;
+            videoMove_PutBox2toBox1State = 9;
         }
         break;
     //到达盒子上方, 降下抓子
-    case 8:
-        coutLogicFlag_PutBox2toBox1 = 10.9;
+    case 9:
+        coutLogicFlag_PutBox2toBox1 = 10.10;
         workStateCout = "到达盒子上方, 降下抓子";
         detection_mode = 0; //关闭视觉
         txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT);
@@ -1931,12 +1946,12 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(GraspBw - 400 - 10, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
         if (absuluteGrasp < 10)
         {
-            videoMove_PutBox2toBox1State = 9;
+            videoMove_PutBox2toBox1State = 10;
         }
         break;
     //松开抓子
-    case 9:
-        coutLogicFlag_PutBox2toBox1 = 10.10;
+    case 10:
+        coutLogicFlag_PutBox2toBox1 = 10.11;
         workStateCout = "松开抓子";
         //finishDetectCentroidFlag = false;   //clear the flag
         detection_mode = 0; //关闭视觉
