@@ -84,7 +84,7 @@
 #endif
 
 // 抓盒子时, 角度补偿值
-#define ANGLE_DIFF 140
+#define ANGLE_DIFF 0
 
 //判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波
 #define BOX_IN_GRASP_MODE 1
