@@ -369,7 +369,7 @@ void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_
     double thetaz = atan2(r21, r11) / CV_PI * 180;
     double thetay = atan2(-1 * r31, sqrt(r32*r32 + r33*r33)) / CV_PI * 180;
     double thetax = atan2(r32, r33) / CV_PI * 180;
-    ry=thetay*PROP;
+    ry=thetay*PROP+10;
     rz=thetaz;
     rx=thetax;
     tx=tvec.ptr<double>(0)[0];
