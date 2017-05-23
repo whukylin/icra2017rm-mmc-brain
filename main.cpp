@@ -1195,7 +1195,7 @@ int main(int argc, char **argv)
             {
             //检测盒子
             case 0:
-                enableSonarsFun(1, 0, 0, 0); // fixed, mobile, left, mobile
+                //enableSonarsFun(1, 0, 0, 0); // fixed, mobile, left, mobile
                 ramp = genRmp();
                 coutLogicFlag = 1;
                 workStageCout = "阶段一: ";
@@ -1209,7 +1209,7 @@ int main(int argc, char **argv)
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 //暂时无法修改成不需要标志位
-                if (finishDetectBoxFlag == true && isSonarStateAllSynced())
+                if (finishDetectBoxFlag == true)
                 {
                     grabBoxState = 1;
                 }
@@ -1217,7 +1217,7 @@ int main(int argc, char **argv)
             //fixed Ultrasonic
             //fixed 超声波引导
             case 1:
-                enableSonarsFun(1, 0, 0, 0); // fixed, mobile, left, mobile
+                //enableSonarsFun(1, 0, 0, 0); // fixed, mobile, left, mobile
                 coutLogicFlag = 2;
                 workStateCout = "fixed超声波引导";
                 detection_mode = 0;
@@ -1236,14 +1236,14 @@ int main(int argc, char **argv)
                 }
                 //抓子和滑台位置保持不变
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
-                if (sr04maf[SR04_IDX_F].avg < SQUARE_TO_FIXED_ULTRASONIC_DISTANCE && isSonarStateAllSynced())
+                if (sr04maf[SR04_IDX_F].avg < SQUARE_TO_FIXED_ULTRASONIC_DISTANCE)
                 {
                     grabBoxState = 2;
                 }
                 break;
             //左右超声波对准之前, 抓子下降
             case 2:
-                enableSonarsFun(0, 0, 0, 0); // fixed, mobile, left, mobile
+                //enableSonarsFun(0, 0, 0, 0); // fixed, mobile, left, mobile
                 //finishDetectBoxFlag = false;
                 coutLogicFlag = 3.1;
                 workStateCout = "左右超声波对准之前, 抓子下降";
@@ -1262,7 +1262,7 @@ int main(int argc, char **argv)
             //left right Ultrasonic
             //左右超声波对准
             case 3:
-                enableSonarsFun(0, 0, 1, 1); // fixed, mobile, left, mobile
+                //enableSonarsFun(0, 0, 1, 1); // fixed, mobile, left, mobile
                 //finishDetectBoxFlag = false;
                 coutLogicFlag = 3;
                 workStateCout = "左右超声波对准";
@@ -1273,7 +1273,7 @@ int main(int argc, char **argv)
 
                 //滑台下降到最低点, 便于超声波进行对准
                 txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
-                if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300 && isSonarStateAllSynced())
+                if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
                 {
                     //跳过质心检测
                     moveDistance = 0;
@@ -1318,7 +1318,7 @@ int main(int argc, char **argv)
             //image detection finished. only go forward
             //mobile 超声波引导小车抓盒子
             case 6:
-                enableSonarsFun(0, 1, 0, 0); // fixed, mobile, left, mobile
+                //enableSonarsFun(0, 1, 0, 0); // fixed, mobile, left, mobile
                 
                 coutLogicFlag = 5;
                 workStateCout = "mobile超声波引导";
@@ -1328,7 +1328,7 @@ int main(int argc, char **argv)
                 txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_M].avg, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
                 //抓子放到在最低点
                 txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
-                if (switchFlagFun() && isSonarStateAllSynced())
+                if (switchFlagFun())
                 {
                     grabBoxState = 7;
                 }
