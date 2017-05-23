@@ -1132,6 +1132,7 @@ int main(int argc, char **argv)
         // 只进行堆叠阶段
         while (1)
         {
+            updateOdomError();
             absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
             absoluteDistanceCout = absoluteDistance;
             absuluteAngle = abs(kylinOdomError.cbus.cp.z);
