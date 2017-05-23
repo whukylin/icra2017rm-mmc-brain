@@ -1130,11 +1130,25 @@ int main(int argc, char **argv)
         //workStateFlagPrint(); //打印当前状态
 
         // 只进行堆叠阶段
-        while(1)
+        while (1)
         {
+            absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
+            absoluteDistanceCout = absoluteDistance;
+            absuluteAngle = abs(kylinOdomError.cbus.cp.z);
+            absuluteGrasp = abs(kylinOdomError.cbus.gp.e);
+            absuluteGraspOpCl = abs(kylinOdomError.cbus.gp.c);
+
+            if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 300)
+            {
+                moveDistance = LRDISTANCE;
+            }
+            if (sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 300)
+            {
+                moveDistance = -(LRDISTANCE + 30);
+            }
             coutLogicFlag = INT_MAX;
             videoMove_PutBox2toBox1();
-            if(finish_HeapBox == true)
+            if (finish_HeapBox == true)
             {
                 finish_HeapBox = false;
             }
