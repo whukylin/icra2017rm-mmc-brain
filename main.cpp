@@ -1094,7 +1094,7 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    boxNum = 4;
+    // boxNum = 4;
 
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
@@ -1130,30 +1130,30 @@ int main(int argc, char **argv)
         //workStateFlagPrint(); //打印当前状态
 
         // 只进行堆叠阶段
-        while (1)
-        {
-            updateOdomError();
-            absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
-            absoluteDistanceCout = absoluteDistance;
-            absuluteAngle = abs(kylinOdomError.cbus.cp.z);
-            absuluteGrasp = abs(kylinOdomError.cbus.gp.e);
-            absuluteGraspOpCl = abs(kylinOdomError.cbus.gp.c);
+        // while (1)
+        // {
+        //     updateOdomError();
+        //     absoluteDistance = pow(pow((kylinOdomError.cbus.cp.x), 2) + pow((kylinOdomError.cbus.cp.y), 2), 0.5);
+        //     absoluteDistanceCout = absoluteDistance;
+        //     absuluteAngle = abs(kylinOdomError.cbus.cp.z);
+        //     absuluteGrasp = abs(kylinOdomError.cbus.gp.e);
+        //     absuluteGraspOpCl = abs(kylinOdomError.cbus.gp.c);
 
-            if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 300)
-            {
-                moveDistance = LRDISTANCE;
-            }
-            if (sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 300)
-            {
-                moveDistance = -(LRDISTANCE + 30);
-            }
-            coutLogicFlag = INT_MAX;
-            videoMove_PutBox2toBox1();
-            if (finish_HeapBox == true)
-            {
-                finish_HeapBox = false;
-            }
-        }
+        //     if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg < 300)
+        //     {
+        //         moveDistance = LRDISTANCE;
+        //     }
+        //     if (sr04maf[SR04_IDX_L].avg < 300 && sr04maf[SR04_IDX_R].avg > 300)
+        //     {
+        //         moveDistance = -(LRDISTANCE + 30);
+        //     }
+        //     coutLogicFlag = INT_MAX;
+        //     videoMove_PutBox2toBox1();
+        //     if (finish_HeapBox == true)
+        //     {
+        //         finish_HeapBox = false;
+        //     }
+        // }
         switch (workState)
         {
         case 0:
@@ -1605,7 +1605,7 @@ int main(int argc, char **argv)
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
-                    //  boxNum++;
+                     boxNum++;
                 }
                 break;
             default:
