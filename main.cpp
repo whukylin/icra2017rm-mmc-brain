@@ -83,6 +83,9 @@
 #define HEAP_NUM 3
 #endif
 
+// 抓盒子时, 角度补偿值
+#define ANGLE_DIFF 87
+
 //判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波
 #define BOX_IN_GRASP_MODE 1
 // 使用超声波判断盒子是否完全进入抓子时, 判断阈值
@@ -1146,10 +1149,10 @@ int main(int argc, char **argv)
             //TODO: 小车移动速度宏定义
             //在原点处旋转 90 度
             txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, 0, kylinOdomCalib.cbus.cp.y, 0, -ZROTATION90DEG + kylinOdomCalib.cbus.cp.z, Z_SPEED_1 * genRmp());
-            zgyroFusedYawPositionCtrl(-ZROTATION90DEG);
+            zgyroFusedYawPositionCtrl(-(ZROTATION90DEG+ANGLE_DIFF));
             //抓子张开
             txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
-            if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f && abs(zgyroFusedYawPositionCtrl(-ZROTATION90DEG)) <= 5.0f * PI / 2.0f)
+            if (absoluteDistance < 20 && absuluteAngle < 5.0f * PI / 2.0f && abs(zgyroFusedYawPositionCtrl(-(ZROTATION90DEG+ANGLE_DIFF))) <= 5.0f * PI / 2.0f)
             {
                 lastWs = workState;
                 rstRmp();
