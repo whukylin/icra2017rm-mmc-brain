@@ -92,7 +92,7 @@
 #define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 22
 
 // 摄像头与小车轴心的固定偏移
-#define DIFFCONST 100
+#define DIFFCONST 105
 
 // 小车旋转角度
 #define ZROTATION90DEG 1572
@@ -538,6 +538,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "2. WorkState: "
              << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "3. State: " << workStageCout << workStateCout << endl;
+        cout << "abs(tz): "<<abs(tz) << <<" lostFlag: "<<lostFlag<< endl;
         cout << "deltaAngle: " << deltaAngle << " zgyroMsg.angle: " << zgyroMsg.angle << " lastZGyroMsg.angle: "<< lastZGyroMsg.angle<< endl;
         cout << "------------------------------------------------------------------------------" << endl;
         // cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
@@ -592,7 +593,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             }
             //TODO: 本 if 语句使用 fixed 还是 mobile 超声波?
             //TODO: 矩形检测 flag 置 true 过程中, 超声波阈值宏定义
-            if ((sr04maf[SR04_IDX_M].avg < 410&&sr04maf[SR04_IDX_F].avg<500) || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
+            if ((sr04maf[SR04_IDX_M].avg < 410 && sr04maf[SR04_IDX_F].avg < 500) || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
             { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
                 finishDetectBoxFlag = true;
                 CountVframe = 0;
@@ -1215,9 +1216,27 @@ int main(int argc, char **argv)
                     grabBoxState = 2;
                 }
                 break;
+            //左右超声波对准之前, 抓子下降
+            case 2:
+                enableSonarsFun(0, 0, 0, 0); // fixed, mobile, left, mobile
+                //finishDetectBoxFlag = false;
+                coutLogicFlag = 3.1;
+                workStateCout = "左右超声波对准之前, 抓子下降";
+                detection_mode = 0;
+
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
+                txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
+
+                //滑台下降到最低点, 便于超声波进行对准
+                txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
+                if (kylinMsg.cbus.gp.e >= GraspBw - 5)
+                {
+                    grabBoxState = 3;
+                }
+                break;
             //left right Ultrasonic
             //左右超声波对准
-            case 2:
+            case 3:
                 enableSonarsFun(0, 0, 1, 1); // fixed, mobile, left, mobile
                 //finishDetectBoxFlag = false;
                 coutLogicFlag = 3;
@@ -1235,13 +1254,13 @@ int main(int argc, char **argv)
                     moveDistance = 0;
                     if (kylinMsg.cbus.gp.e >= GraspBw - 5)
                     {
-                        grabBoxState = 5;
+                        grabBoxState = 6;
                     }
                 }
                 break;
             //squares detection finished, begin detect green area
             // 质心检测前的滑台位置调整
-            case 3:
+            case 4:
                 detection_mode = 0;
                 workStateCout = "抓子下降到最低点";
                 txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
@@ -1252,11 +1271,11 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(GraspBw - 80 - kylinMsg.cbus.gp.e, 0, 0, 0);
                 if (kylinMsg.cbus.gp.e <= GraspBw - DETECT_SQUARE_GRASP_POSITION)
                 {
-                    grabBoxState = 4;
+                    grabBoxState = 5;
                 }
                 break;
             //质心检测
-            case 4:
+            case 5:
                 //finishDetectCentroidFlag = true;
                 coutLogicFlag = 4;
                 workStateCout = "质心引导";
@@ -1268,15 +1287,14 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, 0, 0, 0);
                 if (finishDetectCentroidFlag == true)
                 {
-                    grabBoxState = 5;
+                    grabBoxState = 6;
                 }
                 break;
             //image detection finished. only go forward
             //mobile 超声波引导小车抓盒子
-            case 5:
+            case 6:
                 enableSonarsFun(0, 1, 0, 0); // fixed, mobile, left, mobile
-                calibPx();
-                calibPz90();
+                
                 coutLogicFlag = 5;
                 workStateCout = "mobile超声波引导";
                 detection_mode = 0;                              //关闭视觉
@@ -1287,12 +1305,12 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
                 if (switchFlagFun() && isSonarStateAllSynced())
                 {
-                    grabBoxState = 6;
+                    grabBoxState = 7;
                 }
                 break;
             //begin grasp
             //开始抓盒子
-            case 6:
+            case 7:
                 coutLogicFlag = 6;
                 workStateCout = "合拢抓子";
                 //finishDetectCentroidFlag = false;   //clear the flag
@@ -1306,13 +1324,15 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
                 if (kylinMsg.cbus.gp.c == GraspCl)
                 {
-                    grabBoxState = 7;
+                    grabBoxState = 8;
                 }
                 break;
             //finish grasp. begin pull up.
 
             //滑台上升
-            case 7:
+            case 8:
+                calibPx();
+                calibPz90();
                 coutLogicFlag = 7;
                 workStateCout = "滑台上升";
                 detection_mode = 0; //关闭视觉
