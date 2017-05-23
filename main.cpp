@@ -92,7 +92,7 @@
 #define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 22
 
 // 摄像头与小车轴心的固定偏移
-#define DIFFCONST 50
+#define DIFFCONST 100
 
 // 小车旋转角度
 #define ZROTATION90DEG 1572
