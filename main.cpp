@@ -546,7 +546,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         // cout << "Grasp_Ref: " << txKylinMsg.cbus.gp.c << "Grasp_Fdb: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << " kylinMsg.cbus.fs & (1u << 2)): " << (kylinMsg.cbus.fs & (1u << 2)) << endl;
         // cout << "cl: " << GraspOp << " ch: " << GraspCl << endl;
 
-        //detection_mode = 1; //for testing
+        // detection_mode = 1; //for testing
         switch (detection_mode)
 
         {
@@ -593,7 +593,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             }
             //TODO: 本 if 语句使用 fixed 还是 mobile 超声波?
             //TODO: 矩形检测 flag 置 true 过程中, 超声波阈值宏定义
-            if ((sr04maf[SR04_IDX_M].avg < 410 && sr04maf[SR04_IDX_F].avg < 500) || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
+            if ((sr04maf[SR04_IDX_M].avg < 410 && sr04maf[SR04_IDX_F].avg < 500) || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 15))
             { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
                 finishDetectBoxFlag = true;
                 CountVframe = 0;
@@ -1094,7 +1094,7 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    // boxNum = 1;
+    // boxNum = 4;
 
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
@@ -1605,7 +1605,7 @@ int main(int argc, char **argv)
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
-                     boxNum++;
+                    boxNum++;
                 }
                 break;
             default:
