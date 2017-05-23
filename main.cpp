@@ -813,22 +813,22 @@ uint8_t updateOdomCalib()
 
 void calibPx()
 {
-    //kylinOdomCalib.cbus.cp.x = kylinMsg.cbus.cp.x;
+    kylinOdomCalib.cbus.cp.x = kylinMsg.cbus.cp.x;
 }
 
 void calibPy()
 {
-    //kylinOdomCalib.cbus.cp.y = kylinMsg.cbus.cp.y;
+    kylinOdomCalib.cbus.cp.y = kylinMsg.cbus.cp.y;
 }
 
 void calibPz()
 {
-    //kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z;
+    kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z;
 }
 
 void calibPz90()
 {
-    //kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z + ZROTATION90DEG;
+    kylinOdomCalib.cbus.cp.z = kylinMsg.cbus.cp.z + ZROTATION90DEG;
 }
 
 KylinMsg_t kylinOdomError;
