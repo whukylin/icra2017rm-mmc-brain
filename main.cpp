@@ -538,7 +538,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "2. WorkState: "
              << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
         cout << "3. State: " << workStageCout << workStateCout << endl;
-        cout << "abs(tz): "<<abs(tz) << <<" lostFlag: "<<lostFlag<< endl;
+        cout << "abs(tz): "<<abs(tz) <<" lostFlag: "<<lostFlag<< endl;
         cout << "deltaAngle: " << deltaAngle << " zgyroMsg.angle: " << zgyroMsg.angle << " lastZGyroMsg.angle: "<< lastZGyroMsg.angle<< endl;
         cout << "------------------------------------------------------------------------------" << endl;
         // cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
