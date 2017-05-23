@@ -1575,7 +1575,7 @@ int main(int argc, char **argv)
                     txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
                 }
 
-                if (sr04maf[SR04_IDX_F].avg > DIRECT_BACK_MOVE_DISTANCE && isSonarStateAllSynced())
+                if (sr04maf[SR04_IDX_F].avg > DIRECT_BACK_MOVE_DISTANCE)
                 {
                     backwardState = 1;
                 }
@@ -1657,7 +1657,7 @@ void videoMove_PutBox()
         //矩形检测引导盒子
         txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_3 * ramp, tz, Y_SPEED_3 * ramp, ry * 3141.592654f / 180, Z_SPEED_3_VISION);
         txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
-        if (finishDetectBoxFlag_PutBox == true && isSonarStateAllSynced())
+        if (finishDetectBoxFlag_PutBox == true)
         {
             videoMovePutBoxState = 1;
         }
@@ -1682,7 +1682,7 @@ void videoMove_PutBox()
         }
         //抓子不动
         txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
-        if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_1_PUTBOX && isSonarStateAllSynced())
+        if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_1_PUTBOX)
         {
             //第四个盒子比较特殊
             if(boxNum != 4)
@@ -1729,7 +1729,7 @@ void videoMove_PutBox()
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(0, 0, 0, 0);
-        if (sr04maf[SR04_IDX_L].avg > 350 && sr04maf[SR04_IDX_R].avg > 350 && isSonarStateAllSynced())
+        if (sr04maf[SR04_IDX_L].avg > 350 && sr04maf[SR04_IDX_R].avg > 350)
         {
             if (unFirstBoxJudgeFun())
             {
@@ -1825,7 +1825,7 @@ void videoMove_PutBox()
                 txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_F].avg, FIXED_ULTRASONIC_MOVE_SPEED, 0, 0);
             }
             txKylinMsg_ec_Fun(0, 0, 0, 0);
-            if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_2_PUTBOX && isSonarStateAllSynced())
+            if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_2_PUTBOX)
             {
                 coutLogicFlag_PutBox = 9.6;
                 putBoxState = 1;
@@ -1871,7 +1871,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_xyz_Fun(0, 0, -200, DIRECT_BACK_MOVE_SPEED, 0, 0);
         //打开抓子
         txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
-        if (sr04maf[SR04_IDX_F].avg > DIRECT_BACK_MOVE_DISTANCE_PUTBOX && isSonarStateAllSynced())
+        if (sr04maf[SR04_IDX_F].avg > DIRECT_BACK_MOVE_DISTANCE_PUTBOX)
         {
             videoMove_PutBox2toBox1State = 1;
         }
@@ -1901,7 +1901,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - 20 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
-        if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300 && isSonarStateAllSynced())
+        if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
         {
             //跳过质心检测
             moveDistance = 0;
@@ -1931,7 +1931,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
         txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_M].avg, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
-        if (switchFlagFun() && isSonarStateAllSynced())
+        if (switchFlagFun())
         {
             videoMove_PutBox2toBox1State = 5;
         }
@@ -1960,7 +1960,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
         txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
-        if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300 && isSonarStateAllSynced())
+        if (sr04maf[SR04_IDX_L].avg > 300 && sr04maf[SR04_IDX_R].avg > 300)
         {
             moveDistance = 0;
             videoMove_PutBox2toBox1State = 7;
@@ -1998,7 +1998,7 @@ void videoMove_PutBox2toBox1()
             txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_F].avg, FIXED_ULTRASONIC_MOVE_SPEED, 0, 0);
         }
         txKylinMsg_ec_Fun(0, 0, 0, 0);
-        if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_PUTBOX2TO1 && isSonarStateAllSynced())
+        if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_PUTBOX2TO1)
         {
             videoMove_PutBox2toBox1State = 9;
         }
