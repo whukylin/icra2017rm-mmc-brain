@@ -70,18 +70,18 @@
 
 // 最大搬运盒子数量
 // 盒子全部搬运过去之后, 进行堆叠之前, 总共有几堆盒子
-// #if PUTBOX_MODE == 1
+#if PUTBOX_MODE == 1
 #define MAX_BOXNUM 4
 #define HEAP_NUM 3
-// #endif
-// #if PUTBOX_MODE == 2
-// #define MAX_BOXNUM 5
-// #define HEAP_NUM 2
-// #endif
-// #if PUTBOX_MODE == 3
-// #define MAX_BOXNUM 8
-// #define HEAP_NUM 3
-// #endif
+#endif
+#if PUTBOX_MODE == 2
+#define MAX_BOXNUM 5
+#define HEAP_NUM 2
+#endif
+#if PUTBOX_MODE == 3
+#define MAX_BOXNUM 8
+#define HEAP_NUM 3
+#endif
 
 //判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波
 #define BOX_IN_GRASP_MODE 1
@@ -1553,7 +1553,7 @@ int main(int argc, char **argv)
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
-                    boxNum++;
+                    //boxNum++;
                 }
                 break;
             default:
@@ -1566,13 +1566,15 @@ int main(int argc, char **argv)
         //根据最大搬运盒子数量, 修改这里的值
         if (boxNum == MAX_BOXNUM + 1)
         {
-            missionEndTimeUs = currentTimeUs();
-            cout << "mission time cost:" << (missionEndTimeUs - missionStartTimeUs) * 1e-6 << endl;
+            //missionEndTimeUs = currentTimeUs();
+            //cout << "mission time cost:" << (missionEndTimeUs - missionStartTimeUs) * 1e-6 << endl;
             break;
         }
     }
     //if(capture.isOpened())
     //	capture.release();
+    missionEndTimeUs = currentTimeUs();
+    cout << "mission time cost:" << (missionEndTimeUs - missionStartTimeUs) * 1e-6 << endl;
     capture.closeStream();
     disconnect_serial();
     cout << "function done!" << endl;
