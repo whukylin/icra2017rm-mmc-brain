@@ -2,7 +2,7 @@
 #include "opencv2/opencv.hpp"
 #define DIF_CEN 190
 #define PROP 1.2
-#define DIF_AN -5
+#define DIF_AN - 4.3
 #define CX   343   //To change to calibration parameter.
 #define CY   320;   //the same with cameraMatrix.cx,cy
 //#define _SHOW_PHOTO
