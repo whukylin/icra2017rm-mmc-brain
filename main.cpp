@@ -56,11 +56,11 @@
 
 // 放下盒子之后, 先后推, 后退的距离, 速度以及抓子抬高的高度
 #define DIRECT_BACK_MOVE_DISTANCE 400
-#define DIRECT_BACK_MOVE_SPEED 450
+#define DIRECT_BACK_MOVE_SPEED 500
 #define DIRECT_BACK_MOVE_GRASP_UP_POSITION 100
 
 // 堆叠盒子时, 小车后退的距离
-#define DIRECT_BACK_MOVE_DISTANCE_PUTBOX 500
+#define DIRECT_BACK_MOVE_DISTANCE_PUTBOX 420
 
 // 堆叠盒子时, 放盒子的时候, fixed 超声波距离阈值
 #define FIXED_ULTRASONIC_PUTBOX2TO1 100
@@ -1129,6 +1129,16 @@ int main(int argc, char **argv)
         //boxNum = 6;
         //workStateFlagPrint(); //打印当前状态
 
+        // 只进行堆叠阶段
+        while(1)
+        {
+            coutLogicFlag = INT_MAX;
+            videoMove_PutBox2toBox1();
+            if(finish_HeapBox == true)
+            {
+                finish_HeapBox = false;
+            }
+        }
         switch (workState)
         {
         case 0:
@@ -1514,6 +1524,10 @@ int main(int argc, char **argv)
                         txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, 10, 0 + kylinOdomCalib.cbus.cp.y, 10, 0, 0);
                         txKylinMsg_ec_Fun(GraspTp, 10, 0, 0);
                         backwardState = 0;
+                        /***********************************************
+                        *   只进行抓盒子并堆叠盒子
+                        ************************************************/
+                        finish_HeapBox = false;
                     }
                     break;
                 default:
@@ -1575,7 +1589,6 @@ int main(int argc, char **argv)
                     finishDetectBoxFlag = false;
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
-                    finish_HeapBox  = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
                     //  boxNum++;
                 }
