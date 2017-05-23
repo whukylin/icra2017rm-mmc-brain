@@ -592,7 +592,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             }
             //TODO: 本 if 语句使用 fixed 还是 mobile 超声波?
             //TODO: 矩形检测 flag 置 true 过程中, 超声波阈值宏定义
-            if ((sr04maf[SR04_IDX_M].avg < 410&&sr04maf[SR04_IDX_F]<500) || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
+            if ((sr04maf[SR04_IDX_M].avg < 410&&sr04maf[SR04_IDX_F].avg<500) || (abs(tz) < 700 && (lostFlag == false) && CountVframe > 10))
             { //Usue ultra sonic distance for controlling. Detection_mode will be changed in main.
                 finishDetectBoxFlag = true;
                 CountVframe = 0;
@@ -601,7 +601,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             {
                 finishDetectBoxFlag = false;
             }
-            if (coutLogicFlag == 9 && ((sr04maf[SR04_IDX_M].avg < 410&&sr04maf[SR04_IDX_F]<500) || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
+            if (coutLogicFlag == 9 && ((sr04maf[SR04_IDX_M].avg < 410 && sr04maf[SR04_IDX_F].avg < 500) || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
             {
                 finishDetectBoxFlag_PutBox = true;
                 CountVframe = 0;
