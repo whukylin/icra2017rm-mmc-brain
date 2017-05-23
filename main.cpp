@@ -1094,7 +1094,7 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    boxNum = 1;
+    // boxNum = 1;
 
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
@@ -1605,7 +1605,7 @@ int main(int argc, char **argv)
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
-                     //boxNum++;
+                     boxNum++;
                 }
                 break;
             default:
