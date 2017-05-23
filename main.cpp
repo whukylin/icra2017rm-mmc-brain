@@ -533,7 +533,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         Mat src = frame.clone();
         //cout << "detection_mode=" << (int)detection_mode << endl;
 
-        cout << "1. Ultrasonic: " << " frame_id: "<<frame_id
+        cout << "1. Ultrasonic: " <<
              << " Left: " << sr04maf[SR04_IDX_L].avg << "  Right: " << sr04maf[SR04_IDX_R].avg << "  Fixed: " << sr04maf[SR04_IDX_F].avg << "  Mobile: " << sr04maf[SR04_IDX_M].avg << endl;
         cout << "2. WorkState: "
              << "coutLogicFlag: " << coutLogicFlag << " coutLogicFlag_PutBox: " << coutLogicFlag_PutBox << " coutLogicFlag_PutBox2toBox1: " << coutLogicFlag_PutBox2toBox1 << endl;
