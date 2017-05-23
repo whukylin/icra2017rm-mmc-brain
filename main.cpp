@@ -56,7 +56,7 @@
 
 // 放下盒子之后, 先后推, 后退的距离, 速度以及抓子抬高的高度
 #define DIRECT_BACK_MOVE_DISTANCE 400
-#define DIRECT_BACK_MOVE_SPEED 500
+#define DIRECT_BACK_MOVE_SPEED 450
 #define DIRECT_BACK_MOVE_GRASP_UP_POSITION 100
 
 // 堆叠盒子时, 小车后退的距离
@@ -1575,6 +1575,7 @@ int main(int argc, char **argv)
                     finishDetectBoxFlag = false;
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
+                    finish_HeapBox  false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
                     //  boxNum++;
                 }
@@ -1655,7 +1656,15 @@ void videoMove_PutBox()
         txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
         if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_1_PUTBOX && isSonarStateAllSynced())
         {
-            videoMovePutBoxState = 2;
+            //第四个盒子比较特殊
+            if(boxNum != 4)
+            {
+                videoMovePutBoxState = 2;
+            }
+            else
+            {
+                videoMovePutBoxState = 3;
+            }
         }
         break;
     //add Grasp Flag
@@ -1691,7 +1700,7 @@ void videoMove_PutBox()
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(moveDistance, LRSPEED, 0, 0, 0, 0);
-        txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
+        txKylinMsg_ec_Fun(0, 0, 0, 0);
         if (sr04maf[SR04_IDX_L].avg > 350 && sr04maf[SR04_IDX_R].avg > 350 && isSonarStateAllSynced())
         {
             if (unFirstBoxJudgeFun())
@@ -1729,8 +1738,8 @@ void videoMove_PutBox()
                 }
                 else
                 {
-                    txKylinMsg_ec_Fun((GraspBw - 15 - 20 - 400) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
-                    if (kylinMsg.cbus.gp.e <= GraspBw - 15 - 420)
+                    txKylinMsg_ec_Fun((GraspBw - 20 - 400) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
+                    if (kylinMsg.cbus.gp.e <= GraspBw - 420)
                     {
                         UnFirstBox_PutBoxState = 1;
                     }
