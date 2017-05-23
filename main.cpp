@@ -1575,7 +1575,7 @@ int main(int argc, char **argv)
                     finishDetectBoxFlag = false;
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
-                    finish_HeapBox  false;
+                    finish_HeapBox  = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
                     //  boxNum++;
                 }
