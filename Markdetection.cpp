@@ -80,7 +80,7 @@ void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
         Canny(timg, gray, 50, 200, 5);
 	    
 #ifdef _SHOW_PHOTO
-	    imshow("Canny", gray);
+	   // imshow("Canny", gray);
 #endif
 
 	    //dilate(gray, gray, Mat(), Point(-1,-1));

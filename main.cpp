@@ -546,7 +546,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         // cout << "Grasp_Ref: " << txKylinMsg.cbus.gp.c << "Grasp_Fdb: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << " kylinMsg.cbus.fs & (1u << 2)): " << (kylinMsg.cbus.fs & (1u << 2)) << endl;
         // cout << "cl: " << GraspOp << " ch: " << GraspCl << endl;
 
-        // detection_mode = 1; //for testing
+        detection_mode = 1; //for testing
         switch (detection_mode)
 
         {
