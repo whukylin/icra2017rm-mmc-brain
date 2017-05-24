@@ -33,6 +33,11 @@
 //TODO: 判定 fixed 超声波无法打到盒子并向左移动时的阈值
 #define LEFT_MOVE_DISTANCE 0
 
+// mobile 超声波引导时, 检测小车有无正确进入抓子的数组长度
+#define DETECT_MOBILE_ERROR_LENGTH 100 
+#define DETECT_MOBILE_ERROR_DISTANCE 10 //最长时间容忍的差值
+#define DETECT_MOBILE_ERROR_MOVEBACK_DISTANCE 400   //出错后, 先后退, 后退的距离
+
 //TODO: 抓住盒子之后, 滑台上升位置
 #define GRASP_UP_HAVE_BOX_POSITION 210
 
@@ -169,6 +174,9 @@ double currentTimeUs()
     return cvGetTickCount() / cvGetTickFrequency();
 }
 
+float detectMobileError[DETECT_MOBILE_ERROR_LENGTH];
+int currentMobileErrorCount = 0;
+bool noFirstIn = false;
 extern double ry, rz, rx;
 extern double tx, ty, tz;
 extern const char *wndname;
@@ -981,6 +989,35 @@ bool firstBoxJudgeFun()
         return (boxNum == 1 || boxNum == 4 || boxNum == 7);
     }
 }
+/*************************************************************************
+*  函数名称：detectMobileError()
+*  功能说明：检测mobile超声波引导时, 盒子有没有正确进入抓子的函数
+*  参数说明：mobile mobile超声波测得的距离, 在使用这个函数之前, 要先对 noFirstIn 置 false
+*  函数返回：有无正确进入抓子的标志位
+*  修改时间：2017-05-24
+*************************************************************************/
+bool detectMobileErrorFun(float mobile)
+{
+    detectMobileError[currentMobileErrorCount] = mobile;
+    if (noFirstIn == true)
+    {
+        if (abs(detectMobileError[(currentMobileErrorCount % DETECT_MOBILE_ERROR_LENGTH + 1) % DETECT_MOBILE_ERROR_LENGTH] - detectMobileError[currentMobileErrorCount % DETECT_MOBILE_ERROR_LENGTH]) < DETECT_MOBILE_ERROR_DISTANCE)
+        {
+            return false;
+        }
+        else
+        {
+            noFirstIn = false;
+            return true;
+        }
+    }
+    currentMobileErrorCount++;
+    if(currentMobileErrorCount >= DETECT_MOBILE_ERROR_LENGTH)
+    {
+        noFirstIn = true;
+        currentMobileErrorCount = 0;
+    }
+}
 
 /*************************************************************************
 *  函数名称：enableSonars
@@ -1324,13 +1361,21 @@ int main(int argc, char **argv)
                 workStateCout = "mobile超声波引导";
                 detection_mode = 0;                              //关闭视觉
                 txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
+                
                 //mobil 超声波引导小车前进
                 txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_M].avg, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
                 //抓子放到在最低点
                 txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
-                if (switchFlagFun())
+                if(detectMobileErrorFun(sr04maf[SR04_IDX_M].avg))
                 {
-                    grabBoxState = 7;
+                    if (switchFlagFun())
+                    {
+                        grabBoxState = 7;
+                    }
+                }
+                else        // mobile 超声波出错
+                {
+                    grabBoxState = 9;
                 }
                 break;
             //begin grasp
@@ -1373,6 +1418,21 @@ int main(int argc, char **argv)
                     rstRmp();
                     workState = 2; //切换到下一阶段
                     isZGyroFusedPositionCtrlStart = false;
+                }
+                break;
+            //mobile 超声波出错矫正, 小车直接后退
+            case 9:
+                workStateCout = "mobile 超声波出错, 小车直接后退";
+                detection_mode = 0; //关闭视觉
+                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
+                txKylinMsg_xyz_Fun(0, 0, -150, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
+                txKylinMsg_ec_Fun(0, 0, 0, 0);
+                //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
+                //TODO: 滑台上升位置宏定义
+                if (sr04maf[SR04_IDX_M].avg > DETECT_MOBILE_ERROR_MOVEBACK_DISTANCE)
+                {
+                    //跳回到左右超声波对准阶段
+                    grabBoxState = 3;
                 }
                 break;
             default:
@@ -1714,8 +1774,8 @@ void videoMove_PutBox()
         }
         else
         {
-            txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
-            if (kylinMsg.cbus.gp.e >= GraspBw - 25)
+            txKylinMsg_ec_Fun(GraspBw - 40 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
+            if (kylinMsg.cbus.gp.e >= GraspBw - 40)
             {
                 videoMovePutBoxState = 3;
             }
