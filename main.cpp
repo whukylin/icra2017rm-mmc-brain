@@ -1314,7 +1314,6 @@ int main(int argc, char **argv)
                     if (kylinMsg.cbus.gp.e >= GraspBw - 5)
                     {
                         grabBoxState = 6;
-						currentMobileErrorCount = 0;
                     }
                 }
                 break;
@@ -1354,7 +1353,6 @@ int main(int argc, char **argv)
             //mobile 超声波引导小车抓盒子
             case 6:
                 //enableSonarsFun(0, 1, 0, 0); // fixed, mobile, left, mobile
-                
                 coutLogicFlag = 5;
                 workStateCout = "mobile超声波引导";
                 detection_mode = 0;                              //关闭视觉
@@ -1364,23 +1362,9 @@ int main(int argc, char **argv)
                 txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_M].avg, MOBILE_ULTRASONIC_MOVE_SPEED, 0, 0);
                 //抓子放到在最低点
                 txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, 0, 0);
-				detectFlag = true;
-				indexLoop++;
-				if(indexLoop > 10000)
-				{
-					detectFlag = detectMobileErrorFun(sr04maf[SR04_IDX_M].avg);
-					indexLoop = 0;
-				}
-                if(detectFlag)
+                if (switchFlagFun())
                 {
-                    if (switchFlagFun())
-                    {
-                        grabBoxState = 7;
-                    }
-                }
-                else        // mobile 超声波出错
-                {
-                    grabBoxState = 9;
+                    grabBoxState = 7;
                 }
                 break;
             //begin grasp
@@ -1425,21 +1409,21 @@ int main(int argc, char **argv)
                     isZGyroFusedPositionCtrlStart = false;
                 }
                 break;
-            //mobile 超声波出错矫正, 小车直接后退
-            case 9:
-                workStateCout = "mobile 超声波出错, 小车直接后退";
-                detection_mode = 0; //关闭视觉
-                txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
-                txKylinMsg_xyz_Fun(0, 0, -150, MOBILE_ULTRASONIC_MOVE_SPEED*2, 0, 0);
-                txKylinMsg_ec_Fun(0, 0, 0, 0);
-                //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
-                //TODO: 滑台上升位置宏定义
-                if (sr04maf[SR04_IDX_M].avg > DETECT_MOBILE_ERROR_MOVEBACK_DISTANCE - 100)
-                {
-                    //跳回到左右超声波对准阶段
-                    grabBoxState = 3;
-                }
-                break;
+            // //mobile 超声波出错矫正, 小车直接后退
+            // case 9:
+            //     workStateCout = "mobile 超声波出错, 小车直接后退";
+            //     detection_mode = 0; //关闭视觉
+            //     txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
+            //     txKylinMsg_xyz_Fun(0, 0, -150, MOBILE_ULTRASONIC_MOVE_SPEED*2, 0, 0);
+            //     txKylinMsg_ec_Fun(0, 0, 0, 0);
+            //     //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
+            //     //TODO: 滑台上升位置宏定义
+            //     if (sr04maf[SR04_IDX_M].avg > DETECT_MOBILE_ERROR_MOVEBACK_DISTANCE - 100)
+            //     {
+            //         //跳回到左右超声波对准阶段
+            //         grabBoxState = 3;
+            //     }
+            //     break;
             default:
                 break;
             }
