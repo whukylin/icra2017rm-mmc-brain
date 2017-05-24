@@ -1502,7 +1502,7 @@ int main(int argc, char **argv)
                         putBoxState = 1;
                     }
                 }
-                else if(boxNum>4&&addboxNum>0)
+                else if(boxNum>4 && addboxNum>0)
                 {
                     detection_mode = 0;                           //关闭视觉
                     txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
@@ -1705,7 +1705,7 @@ int main(int argc, char **argv)
 *  功能说明：单次盒子放置函数
 *  参数说明：无
 *  函数返回：无
-*  修改时间：addboxNum2017-05-17
+*  修改时间：2017-05-17
 *************************************************************************/
 void videoMove_PutBox()
 {
