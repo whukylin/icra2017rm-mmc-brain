@@ -1487,12 +1487,12 @@ int main(int argc, char **argv)
                 workState3_Num++;
                 coutLogicFlag = 9;
                 workStageCout = "阶段三: ";
-                workStateCout = "前往基地区";
+                
                 if (boxNum == 1)
                 {
                     detection_mode = 0;                           //关闭视觉
                     txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
-
+                    workStateCout = "boxNum = 1, 前往基地区固定位置";
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
                     txKylinMsg_xyz_Fun(AXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
@@ -1506,7 +1506,7 @@ int main(int argc, char **argv)
                 {
                     detection_mode = 0;                           //关闭视觉
                     txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
-
+                    workStateCout = "boxNum > 4, 前往基地区固定位置, 只抓盒子";
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
                     txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY- (addboxNum-1)*200 + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
@@ -1519,9 +1519,9 @@ int main(int argc, char **argv)
                 else
                 {
                     //跳变部分在函数体里面
+                    workStateCout = "1 < boxNum <= 4, 视觉引导前往基地区固定位置";
                     videoMove_PutBox();
                 }
-
                 break;
             //到达指定位置(盒子上方)，放下盒子
             case 1:
