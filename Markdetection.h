@@ -27,7 +27,7 @@ public:
 
 void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares );
 void drawSquares( Mat& image, const vector<vector<Point> >& squares );
-void LocationMarkes(const vector<vector<Point> >& squares);
+void LocationMarkes(Mat& image,const vector<vector<Point> >& squares);
 void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_br,Point3f world_pnt_bl,Point2f pnt_tl_src,Point2f pnt_tr_src,Point2f pnt_br_src,Point2f pnt_bl_src);
 int Color_judge(Mat &src,int area);
 void Sort_rect(vector<Point>& approx);

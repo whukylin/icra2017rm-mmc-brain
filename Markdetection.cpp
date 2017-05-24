@@ -310,21 +310,26 @@ void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 #endif
 }
 
-void LocationMarkes(const vector<vector<Point> >& squares)
+void LocationMarkes(Mat& image, const vector<vector<Point> >& squares)
 {
 	if(squares.size()>0)
     {
         Point tl,tr,br,bl;
-        int max=squares[0][0].y;
+        int min=squares[0][0].y;
         int id=0;
         for(int i=1; i<squares.size(); i++)
         {
-            if(squares[i][0].y>max)
+            if(squares[i][0].y<min)
             {
-                max=squares[i][0].y;
+                min=squares[i][0].y;
                 id=i;
             }
         }
+        const Point* p = &squares[id][0];
+        int n = (int)squares[id].size();
+        polylines(image, &p, &n, 1, true, Scalar(0,255,0), 1, CV_AA);
+        imshow("Only Left Square", image);
+        
         tl=squares[id][0];
         tr=squares[id][1];
         br=squares[id][2];
