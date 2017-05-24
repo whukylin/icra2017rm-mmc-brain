@@ -1094,7 +1094,7 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    // boxNum = 4;
+    boxNum = 4;
 
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
@@ -1681,18 +1681,19 @@ void videoMove_PutBox()
             txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_F].avg, FIXED_ULTRASONIC_MOVE_SPEED, 0, 0);
         }
         //抓子不动
-        txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
+        txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
         if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_1_PUTBOX)
         {
             //第四个盒子比较特殊
-            if(boxNum != 4)
-            {
-                videoMovePutBoxState = 2;
-            }
-            else
-            {
-                videoMovePutBoxState = 3;
-            }
+            videoMovePutBoxState = 2;
+            // if(boxNum != 4)
+            // {
+            //     videoMovePutBoxState = 2;
+            // }
+            // else
+            // {
+            //     videoMovePutBoxState = 3;
+            // }
         }
         break;
     //add Grasp Flag
@@ -1995,7 +1996,14 @@ void videoMove_PutBox2toBox1()
         }
         else
         {
-            txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_F].avg, FIXED_ULTRASONIC_MOVE_SPEED, 0, 0);
+            if(heapCount == 1)  //堆叠最后一堆盒子, 数量较多, 降低速度
+            {
+                txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_F].avg, FIXED_ULTRASONIC_MOVE_SPEED / 2, 0, 0);
+            }
+            else
+            {
+                txKylinMsg_xyz_Fun(0, 0, sr04maf[SR04_IDX_F].avg, FIXED_ULTRASONIC_MOVE_SPEED, 0, 0);
+            }
         }
         txKylinMsg_ec_Fun(0, 0, 0, 0);
         if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_PUTBOX2TO1)
@@ -2045,8 +2053,6 @@ void videoMove_PutBox2toBox1()
 }
 /* 整体工程
 * FIXME:
-* 1. 将标志位结构整体换成 switch case 结构(下一个大版本)
-* 2. 堆叠盒子的高度
 * 3. fixed 超声波无法打到盒子时, 程序流程
 * 4. 抓盒子之后的抬高高度(宏定义)(一个盒子高度)
 * 5. 第四个盒子进行超声波对准的时候, 不降到最低点
