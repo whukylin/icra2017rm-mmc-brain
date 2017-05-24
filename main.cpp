@@ -47,7 +47,7 @@
 
 //基地区新加盒子的坐标 addaxisX addaxisY
 #define ADDAXISX -100
-#define ADDAXISY 3000
+#define ADDAXISY 3500
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
 #define FIXED_ULTRASONIC_2_PUTBOX 100
 // 放置盒子的时候, 每一堆第一个盒子放置的位置
@@ -246,7 +246,7 @@ string workStateCout;
 string workStageCout;
 
 int putBoxNum = 1;
-int boxNum = 1, addboxNum=0; //the num of the box
+int boxNum = 5, addboxNum=1; //the num of the box
 int GraspTp;
 int GraspBw;
 int GraspOp;
@@ -1509,7 +1509,7 @@ int main(int argc, char **argv)
 
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
-                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY- (addboxNum-1)*40 + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY- (addboxNum-1)*200 + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
                     if (absoluteDistance < 10)
                     {
@@ -1682,7 +1682,7 @@ int main(int argc, char **argv)
             break;
         }
         //根据最大搬运盒子数量, 修改这里的值
-        if (boxNum == MAX_BOXNUM + 1)
+        if (boxNum >= MAX_BOXNUM + 1)
         {
             addboxNum++;
             if(addboxNum>MAX_BOXNUM+1)
