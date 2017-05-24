@@ -34,7 +34,7 @@
 #define LEFT_MOVE_DISTANCE 0
 
 // mobile 超声波引导时, 检测小车有无正确进入抓子的数组长度
-#define DETECT_MOBILE_ERROR_LENGTH 100 
+#define DETECT_MOBILE_ERROR_LENGTH 500 
 #define DETECT_MOBILE_ERROR_DISTANCE 10 //最长时间容忍的差值
 #define DETECT_MOBILE_ERROR_MOVEBACK_DISTANCE 400   //出错后, 先后退, 后退的距离
 
