@@ -568,7 +568,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         case 1: //detect squares
             //cout << "detection_mode=" << (int)detection_mode << endl;
             findSquares(src, frame, squares);
-            LocationMarkes(src, squares);
+            LocationMarkes(squares);
             drawSquares(frame, squares);
             if (squares.size() > 0)
             {

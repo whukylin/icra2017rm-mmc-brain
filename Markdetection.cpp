@@ -310,7 +310,7 @@ void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 #endif
 }
 
-void LocationMarkes(Mat& image, const vector<vector<Point> >& squares)
+void LocationMarkes(const vector<vector<Point> >& squares)
 {
 	if(squares.size()>0)
     {
@@ -325,10 +325,6 @@ void LocationMarkes(Mat& image, const vector<vector<Point> >& squares)
                 id=i;
             }
         }
-        const Point* p = &squares[id][0];
-        int n = (int)squares[id].size();
-        polylines(image, &p, &n, 1, true, Scalar(0,255,0), 1, CV_AA);
-        imshow("Only Left Square", image);
         
         tl=squares[id][0];
         tr=squares[id][1];

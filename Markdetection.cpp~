@@ -80,7 +80,7 @@ void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
         Canny(timg, gray, 50, 200, 5);
 	    
 #ifdef _SHOW_PHOTO
-	    imshow("Canny", gray);
+	   // imshow("Canny", gray);
 #endif
 
 	    //dilate(gray, gray, Mat(), Point(-1,-1));
@@ -315,16 +315,17 @@ void LocationMarkes(const vector<vector<Point> >& squares)
 	if(squares.size()>0)
     {
         Point tl,tr,br,bl;
-        int max=squares[0][0].y;
+        int min=squares[0][0].y;
         int id=0;
         for(int i=1; i<squares.size(); i++)
         {
-            if(squares[i][0].y>max)
+            if(squares[i][0].y<min)
             {
-                max=squares[i][0].y;
+                min=squares[i][0].y;
                 id=i;
             }
         }
+        
         tl=squares[id][0];
         tr=squares[id][1];
         br=squares[id][2];
@@ -369,7 +370,7 @@ void Calcu_attitude(Point3f world_pnt_tl,Point3f world_pnt_tr,Point3f world_pnt_
     double thetaz = atan2(r21, r11) / CV_PI * 180;
     double thetay = atan2(-1 * r31, sqrt(r32*r32 + r33*r33)) / CV_PI * 180;
     double thetax = atan2(r32, r33) / CV_PI * 180;
-    ry=thetay*PROP;
+    ry=(thetay+DIF_AN)*PROP;
     rz=thetaz;
     rx=thetax;
     tx=tvec.ptr<double>(0)[0];
