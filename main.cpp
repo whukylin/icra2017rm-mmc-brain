@@ -47,13 +47,13 @@
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
-#define AXISY 2500
+#define AXISY 2200
 
 //基地区新加盒子的坐标 addaxisX addaxisY
 #define PY_MAN_CALIB_VAL 400
 #define TWO_BOX_DIFF 350
 #define ADDAXISX 0
-#define ADDAXISY (AXISY - TWO_BOX_DIFF - PY_MAN_CALIB_VAL)
+#define ADDAXISY (AXISY - PY_MAN_CALIB_VAL)
 
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
 #define FIXED_ULTRASONIC_2_PUTBOX 100
@@ -136,7 +136,7 @@
 #define FIXED_SPEED 150
 
 // mobile 超声波引导小车前进时, 小车移动速度
-#define MOBILE_ULTRASONIC_MOVE_SPEED 300
+#define MOBILE_ULTRASONIC_MOVE_SPEED 600
 
 // 阶段 2 : 小车抓取到盒子之后, 回原点的速度
 #define X_SPEED_2 600
