@@ -56,7 +56,18 @@ double angle( Point pt1, Point pt2, Point pt0 )
     double dy1 = pt1.y - pt0.y;
     double dx2 = pt2.x - pt0.x;
     double dy2 = pt2.y - pt0.y;
+    double prop= sqrt((dx1*dx1 + dy1*dy1)/((dx2*dx2 + dy2*dy2)+1e-10));
     return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
+}
+
+double proportion( Point pt1, Point pt2, Point pt0 )
+{
+    double dx1 = pt1.x - pt0.x;
+    double dy1 = pt1.y - pt0.y;
+    double dx2 = pt2.x - pt0.x;
+    double dy2 = pt2.y - pt0.y;
+    return sqrt((dx1*dx1 + dy1*dy1)/((dx2*dx2 + dy2*dy2)+1e-10));
+    //return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
 }
 
 void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
@@ -109,8 +120,11 @@ void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
                         double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
                         maxCosine = MAX(maxCosine, cosine);
                     }
-                    if( maxCosine < 0.3 )
+                    double prop=proportion(approx[2],approx[0],approx[1]);
+                    double normal_prop=prop<1.0? prop:(1.0/prop);
+                    if( maxCosine < 0.3 && normal_prop>0.6&& normal_prop<0.95)
                     {
+                        double prop=proportion(approx[2],approx[0],approx[1]);
                         counts++;
                         int tl_x,tl_y,br_x,br_y;
 			int tl_x_2,tl_y_2,br_x_2,br_y_2;
