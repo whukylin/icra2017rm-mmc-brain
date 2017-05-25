@@ -43,7 +43,7 @@
 
 // 进行矩形检测之前, 小车先直行一段距离, 降低小车矩形漏检率
 #define AXISX_DIRECT 0
-#define AXISY_DIRECT 1000
+#define AXISY_DIRECT 1500
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
@@ -1961,7 +1961,7 @@ void videoMove_PutBox()
         }
         break;
     case 6:
-        if (kylinMsg.cbus.gp.e >= GraspBw - 60)
+        if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
         {
             //放完盒子跳变到下一个状态
             putBoxState = 1;
