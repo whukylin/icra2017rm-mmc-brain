@@ -1672,6 +1672,10 @@ int main(int argc, char **argv)
                     finishDetectBoxFlag_PutBox = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
                     boxNum++;
+					if (boxNum >= MAX_BOXNUM + 1)
+					{
+						addboxNum++;
+					}
                 }
                 break;
             default:
@@ -1684,8 +1688,7 @@ int main(int argc, char **argv)
         //根据最大搬运盒子数量, 修改这里的值
         if (boxNum >= MAX_BOXNUM + 1)
         {
-            addboxNum++;
-            if(addboxNum>MAX_BOXNUM+1)
+            if(addboxNum > MAX_BOXNUM + 1)
                 break;
         }
         
