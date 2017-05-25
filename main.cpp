@@ -1098,8 +1098,56 @@ void rstYaw()
     isZGyroFusedPositionCtrlStart = false;
     saveZGyroMsg();
 }
-
 int main(int argc, char **argv)
+{
+    if (!setcamera())
+    {
+        cout << "Setup camera failure. Won't do anything." << endl;
+        return -1;
+    }
+
+    init();
+    rstRmp();
+    //uint32_t cnt = 0;
+    //Rmp_Config(&rmp, 50000);
+    Maf_Init(&maf, maf_buf, MAF_BUF_LEN);
+    Tri_Init(&tri, 2.5e4);
+
+    const char *device = "/dev/ttyTHS2";
+    if (connect_serial(device, 115200) == -1)
+    {
+        printf("serial open error!\n");
+        return -1;
+    }
+
+    updateOdomCalib();
+    logicInit(); //逻辑控制初始化
+    Mat frame;
+    vector<vector<Point>> squares;
+    int lostFlag = false;
+    //KylinBotMsgPullerThreadFunc(NULL);
+    //printf("hjhklhjllllllhkl\n");
+    printf("exit_flag=%d\n", exit_flag);
+    int lostCount = 0;
+    int CountVframe = 0;
+    int fflage = -1;
+    while (exit_flag == 0) //&&(capture.read(frame)))
+    {
+        squares.clear();
+
+        capture >> frame;
+        if (frame.empty())
+            continue;
+
+        int dif_x = 0, dif_y = 0;
+        Mat src = frame.clone();
+        findSquares(src, frame, squares);
+        LocationMarkes(squares);
+        drawSquares(frame, squares);
+    }
+}
+
+int main_(int argc, char **argv)
 {
     missionStartTimeUs = currentTimeUs();
     if (!setcamera())
