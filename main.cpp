@@ -194,7 +194,7 @@ float detectMobileError[DETECT_MOBILE_ERROR_LENGTH];
 int currentMobileErrorCount = 0;
 bool detectFlag = true;
 int indexLoop = 0;
-bool noFirstIn = false;
+bool firstInCalibPy = false;
 extern double ry, rz, rx;
 extern double tx, ty, tz;
 extern const char *wndname;
@@ -845,6 +845,11 @@ void calibPyManually()
     kylinOdomCalib.cbus.cp.y += PY_MAN_CALIB_VAL;
 }
 
+void calibPyManuallyAgain()
+{
+    kylinOdomCalib.cbus.cp.y += TWO_BOX_DIFF;
+}
+
 void calibPx()
 {
     kylinOdomCalib.cbus.cp.x = kylinMsg.cbus.cp.x;
@@ -1433,6 +1438,7 @@ int main(int argc, char **argv)
                     rstRmp();
                     workState = 2; //切换到下一阶段
                     isZGyroFusedPositionCtrlStart = false;
+                    firstInCalibPy = false;
                 }
                 break;
             // //mobile 超声波出错矫正, 小车直接后退
@@ -1474,6 +1480,11 @@ int main(int argc, char **argv)
             detection_mode = 0;                           //关闭视觉
             txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
+            if(firstInCalibPy == false)
+            {
+                calibPyManuallyAgain();
+                firstInCalibPy = true;
+            }
             if (absoluteDistance < 10)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
@@ -1532,7 +1543,7 @@ int main(int argc, char **argv)
                     workStateCout = "boxNum > 4, 前往基地区固定位置, 只抓盒子";
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
-                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY - (addboxNum - 1) * TWO_BOX_DIFF + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY - TWO_BOX_DIFF + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
                     if (absoluteDistance < 10)
                     {
@@ -1762,9 +1773,9 @@ void videoMove_PutBox()
         //到达目的地(基地区位置)
         //基地区坐标为(AXISX, AXISY)
 
-        txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+        txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
         txKylinMsg_ec_Fun(0, 0, 0, 0);
-        if (absoluteDistance < 10)
+        if (absoluteDistance < 100)
         {
             videoMovePutBoxState = 1;
         }
