@@ -122,9 +122,8 @@ void findSquares( Mat src,const Mat& image, vector<vector<Point> >& squares )
                     }
                     double prop=proportion(approx[2],approx[0],approx[1]);
                     double normal_prop=prop<1.0? prop:(1.0/prop);
-                    if( maxCosine < 0.3 && normal_prop>0.6&& normal_prop<0.95)
+                    if( maxCosine < 0.3)// && normal_prop>0.6&& normal_prop<0.95)
                     {
-                        double prop=proportion(approx[2],approx[0],approx[1]);
                         counts++;
                         int tl_x,tl_y,br_x,br_y;
 			int tl_x_2,tl_y_2,br_x_2,br_y_2;
@@ -268,7 +267,8 @@ void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 #endif
     }
     //cout<<"squares.size: "<<squares.size()<<endl;
-	
+	double prop=proportion(squares[0][2],squares[0][0],squares[0][1]);
+    double normal_prop=prop<1.0? prop:(1.0/prop);
 	//caculate the omission rate
 	numframe++;
 
@@ -295,7 +295,7 @@ void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         sprintf(str_tz,"%lf",tz);
         sprintf(str_ty,"%lf",ty);
         sprintf(str_tx,"%lf",tx);
-		sprintf(str_om,"%lf",omission);
+		sprintf(str_om,"%lf",normal_prop);
         string pre_str_y="thetay: ";
         string pre_str_z="thetaz: ";
         string pre_str_x="thetax: ";
