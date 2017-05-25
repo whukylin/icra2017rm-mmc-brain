@@ -47,11 +47,11 @@
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
-#define AXISY 2000
+#define AXISY 2500
 
 //基地区新加盒子的坐标 addaxisX addaxisY
 #define PY_MAN_CALIB_VAL 400
-#define TWO_BOX_DIFF 300
+#define TWO_BOX_DIFF 350
 #define ADDAXISX 0
 #define ADDAXISY (AXISY - TWO_BOX_DIFF - PY_MAN_CALIB_VAL)
 
@@ -157,6 +157,9 @@
 #define Y_SPEED_4 1200
 #define Z_SPEED_4 1400
 
+#define ADDSPEED 200
+
+
 #define YSPEED 1200 //forward speed
 #define XSPEED 400
 #define ZSPEED 1300
@@ -167,7 +170,7 @@
 #define BUF_LEN 256
 #define TIMEOUT 30
 #define FRAME_N 20000
-#define ADDSPEED 100
+
 
 // 标志位 fs 宏定义
 #define CONTROL_MODE_BIT 30 //相对位置和绝对位置控制模式对应的位数
@@ -1480,7 +1483,7 @@ int main(int argc, char **argv)
             detection_mode = 0;                           //关闭视觉
             txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
-            if(firstInCalibPy == false && addboxNum >= 1)
+            if(firstInCalibPy == false && addboxNum > 1)
             {
                 calibPyManuallyAgain();
                 firstInCalibPy = true;
@@ -1531,7 +1534,7 @@ int main(int argc, char **argv)
                     //基地区坐标为(AXISX, AXISY)
                     txKylinMsg_xyz_Fun(AXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
-                    if (absoluteDistance < 10)
+                    if (absoluteDistance < 100)
                     {
                         putBoxState = 1;
                     }
@@ -1543,7 +1546,7 @@ int main(int argc, char **argv)
                     workStateCout = "boxNum > 4, 前往基地区固定位置, 只抓盒子";
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
-                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY - TWO_BOX_DIFF + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY - TWO_BOX_DIFF + kylinOdomCalib.cbus.cp.y, (Y_SPEED_3_FIRSTBOX + ADDSPEED) * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
                     if (absoluteDistance < 10)
                     {
@@ -1775,7 +1778,8 @@ void videoMove_PutBox()
 
         txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
         txKylinMsg_ec_Fun(0, 0, 0, 0);
-        if (absoluteDistance < 100)
+        //关闭直接移动
+        //if (absoluteDistance < 100)
         {
             videoMovePutBoxState = 1;
         }
