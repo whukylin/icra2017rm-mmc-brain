@@ -47,13 +47,13 @@
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
-#define AXISY 2200
+#define AXISY 2000
 
 //基地区新加盒子的坐标 addaxisX addaxisY
 #define PY_MAN_CALIB_VAL 400
 #define TWO_BOX_DIFF 350
 #define ADDAXISX 0
-#define ADDAXISY (AXISY - PY_MAN_CALIB_VAL)
+#define ADDAXISY (AXISY - PY_MAN_CALIB_VAL - 200)
 
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
 #define FIXED_ULTRASONIC_2_PUTBOX 100
@@ -64,6 +64,7 @@
 #define SLIDE_DIFF 30
 // 抓盒子时, 滑台身高位置
 #define GRASP_BOX_POSITION 240
+#define GRASP_BOX_POSITION_ADDBOX 100
 
 // 抓子松开和合拢速度
 #define GRASP_OPEN_SPEED 10000
@@ -136,7 +137,7 @@
 #define FIXED_SPEED 150
 
 // mobile 超声波引导小车前进时, 小车移动速度
-#define MOBILE_ULTRASONIC_MOVE_SPEED 600
+#define MOBILE_ULTRASONIC_MOVE_SPEED 500
 
 // 阶段 2 : 小车抓取到盒子之后, 回原点的速度
 #define X_SPEED_2 600
@@ -1431,10 +1432,18 @@ int main(int argc, char **argv)
                 detection_mode = 0; //关闭视觉
                 txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT);
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-                txKylinMsg_ec_Fun(GraspBw - GRASP_BOX_POSITION, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
+                if(addboxNum > 0)
+                {
+                    txKylinMsg_ec_Fun(GraspBw - GRASP_BOX_POSITION, GRASP_UP_SPEED_HAVE_BOX * 1.5, 0, 0);
+                }
+                else
+                {
+                    txKylinMsg_ec_Fun(GraspBw - GRASP_BOX_POSITION, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
+                }
+                
                 //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
                 //TODO: 滑台上升位置宏定义
-                if (kylinMsg.cbus.gp.e <= GraspBw - GRASP_BOX_POSITION)
+                if (kylinMsg.cbus.gp.e <= GraspBw - GRASP_BOX_POSITION || ( addboxNum > 0 &&  kylinMsg.cbus.gp.e <= GraspBw - GRASP_BOX_POSITION_ADDBOX))
                 {
                     txKylinMsg.cbus.gv.e = 0;
                     lastWs = workState;
@@ -1534,7 +1543,7 @@ int main(int argc, char **argv)
                     //基地区坐标为(AXISX, AXISY)
                     txKylinMsg_xyz_Fun(AXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
-                    if (absoluteDistance < 100)
+                    if (absoluteDistance < 50)
                     {
                         putBoxState = 1;
                     }
@@ -1548,7 +1557,7 @@ int main(int argc, char **argv)
                     //基地区坐标为(AXISX, AXISY)
                     txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY - TWO_BOX_DIFF + kylinOdomCalib.cbus.cp.y, (Y_SPEED_3_FIRSTBOX + ADDSPEED) * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
-                    if (absoluteDistance < 10)
+                    if (absoluteDistance < 100)
                     {
                         putBoxState = 1;
                     }
