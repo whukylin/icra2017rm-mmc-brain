@@ -1509,7 +1509,7 @@ int main(int argc, char **argv)
                         putBoxState = 1;
                     }
                 }
-                else if(boxNum>4&&addboxNum>0)
+                else if(boxNum>4 && addboxNum>0)
                 {
                     detection_mode = 0;                           //关闭视觉
                     txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
@@ -1689,6 +1689,10 @@ int main(int argc, char **argv)
                     finishDetectBoxFlag_PutBox = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
                     boxNum++;
+					if (boxNum >= MAX_BOXNUM + 1)
+					{
+						addboxNum++;
+					}
                 }
                 break;
             default:
@@ -1701,8 +1705,7 @@ int main(int argc, char **argv)
         //根据最大搬运盒子数量, 修改这里的值
         if (boxNum >= MAX_BOXNUM + 1)
         {
-            addboxNum++;
-            if(addboxNum>MAX_BOXNUM+1)
+            if(addboxNum > MAX_BOXNUM + 1)
                 break;
         }
         
@@ -1722,7 +1725,7 @@ int main(int argc, char **argv)
 *  功能说明：单次盒子放置函数
 *  参数说明：无
 *  函数返回：无
-*  修改时间：addboxNum2017-05-17
+*  修改时间：2017-05-17
 *************************************************************************/
 void videoMove_PutBox()
 {
