@@ -1150,7 +1150,7 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    boxNum = 4;
+    // boxNum = 4;
 
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
