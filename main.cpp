@@ -41,6 +41,10 @@
 //TODO: 抓住盒子之后, 滑台上升位置
 #define GRASP_UP_HAVE_BOX_POSITION 210
 
+// 进行矩形检测之前, 小车先直行一段距离, 降低小车矩形漏检率
+#define AXISX_DIRECT 0
+#define AXISY_DIRECT 1000
+
 // 基地区坐标 axisX axisY
 #define AXISX 0
 #define AXISY 3000
@@ -66,7 +70,7 @@
 #define GRASP_CLOSE_SPEED 10000
 
 //每一堆第一个盒子, 进行超声波对准之前, 抓子离地面的高度
-#define PUT_FIRST_BOX_HEIGHT 60
+#define PUT_FIRST_BOX_HEIGHT 150
 
 // 放下盒子之后, 先后推, 后退的距离, 速度以及抓子抬高的高度
 #define DIRECT_BACK_MOVE_DISTANCE 400
@@ -1750,8 +1754,23 @@ void videoMove_PutBox()
 
     switch (videoMovePutBoxState)
     {
-    //矩形检测
     case 0:
+        ramp = genRmp();
+        detection_mode = 0;                           //关闭视觉
+        txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
+        workStateCout = "矩形引导之前, 先直接前进";
+        //到达目的地(基地区位置)
+        //基地区坐标为(AXISX, AXISY)
+
+        txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+        txKylinMsg_ec_Fun(0, 0, 0, 0);
+        if (absoluteDistance < 10)
+        {
+            videoMovePutBoxState = 1;
+        }
+        break;
+    //矩形检测
+    case 1:
         enableSonarsFun(1, 0, 0, 0); // fixed, mobile, left, mobile
         ramp = genRmp();
         coutLogicFlag_PutBox = 9.1;
@@ -1764,12 +1783,12 @@ void videoMove_PutBox()
         txKylinMsg_ec_Fun((GraspBw + GraspTp) / 2.0 - kylinMsg.cbus.gp.e, 0, GraspCl, 0);
         if (finishDetectBoxFlag_PutBox == true)
         {
-            videoMovePutBoxState = 1;
+            videoMovePutBoxState = 2;
         }
         break;
     //fixed Ultrasonic
     //fixed 超声波引导检测
-    case 1:
+    case 2:
         enableSonarsFun(1, 0, 0, 0); // fixed, mobile, left, mobile
         coutLogicFlag_PutBox = 9.2;
         workStateCout = "fixed超声波引导";
@@ -1790,7 +1809,7 @@ void videoMove_PutBox()
         if (sr04maf[SR04_IDX_F].avg < FIXED_ULTRASONIC_1_PUTBOX)
         {
             //第四个盒子比较特殊
-            videoMovePutBoxState = 2;
+            videoMovePutBoxState = 3;
             // if(boxNum != 4)
             // {
             //     videoMovePutBoxState = 2;
@@ -1803,7 +1822,7 @@ void videoMove_PutBox()
         break;
     //add Grasp Flag
     //抓子下降到最低点
-    case 2:
+    case 3:
         coutLogicFlag_PutBox = 9.21;
         workStateCout = "抓子下降到指定位置";
         detection_mode = 0;
@@ -1814,7 +1833,7 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - 30 - 200)
             {
-                videoMovePutBoxState = 3;
+                videoMovePutBoxState = 4;
             }
         }
         else
@@ -1822,12 +1841,12 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - PUT_FIRST_BOX_HEIGHT - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
             {
-                videoMovePutBoxState = 3;
+                videoMovePutBoxState = 4;
             }
         }
         break;
     //左右超声波对准盒子
-    case 3:
+    case 4:
         enableSonarsFun(0, 0, 1, 1); // fixed, mobile, left, mobile
         coutLogicFlag_PutBox = 9.3;
         workStateCout = "左右超声波对准";
@@ -1839,18 +1858,18 @@ void videoMove_PutBox()
         {
             if (unFirstBoxJudgeFun())
             {
-                videoMovePutBoxState = 4;
+                videoMovePutBoxState = 5;
                 UnFirstBox_PutBoxState = 0;
             }
             if (firstBoxJudgeFun())
             {
-                videoMovePutBoxState = 5;
+                videoMovePutBoxState = 6;
             }
             moveDistance = 0;
         }
         break;
     //非每一堆的第一个盒子, 进入此 case 语句
-    case 4:
+    case 5:
         switch (UnFirstBox_PutBoxState)
         {
         case 0:
@@ -1941,7 +1960,7 @@ void videoMove_PutBox()
             break;
         }
         break;
-    case 5:
+    case 6:
         if (kylinMsg.cbus.gp.e >= GraspBw - 60)
         {
             //放完盒子跳变到下一个状态
