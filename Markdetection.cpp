@@ -268,7 +268,7 @@ void drawSquares( Mat& image, const vector<vector<Point> >& squares )
     }
     //cout<<"squares.size: "<<squares.size()<<endl;
 	double prop=proportion(squares[0][2],squares[0][0],squares[0][1]);
-    double normal_prop=prop<1.0? prop:(1.0/prop);
+    //double normal_prop=prop<1.0? prop:(1.0/prop);
 	//caculate the omission rate
 	numframe++;
 
@@ -295,7 +295,7 @@ void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         sprintf(str_tz,"%lf",tz);
         sprintf(str_ty,"%lf",ty);
         sprintf(str_tx,"%lf",tx);
-		sprintf(str_om,"%lf",normal_prop);
+		sprintf(str_om,"%lf",prop);
         string pre_str_y="thetay: ";
         string pre_str_z="thetaz: ";
         string pre_str_x="thetax: ";
