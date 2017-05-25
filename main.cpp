@@ -47,7 +47,7 @@
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
-#define AXISY 3200
+#define AXISY 2000
 
 //基地区新加盒子的坐标 addaxisX addaxisY
 #define PY_MAN_CALIB_VAL 400
@@ -1480,7 +1480,7 @@ int main(int argc, char **argv)
             detection_mode = 0;                           //关闭视觉
             txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
-            if(firstInCalibPy == false)
+            if(firstInCalibPy == false && addboxNum >= 1)
             {
                 calibPyManuallyAgain();
                 firstInCalibPy = true;
