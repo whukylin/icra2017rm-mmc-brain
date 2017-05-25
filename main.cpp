@@ -46,8 +46,10 @@
 #define AXISY 3000
 
 //基地区新加盒子的坐标 addaxisX addaxisY
+#define PY_MAN_CALIB_VAL 400
+#define TWO_BOX_DIFF 300
 #define ADDAXISX 0
-#define ADDAXISY (AXISY - 400)
+#define ADDAXISY (AXISY - TWO_BOX_DIFF - PY_MAN_CALIB_VAL)
 
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
 #define FIXED_ULTRASONIC_2_PUTBOX 100
@@ -104,7 +106,7 @@
 //判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波, 3-> 融合
 #define BOX_IN_GRASP_MODE 3
 // 使用超声波判断盒子是否完全进入抓子时, 判断阈值
-#define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 22
+#define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 20
 
 // 摄像头与小车轴心的固定偏移
 #define DIFFCONST 101
@@ -832,7 +834,6 @@ uint8_t updateOdomCalib()
     return 1;
 }
 
-#define PY_MAN_CALIB_VAL 400
 bool isPilingMissionDone = false;
 
 void calibPyManually()
@@ -1527,7 +1528,7 @@ int main(int argc, char **argv)
                     workStateCout = "boxNum > 4, 前往基地区固定位置, 只抓盒子";
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
-                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY - (addboxNum - 1) * 400 + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY - (addboxNum - 1) * TWO_BOX_DIFF + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
                     if (absoluteDistance < 10)
                     {
@@ -1723,7 +1724,7 @@ int main(int argc, char **argv)
         //根据最大搬运盒子数量, 修改这里的值
         if (boxNum >= MAX_BOXNUM + 1)
         {
-            if (addboxNum > MAX_BOXNUM + 1)
+            if (addboxNum >= MAX_BOXNUM + 1)
                 break;
         }
     }
