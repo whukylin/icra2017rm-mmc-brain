@@ -101,8 +101,8 @@
 // 抓盒子时, 角度补偿值
 #define ANGLE_DIFF 0
 
-//判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波
-#define BOX_IN_GRASP_MODE 1
+//判断盒子是否完全进入抓子的模式: 1 -> 光电对管, 2-> 超声波, 3-> 融合
+#define BOX_IN_GRASP_MODE 3
 // 使用超声波判断盒子是否完全进入抓子时, 判断阈值
 #define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 22
 
@@ -837,7 +837,7 @@ bool isPilingMissionDone = false;
 
 void calibPyManually()
 {
-    kylinOdomCalib.cbus.cp.y = kylinMsg.cbus.cp.y + PY_MAN_CALIB_VAL;
+    kylinOdomCalib.cbus.cp.y += PY_MAN_CALIB_VAL;
 }
 
 void calibPx()
@@ -926,9 +926,13 @@ bool switchFlagFun()
     {
         return (kylinMsg.cbus.fs & (1u << 2));
     }
-    else //使用 mobile 超声波
+    else if(BOX_IN_GRASP_MODE == 2) //使用 mobile 超声波
     {
         return (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE);
+    }
+    else
+    {
+        return ((sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE) || (kylinMsg.cbus.fs & (1u << 2)));   
     }
 }
 
@@ -1145,7 +1149,7 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    // boxNum = 4;
+    boxNum = 4;
 
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
