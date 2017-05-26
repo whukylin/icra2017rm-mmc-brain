@@ -1715,7 +1715,7 @@ int main(int argc, char **argv)
                     }
                 }
                 //因为抓子当前处于最低点, 为了能够时候 fixed 超声波, 先将抓子抬高
-                if (firstBoxJudgeFun())
+                if (firstBoxJudgeFun() && addboxNum == 0)
                 {
                     txKylinMsg_ec_Fun(GraspBw - DIRECT_BACK_MOVE_GRASP_UP_POSITION - kylinMsg.cbus.gp.e, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
                 }
