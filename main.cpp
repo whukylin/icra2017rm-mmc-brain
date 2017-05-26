@@ -1955,7 +1955,7 @@ void videoMove_PutBox()
             txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
             if (PUTBOX_MODE == 1)
             {
-                if (boxNum != 4)
+                if (boxNum != MAX_BOXNUM)
                 {
                     txKylinMsg_ec_Fun((GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
                     if (kylinMsg.cbus.gp.e <= GraspBw - 15)
