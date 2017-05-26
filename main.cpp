@@ -1594,7 +1594,14 @@ int main(int argc, char **argv)
                 {
                     if (boxNum != 4)
                     {
-                        txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                        if(addboxNum > 0)
+                        {
+                            txKylinMsg_ec_Fun((GraspBw - 10 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);                            
+                        }
+                        else
+                        {
+                            txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);                            
+                        }
                     }
                     else
                     {
