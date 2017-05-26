@@ -53,7 +53,7 @@
 #define PY_MAN_CALIB_VAL 400
 #define TWO_BOX_DIFF 350
 #define ADDAXISX 0
-#define ADDAXISY (AXISY - PY_MAN_CALIB_VAL - 200)
+#define ADDAXISY (AXISY - PY_MAN_CALIB_VAL)
 
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
 #define FIXED_ULTRASONIC_2_PUTBOX 100
@@ -1275,7 +1275,14 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
 
                 //视觉引导小车前进, 直到小车与盒子之间的距离小于 TODO: 多少厘米 宏定义
-                txKylinMsg_xyz_Fun(tx - DIFFCONST, X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                if(addboxNum > 0)
+                {
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + 16 - 4*(addboxNum), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                }
+                else
+                {
+                    txKylinMsg_xyz_Fun(tx - DIFFCONST + 16 - 4*(boxNum), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //   
+                }
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 //暂时无法修改成不需要标志位
