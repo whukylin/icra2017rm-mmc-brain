@@ -199,6 +199,7 @@ int currentMobileErrorCount = 0;
 bool detectFlag = true;
 int indexLoop = 0;
 bool firstInCalibPy = false;
+bool firstInCalibPyManually = false;
 extern double ry, rz, rx;
 extern double tx, ty, tz;
 extern const char *wndname;
@@ -1739,6 +1740,11 @@ int main(int argc, char **argv)
                     {
                         addboxNum++;
                     }
+                    if(addboxNum == 2 && firstInCalibPyManually == false)
+                    {
+                        calibPyManually();
+                        firstInCalibPyManually == true;
+                    }
                 }
                 break;
             default:
@@ -2193,7 +2199,6 @@ void videoMove_PutBox2toBox1()
             {
                 finish_HeapBox = true;
                 //if (isPilingMissionDone == )
-                calibPyManually();
             }
         }
         break;
