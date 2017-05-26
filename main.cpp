@@ -114,7 +114,7 @@
 #define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 20
 
 // 摄像头与小车轴心的固定偏移
-#define DIFFCONST 101
+#define DIFFCONST 111
 
 // 小车旋转角度
 #define ZROTATION90DEG 1572
@@ -1165,7 +1165,7 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    // boxNum = 4;
+    boxNum = 4;
 
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
@@ -1521,6 +1521,7 @@ int main(int argc, char **argv)
                 //放盒子时候的状态位跳变
                 putBoxState = 0;
                 videoMovePutBoxState = 0;
+                videoMovePutAddBoxState = 0;
                 isZGyroFusedPositionCtrlStart = false;
             }
             break;
