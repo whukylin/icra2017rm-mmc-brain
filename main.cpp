@@ -1715,7 +1715,7 @@ int main(int argc, char **argv)
                     }
                 }
                 //因为抓子当前处于最低点, 为了能够时候 fixed 超声波, 先将抓子抬高
-                if (firstBoxJudgeFun() && addboxNum == 0)
+                if (firstBoxJudgeFun() || addboxNum == 1 || addboxNum == 3)
                 {
                     txKylinMsg_ec_Fun(GraspBw - DIRECT_BACK_MOVE_GRASP_UP_POSITION - kylinMsg.cbus.gp.e, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
                 }
@@ -1733,13 +1733,13 @@ int main(int argc, char **argv)
                 workStateCout = "回原点";
                 txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
                 // 回原点
-                if(addboxNum > 0)
+                if (addboxNum > 0)
                 {
-                txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_4);   
+                    txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_4);
                 }
                 else
                 {
-                txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_4);
+                    txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_4);
                 }
                 // 滑台升高位置
                 txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
