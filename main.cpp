@@ -2184,7 +2184,7 @@ void videoMove_PutBox2toBox1()
             txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
         }
         
-        if (kylinMsg.cbus.gp.e <= GraspBw - 480 || (((heapCount == 2 || heapCount == 1) && kylinMsg.cbus.gp.e <= GraspBw - 465))
+        if (kylinMsg.cbus.gp.e <= GraspBw - 480 || (((heapCount == 2 || heapCount == 1) && kylinMsg.cbus.gp.e <= GraspBw - 465)))
         {
             videoMove_PutBox2toBox1State = 8;
         }
