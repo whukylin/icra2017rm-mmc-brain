@@ -47,7 +47,7 @@
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
-#define AXISY 2000
+#define AXISY 2200
 
 //基地区新加盒子的坐标 addaxisX addaxisY
 #define PY_MAN_CALIB_VAL 400
