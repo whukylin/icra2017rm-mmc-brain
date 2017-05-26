@@ -1549,7 +1549,7 @@ int main(int argc, char **argv)
                         putBoxState = 1;
                     }
                 }
-                else if (boxNum > 4 && addboxNum > 0)
+                else if (boxNum > MAX_BOXNUM && addboxNum > 0)
                 {
                     detection_mode = 0;                           //关闭视觉
                     txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
@@ -1635,6 +1635,11 @@ int main(int argc, char **argv)
                     if (absuluteGraspOpCl < 250)
                     {
                         graspOpClState = 1;
+                        if(addboxNum == 1 && firstInCalibPyManually == false)
+                        {
+                            calibPyManually();
+                            firstInCalibPyManually == true;
+                        }
                     }
                     break;
                 //堆叠盒子(主过程)
@@ -1739,11 +1744,6 @@ int main(int argc, char **argv)
                     if (boxNum >= MAX_BOXNUM + 1)
                     {
                         addboxNum++;
-                    }
-                    if(addboxNum == 2 && firstInCalibPyManually == false)
-                    {
-                        calibPyManually();
-                        firstInCalibPyManually == true;
                     }
                 }
                 break;
