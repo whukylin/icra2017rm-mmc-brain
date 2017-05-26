@@ -114,7 +114,7 @@
 #define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 20
 
 // 摄像头与小车轴心的固定偏移
-#define DIFFCONST 111
+#define DIFFCONST 121
 
 // 小车旋转角度
 #define ZROTATION90DEG 1572
@@ -1594,9 +1594,13 @@ int main(int argc, char **argv)
                 {
                     if (boxNum != 4)
                     {
-                        if(addboxNum > 0)
+                        if(addboxNum == 1 || addboxNum == 3)
                         {
-                            txKylinMsg_ec_Fun((GraspBw - 10 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);                            
+                            txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);                            
+                        }
+                        else if(addboxNum == 2 || addboxNum == 4)
+                        {
+                            txKylinMsg_ec_Fun((GraspBw - 10 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                         }
                         else
                         {
