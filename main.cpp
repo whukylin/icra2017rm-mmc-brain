@@ -15,7 +15,7 @@
 #define GRASP_UP_SPEED_HAVE_BOX 600
 #define GRASP_DOWN_SPEED_HAVE_BOX 600
 #define GRASP_DOWN_SPEED_HAVE_MANY_BOX 400
-#define GRASP_UP_SPEED_HAVE_MANY_BOX 200
+#define GRASP_UP_SPEED_HAVE_MANY_BOX 400
 
 // 全局滑台高度宏定义
 #define DETECT_BOX_SLIDE_HEIGHT 0 //矩形检测时, 滑台高度
@@ -1166,7 +1166,7 @@ int main(int argc, char **argv)
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
 
     //addboxNum = 1;
-    boxNum = 5;
+    // boxNum = 5;
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
         updateOdomError();
@@ -2147,7 +2147,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
         if (kylinMsg.cbus.gp.c == GraspCl)
         {
-            videoMove_PutBox2toBox1State = 6;
+            videoMove_PutBox2toBox1State = 7;
         }
         break;
     //左右超声波对准
@@ -2175,8 +2175,16 @@ void videoMove_PutBox2toBox1()
         //txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-        if (kylinMsg.cbus.gp.e <= GraspBw - 480)
+        if(heapCount == 2 || heapCount == 1)
+        {
+            txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX / 2, GraspCl, 0);
+        }
+        else
+        {
+            txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
+        }
+        
+        if (kylinMsg.cbus.gp.e <= GraspBw - 480 || (((heapCount == 2 || heapCount == 1) && kylinMsg.cbus.gp.e <= GraspBw - 465))
         {
             videoMove_PutBox2toBox1State = 8;
         }
