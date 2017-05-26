@@ -220,6 +220,7 @@ int putBoxState;
 int backwardState;
 int graspOpClState;
 int videoMovePutBoxState;
+int videoMovePutAddBoxState;
 int UnFirstBox_PutBoxState;
 int videoMove_PutBox2toBox1State;
 volatile int8_t detection_mode = 0;
@@ -275,6 +276,7 @@ void videoMove_PutBox2toBox1();
 int moveDistance = 0;
 int numDelay = 100000000;
 float coutAngle = 0;
+void videoMove_PutAddBox();
 static void Dnl_ProcZGyroMsg(const ZGyroMsg_t *zgyroMsg)
 {
     //printf("*************************************ZGYRO********************************************\n");
