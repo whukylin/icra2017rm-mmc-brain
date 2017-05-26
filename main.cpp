@@ -47,13 +47,13 @@
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
-#define AXISY 2000
+#define AXISY 2100
 
 //基地区新加盒子的坐标 addaxisX addaxisY
 #define PY_MAN_CALIB_VAL 400
 #define TWO_BOX_DIFF 400
 #define ADDAXISX 0
-#define ADDAXISY (AXISY - PY_MAN_CALIB_VAL - 200)
+#define ADDAXISY (AXISY - PY_MAN_CALIB_VAL)
 
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
 #define FIXED_ULTRASONIC_2_PUTBOX 100
@@ -114,7 +114,7 @@
 #define CLAW_CLOSE_SONAR_TRIGGER_DISTANCE 20
 
 // 摄像头与小车轴心的固定偏移
-#define DIFFCONST 121
+#define DIFFCONST 151
 
 // 小车旋转角度
 #define ZROTATION90DEG 1572
@@ -217,7 +217,7 @@ int8_t exit_flag = 0;
 int workState = 0;
 int grabBoxState;
 int putBoxState;
-int backwardState;
+int backwardState = 0;
 int graspOpClState;
 int videoMovePutBoxState;
 int videoMovePutAddBoxState;
