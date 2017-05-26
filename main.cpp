@@ -93,8 +93,8 @@
 // 最大搬运盒子数量
 // 盒子全部搬运过去之后, 进行堆叠之前, 总共有几堆盒子
 #if PUTBOX_MODE == 1
-#define MAX_BOXNUM 4
-#define HEAP_NUM 3
+#define MAX_BOXNUM 3
+#define HEAP_NUM 2
 #endif
 #if PUTBOX_MODE == 2
 #define MAX_BOXNUM 5
@@ -993,7 +993,7 @@ bool unFirstBoxJudgeFun()
 {
     if (PUTBOX_MODE == 1) //2+2+2+2
     {
-        return (boxNum == 4);
+        return (boxNum == MAX_BOXNUM);
     }
     if (PUTBOX_MODE == 2) //2+1+2+1+2
     {
@@ -1015,7 +1015,7 @@ bool firstBoxJudgeFun()
 {
     if (PUTBOX_MODE == 1) //2+2+2+2
     {
-        return (boxNum == 1 || boxNum != 4);
+        return (boxNum == 1 || boxNum != MAX_BOXNUM);
     }
     if (PUTBOX_MODE == 2) //2+1+2+1+2
     {
@@ -1581,7 +1581,7 @@ int main(int argc, char **argv)
                 //堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
                 if (PUTBOX_MODE == 1)
                 {
-                    if (boxNum != 4)
+                    if (boxNum != MAX_BOXNUM)
                     {
                         txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                     }
@@ -1751,7 +1751,7 @@ int main(int argc, char **argv)
         //根据最大搬运盒子数量, 修改这里的值
         if (boxNum >= MAX_BOXNUM + 1)
         {
-            if (addboxNum >= MAX_BOXNUM + 1)
+            if (addboxNum >= MAX_BOXNUM + 3)
                 break;
         }
     }
@@ -1852,7 +1852,7 @@ void videoMove_PutBox()
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-        if (boxNum == 4)
+        if (boxNum == MAX_BOXNUM)
         {
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - 30 - 200)
@@ -1905,7 +1905,7 @@ void videoMove_PutBox()
             txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
             if (PUTBOX_MODE == 1)
             {
-                if (boxNum != 4)
+                if (boxNum != MAX_BOXNUM)
                 {
                     txKylinMsg_ec_Fun((GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
                     if (kylinMsg.cbus.gp.e <= GraspBw - 15)
