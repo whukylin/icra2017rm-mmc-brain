@@ -1563,7 +1563,7 @@ int main(int argc, char **argv)
                     workStateCout = "boxNum > 4, 前往基地区固定位置, 只抓盒子";
                     //到达目的地(基地区位置)
                     //基地区坐标为(AXISX, AXISY)
-                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY - TWO_BOX_DIFF + kylinOdomCalib.cbus.cp.y, (Y_SPEED_3_FIRSTBOX + ADDSPEED) * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+                    txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY + kylinOdomCalib.cbus.cp.y, (Y_SPEED_3_FIRSTBOX + ADDSPEED) * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
                     txKylinMsg_ec_Fun(0, 0, 0, 0);
                     if (absoluteDistance < 100)
                     {
@@ -1878,8 +1878,17 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - PUT_FIRST_BOX_HEIGHT - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
             {
-                videoMovePutBoxState = 4;
-            }
+                //videoMovePutBoxState = 4;
+                if (unFirstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 5;
+                    UnFirstBox_PutBoxState = 0;
+                }
+                if (firstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 6;
+                }
+            }    
         }
         break;
     //左右超声波对准盒子
@@ -2110,7 +2119,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
         if (kylinMsg.cbus.gp.c == GraspCl)
         {
-            videoMove_PutBox2toBox1State = 6;
+            videoMove_PutBox2toBox1State = 7;
         }
         break;
     //左右超声波对准
