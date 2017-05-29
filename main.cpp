@@ -1367,7 +1367,7 @@ int main(int argc, char **argv)
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
 
                 //滑台下降到最低点, 便于超声波进行对准
-                txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
+                txKylinMsg_ec_Fun(GraspBw - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspOp, 0);
                 if (kylinMsg.cbus.gp.e >= GraspBw - 5)
                 {
                     grabBoxState = 5;
