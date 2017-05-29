@@ -50,7 +50,7 @@
 #define AXISY 2100
 
 //基地区新加盒子的坐标 addaxisX addaxisY
-#define PY_MAN_CALIB_VAL 400
+#define PY_MAN_CALIB_VAL 500
 #define TWO_BOX_DIFF 400
 #define ADDAXISX 0
 #define ADDAXISY (AXISY - PY_MAN_CALIB_VAL)
