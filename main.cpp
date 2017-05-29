@@ -28,7 +28,7 @@
 
 //TODO: 小车与盒子之间的距离小于多少时 从矩形检测引导小车切换到超声波引导
 
-#define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 500
+#define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 550
 
 //TODO: 判定 fixed 超声波无法打到盒子并向左移动时的阈值
 #define LEFT_MOVE_DISTANCE 0
@@ -50,7 +50,7 @@
 #define AXISY 2100
 
 //基地区新加盒子的坐标 addaxisX addaxisY
-#define PY_MAN_CALIB_VAL 400
+#define PY_MAN_CALIB_VAL 500
 #define TWO_BOX_DIFF 400
 #define ADDAXISX 0
 #define ADDAXISY (AXISY - PY_MAN_CALIB_VAL)
@@ -58,7 +58,7 @@
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
 #define FIXED_ULTRASONIC_2_PUTBOX 100
 // 放置盒子的时候, 每一堆第一个盒子放置的位置
-#define FIXED_ULTRASONIC_1_PUTBOX 500
+#define FIXED_ULTRASONIC_1_PUTBOX 600
 
 // 放盒子时, 滑台偏移量(不让盒子挨着或者直接着地的偏移量)
 #define SLIDE_DIFF 30
@@ -75,7 +75,7 @@
 
 // 放下盒子之后, 先后推, 后退的距离, 速度以及抓子抬高的高度
 #define DIRECT_BACK_MOVE_DISTANCE 400
-#define DIRECT_BACK_MOVE_SPEED 500
+#define DIRECT_BACK_MOVE_SPEED 1200
 #define DIRECT_BACK_MOVE_GRASP_UP_POSITION 100
 
 //
@@ -121,16 +121,16 @@
 
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
-#define X_SPEED_1 400
-#define Y_SPEED_1 800
-#define Z_SPEED_1 1500
+#define X_SPEED_1 700
+#define Y_SPEED_1 1200
+#define Z_SPEED_1 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
 // fixed 超声波引导小车前进的速度
 #define FIXED_ULTRASONIC_MOVE_SPEED 300
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
 #define LRDISTANCE 100 //100
-#define LRSPEED 100    //200
+#define LRSPEED 200    //200
 
 //fixed 超声波打不到的时候, 小车向左移动的速度和距离
 #define FIXED_DISTANCE 200
@@ -141,22 +141,22 @@
 
 // 阶段 2 : 小车抓取到盒子之后, 回原点的速度
 #define X_SPEED_2 600
-#define Y_SPEED_2 700
-#define Z_SPEED_2 1400
+#define Y_SPEED_2 1200
+#define Z_SPEED_2 2200
 
 // 阶段 3 : 小车拿着盒子, 到达基地区
-#define X_SPEED_3 400
-#define Y_SPEED_3 800
+#define X_SPEED_3 800
+#define Y_SPEED_3 1400
 // First box is special, speed larger
 #define Y_SPEED_3_FIRSTBOX 1000
-#define Z_SPEED_3 1400
+#define Z_SPEED_3 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_3_VISION 400
 
 // 阶段 4 : 小车放下盒子, 回原点的速度
 #define X_SPEED_4 600
-#define Y_SPEED_4 1200
-#define Z_SPEED_4 1400
+#define Y_SPEED_4 1600
+#define Z_SPEED_4 2200
 
 #define ADDSPEED 200
 
@@ -205,8 +205,8 @@ extern const char *wndname;
 CMT cmt0;
 RMVideoCapture capture("/dev/video0", 3);
 //VideoCapture capture;
-int exp_time = 48;
-int gain = 30;
+int exp_time = 63;
+int gain = 40;
 int brightness_ = 10;
 int whiteness_ = 86;
 int saturation_ = 60;
@@ -1279,11 +1279,11 @@ int main(int argc, char **argv)
                 //视觉引导小车前进, 直到小车与盒子之间的距离小于 TODO: 多少厘米 宏定义
                 if (addboxNum > 0)
                 {
-                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4 * addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (8 - 2 * addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
                 }
                 else
                 {
-                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4 * boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (8 - 2 * boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
                 }
 
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
@@ -1512,8 +1512,9 @@ int main(int argc, char **argv)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
                 zgyroFusedYawPositionCtrl(ZROTATION90DEG);
+                firstInBack = true;
             }
-            else
+            if (absoluteDistance >= 10 && firstInBack == false)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, 0);
                 // zgyroFusedYawPositionCtrl(0);
@@ -1783,6 +1784,7 @@ int main(int argc, char **argv)
                     finishDetectBoxFlag = false;
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
+                    firstInBack = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
                     boxNum++;
                     if (boxNum >= MAX_BOXNUM + 1)
