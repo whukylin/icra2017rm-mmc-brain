@@ -650,10 +650,10 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             fflage = Color_detect(src, dif_x, dif_y);
             if (fflage == 0)
                 CountVframe++;
-            tx = 2 * (dif_x - DIF_CEN);
+            tx = 5 * (dif_x - DIF_CEN);
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout << "tx=" << tx << endl;
-            if (abs(tx) < 30 && (CountVframe > 50 || fflage)) //number of pixels
+            if (abs(tx) < 100 && (CountVframe > 50 || fflage)) //number of pixels
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
@@ -1347,7 +1347,7 @@ int main(int argc, char **argv)
                 detection_mode = 2;                              //打开视觉,检测质心
                 txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
                 //左右移动
-                txKylinMsg_xyz_Fun(tx, 100, 0, 0, 0, 0);
+                txKylinMsg_xyz_Fun(tx, LRSPEED, 0, 0, 0, 0);
                 //注意抓子位置
                 txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, 0, 0, 0);
                 if (finishDetectCentroidFlag == true)
