@@ -75,7 +75,7 @@
 
 // 放下盒子之后, 先后推, 后退的距离, 速度以及抓子抬高的高度
 #define DIRECT_BACK_MOVE_DISTANCE 400
-#define DIRECT_BACK_MOVE_SPEED 800
+#define DIRECT_BACK_MOVE_SPEED 1000
 #define DIRECT_BACK_MOVE_GRASP_UP_POSITION 100
 
 //
