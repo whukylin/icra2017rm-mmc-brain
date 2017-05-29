@@ -121,7 +121,7 @@
 
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
-#define X_SPEED_1 1000
+#define X_SPEED_1 800
 #define Y_SPEED_1 1200
 #define Z_SPEED_1 2200
 // 矩形检测引导小车旋转的速度
