@@ -50,7 +50,7 @@
 #define AXISY 2500
 
 //基地区新加盒子的坐标 addaxisX addaxisY
-#define PY_MAN_CALIB_VAL 550
+#define PY_MAN_CALIB_VAL 400
 #define TWO_BOX_DIFF 400
 #define ADDAXISX 0
 #define ADDAXISY (AXISY - PY_MAN_CALIB_VAL)
@@ -130,7 +130,7 @@
 #define FIXED_ULTRASONIC_MOVE_SPEED 300
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
 #define LRDISTANCE 100 //100
-#define LRSPEED 200    //200
+#define LRSPEED 150    //200
 
 //fixed 超声波打不到的时候, 小车向左移动的速度和距离
 #define FIXED_DISTANCE 200
@@ -1170,7 +1170,6 @@ int main(int argc, char **argv)
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
 
     //addboxNum = 1;
-	cout << "ok!"<<endl;
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
 	//cout << "ok1!"<<endl;
@@ -1230,7 +1229,7 @@ int main(int argc, char **argv)
         //         finish_HeapBox = false;
         //     }
         // }
-        //boxNum = 2;
+        boxNum = 2;
         switch (workState)
         {
         case 0:
@@ -1751,7 +1750,7 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
+                        txKylinMsg_ec_Fun(GraspBw - DIRECT_BACK_MOVE_GRASP_UP_POSITION - kylinMsg.cbus.gp.e, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
                     }
                 }
 
