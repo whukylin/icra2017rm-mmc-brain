@@ -1511,15 +1511,16 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                 calibPyManuallyAgain();
                 firstInCalibPy = true;
             }
-            if (absoluteDistance < 10 && firstInBack == false)
+            if (absoluteDistance < 10)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
                 zgyroFusedYawPositionCtrl(ZROTATION90DEG);
                 firstInBack = true;
             }
-            else
+            if (absoluteDistance >= 10 && firstInBack == false)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, 0);
+                
                 // zgyroFusedYawPositionCtrl(0);
             }
             //保持抓子不变
