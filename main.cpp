@@ -650,10 +650,10 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             fflage = Color_detect(src, dif_x, dif_y);
             if (fflage == 0)
                 CountVframe++;
-            tx = 5 * (dif_x - DIF_CEN);
+            tx = 3 * (dif_x - DIF_CEN);
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout << "tx=" << tx << endl;
-            if (abs(tx) < 100 && (CountVframe > 50 || fflage)) //number of pixels
+            if (abs(tx) < 60 && (CountVframe > 50 || fflage)) //number of pixels
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
@@ -830,6 +830,7 @@ uint8_t updateOdomCalib()
     uint32_t frame_id = kylinMsg.frame_id;
     while (frame_cnt < 50)
     {
+        cout << kylinMsg.frame_id << endl;
         if (kylinMsg.frame_id != frame_id)
         {
             frame_id = kylinMsg.frame_id;
@@ -1151,7 +1152,7 @@ int main(int argc, char **argv)
 
     kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
     kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
-    kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
+    //kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
 
     updateOdomCalib();
     logicInit(); //逻辑控制初始化
@@ -2148,7 +2149,14 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
         if (kylinMsg.cbus.gp.c == GraspCl)
         {
-            videoMove_PutBox2toBox1State = 6;
+            if(heapCount != 1)
+            {
+                videoMove_PutBox2toBox1State = 6;
+            }
+            else
+            {
+                videoMove_PutBox2toBox1State = 7;
+            }
         }
         break;
     //左右超声波对准
