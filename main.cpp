@@ -43,11 +43,11 @@
 
 // 进行矩形检测之前, 小车先直行一段距离, 降低小车矩形漏检率
 #define AXISX_DIRECT 0
-#define AXISY_DIRECT 1500
+#define AXISY_DIRECT 400
 
 // 基地区坐标 axisX axisY
 #define AXISX 0
-#define AXISY 2100
+#define AXISY 2500
 
 //基地区新加盒子的坐标 addaxisX addaxisY
 #define PY_MAN_CALIB_VAL 500
@@ -148,7 +148,7 @@
 #define X_SPEED_3 800
 #define Y_SPEED_3 1400
 // First box is special, speed larger
-#define Y_SPEED_3_FIRSTBOX 1000
+#define Y_SPEED_3_FIRSTBOX 1200
 #define Z_SPEED_3 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_3_VISION 400
@@ -1839,7 +1839,7 @@ void videoMove_PutBox()
         txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
         txKylinMsg_ec_Fun(0, 0, 0, 0);
         //关闭直接移动
-        //if (absoluteDistance < 100)
+        if (absoluteDistance < 100)
         {
             videoMovePutBoxState = 1;
         }
