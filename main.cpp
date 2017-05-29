@@ -58,7 +58,7 @@
 //TODO: 放置盒子的时候, 每一堆非第一个盒子放置的位置
 #define FIXED_ULTRASONIC_2_PUTBOX 100
 // 放置盒子的时候, 每一堆第一个盒子放置的位置
-#define FIXED_ULTRASONIC_1_PUTBOX 500
+#define FIXED_ULTRASONIC_1_PUTBOX 600
 
 // 放盒子时, 滑台偏移量(不让盒子挨着或者直接着地的偏移量)
 #define SLIDE_DIFF 30
