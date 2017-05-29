@@ -28,7 +28,7 @@
 
 //TODO: 小车与盒子之间的距离小于多少时 从矩形检测引导小车切换到超声波引导
 
-#define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 500
+#define SQUARE_TO_FIXED_ULTRASONIC_DISTANCE 550
 
 //TODO: 判定 fixed 超声波无法打到盒子并向左移动时的阈值
 #define LEFT_MOVE_DISTANCE 0
@@ -1282,11 +1282,11 @@ int main(int argc, char **argv)
                 //视觉引导小车前进, 直到小车与盒子之间的距离小于 TODO: 多少厘米 宏定义
 		if(addboxNum > 0)
 {
-txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+txKylinMsg_xyz_Fun(tx - (DIFFCONST + (8 - 2*addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
 }
 else
 {
-txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+txKylinMsg_xyz_Fun(tx - (DIFFCONST + (8 - 2*boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
 }
                 
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
