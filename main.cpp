@@ -248,6 +248,8 @@ FIFO_t tx_fifo;
 uint8_t tx_buf[2][BUF_LEN];
 KylinMsg_t txKylinMsg;
 
+bool firstInBack = false;
+
 volatile int coutLogicFlag = 0;
 int lineflag = 0;
 volatile bool finishDetectBoxFlag = false;      //完成检测盒子(小车到了检测不到盒子的位置)
@@ -1509,10 +1511,11 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                 calibPyManuallyAgain();
                 firstInCalibPy = true;
             }
-            if (absoluteDistance < 10)
+            if (absoluteDistance < 10 && firstInBack == false)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
                 zgyroFusedYawPositionCtrl(ZROTATION90DEG);
+                firstInBack = true;
             }
             else
             {
@@ -1779,6 +1782,7 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                     finishDetectBoxFlag = false;
                     finishDetectCentroidFlag = false; //完成质心检测
                     finishDetectBoxFlag_PutBox = false;
+                    firstInBack = false;
                     workState4_Num = 0, workState3_Num = 0, workState2_Num = 0, workState1_Num = 0, workState0_Num = 0;
                     boxNum++;
                     if (boxNum >= MAX_BOXNUM + 1)
