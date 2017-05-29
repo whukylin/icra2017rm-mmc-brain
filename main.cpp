@@ -655,7 +655,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
-                if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+                if (coutLogicFlag == INT_MAX)// && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
                 {
                     finishDetectCentroidFlag_PutBox2toBox1 = true;
                 }
