@@ -2351,7 +2351,16 @@ void videoMove_PutAddBox()
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - 30 - 200)
             {
-                videoMovePutAddBoxState = 4;
+                if (addboxNum == 2 || addboxNum == 4)
+                {
+                    videoMovePutAddBoxState = 5;
+                    UnFirstBox_PutBoxState = 0;
+                }
+                if (addboxNum == 1)
+                {
+                    videoMovePutAddBoxState = 6;
+                }
+                // videoMovePutAddBoxState = 4;
             }
         }
         else
@@ -2359,7 +2368,16 @@ void videoMove_PutAddBox()
             txKylinMsg_ec_Fun(GraspBw - PUT_FIRST_BOX_HEIGHT - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
             {
-                videoMovePutAddBoxState = 4;
+                if (addboxNum == 2 || addboxNum == 4)
+                {
+                    videoMovePutAddBoxState = 5;
+                    UnFirstBox_PutBoxState = 0;
+                }
+                if (addboxNum == 1)
+                {
+                    videoMovePutAddBoxState = 6;
+                }
+                // videoMovePutAddBoxState = 4;
             }
         }
         break;
