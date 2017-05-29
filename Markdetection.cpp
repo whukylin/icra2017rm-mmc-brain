@@ -634,11 +634,11 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
               cout<<"width="<<mt.m10/mt.m00<<"  height="<<mt.m01/mt.m00<<endl;
               diff_x=center.x-CX;//;center.x*800/640-cx;
                 diff_y=center.y-CY;//*600/480-cy;
-                    cout<<"diff x: "<<diff_x<<endl;
+                cout<<"diff x: "<<diff_x<<endl;
                 cout<<"diff y: "<<diff_y<<endl;
                 
                   
-                  imshow("result",frame);
+                  //imshow("result",frame);
                   return 1;
                   
                }

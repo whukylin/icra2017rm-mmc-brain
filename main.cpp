@@ -1167,7 +1167,10 @@ int main(int argc, char **argv)
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
 
     //addboxNum = 1;
-
+    while(1)
+    {
+        detection_mode = 2;
+    }
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
         updateOdomError();
