@@ -121,8 +121,8 @@
 
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
-#define X_SPEED_1 600
-#define Y_SPEED_1 1000
+#define X_SPEED_1 800
+#define Y_SPEED_1 1200
 #define Z_SPEED_1 2000
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
@@ -130,7 +130,7 @@
 #define FIXED_ULTRASONIC_MOVE_SPEED 300
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
 #define LRDISTANCE 100 //100
-#define LRSPEED 100    //200
+#define LRSPEED 200    //200
 
 //fixed 超声波打不到的时候, 小车向左移动的速度和距离
 #define FIXED_DISTANCE 200
@@ -141,12 +141,12 @@
 
 // 阶段 2 : 小车抓取到盒子之后, 回原点的速度
 #define X_SPEED_2 600
-#define Y_SPEED_2 1000
+#define Y_SPEED_2 1200
 #define Z_SPEED_2 2000
 
 // 阶段 3 : 小车拿着盒子, 到达基地区
-#define X_SPEED_3 600
-#define Y_SPEED_3 1000
+#define X_SPEED_3 800
+#define Y_SPEED_3 1200
 // First box is special, speed larger
 #define Y_SPEED_3_FIRSTBOX 1000
 #define Z_SPEED_3 2000
@@ -155,7 +155,7 @@
 
 // 阶段 4 : 小车放下盒子, 回原点的速度
 #define X_SPEED_4 600
-#define Y_SPEED_4 1400
+#define Y_SPEED_4 1600
 #define Z_SPEED_4 2000
 
 #define ADDSPEED 200
