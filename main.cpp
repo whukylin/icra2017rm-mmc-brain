@@ -224,7 +224,7 @@ int UnFirstBox_PutBoxState;
 int videoMove_PutBox2toBox1State;
 volatile int8_t detection_mode = 0;
 volatile bool useUltrasonic = false;
-
+bool firstInBack = false;
 FIFO_t rx_fifo;
 uint8_t rx_buf[2][BUF_LEN];
 

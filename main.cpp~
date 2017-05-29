@@ -15,7 +15,7 @@
 #define GRASP_UP_SPEED_HAVE_BOX 600
 #define GRASP_DOWN_SPEED_HAVE_BOX 600
 #define GRASP_DOWN_SPEED_HAVE_MANY_BOX 400
-#define GRASP_UP_SPEED_HAVE_MANY_BOX 200
+#define GRASP_UP_SPEED_HAVE_MANY_BOX 400
 
 // 全局滑台高度宏定义
 #define DETECT_BOX_SLIDE_HEIGHT 0 //矩形检测时, 滑台高度
@@ -93,8 +93,8 @@
 // 最大搬运盒子数量
 // 盒子全部搬运过去之后, 进行堆叠之前, 总共有几堆盒子
 #if PUTBOX_MODE == 1
-#define MAX_BOXNUM 4
-#define HEAP_NUM 3
+#define MAX_BOXNUM 5
+#define HEAP_NUM 4
 #endif
 #if PUTBOX_MODE == 2
 #define MAX_BOXNUM 5
@@ -160,7 +160,6 @@
 
 #define ADDSPEED 200
 
-
 #define YSPEED 1200 //forward speed
 #define XSPEED 400
 #define ZSPEED 1300
@@ -171,7 +170,6 @@
 #define BUF_LEN 256
 #define TIMEOUT 30
 #define FRAME_N 20000
-
 
 // 标志位 fs 宏定义
 #define CONTROL_MODE_BIT 30 //相对位置和绝对位置控制模式对应的位数
@@ -199,6 +197,7 @@ int currentMobileErrorCount = 0;
 bool detectFlag = true;
 int indexLoop = 0;
 bool firstInCalibPy = false;
+bool firstInCalibPyPutBox = false;
 extern double ry, rz, rx;
 extern double tx, ty, tz;
 extern const char *wndname;
@@ -942,13 +941,13 @@ bool switchFlagFun()
     {
         return (kylinMsg.cbus.fs & (1u << 2));
     }
-    else if(BOX_IN_GRASP_MODE == 2) //使用 mobile 超声波
+    else if (BOX_IN_GRASP_MODE == 2) //使用 mobile 超声波
     {
         return (sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE);
     }
     else
     {
-        return ((sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE) || (kylinMsg.cbus.fs & (1u << 2)));   
+        return ((sr04maf[SR04_IDX_M].avg < CLAW_CLOSE_SONAR_TRIGGER_DISTANCE) || (kylinMsg.cbus.fs & (1u << 2)));
     }
 }
 
@@ -995,7 +994,7 @@ bool unFirstBoxJudgeFun()
 {
     if (PUTBOX_MODE == 1) //2+2+2+2
     {
-        return (boxNum == 4);
+        return (boxNum == MAX_BOXNUM);
     }
     if (PUTBOX_MODE == 2) //2+1+2+1+2
     {
@@ -1017,7 +1016,7 @@ bool firstBoxJudgeFun()
 {
     if (PUTBOX_MODE == 1) //2+2+2+2
     {
-        return (boxNum == 1 || boxNum != 4);
+        return (boxNum == 1 || boxNum != MAX_BOXNUM);
     }
     if (PUTBOX_MODE == 2) //2+1+2+1+2
     {
@@ -1165,9 +1164,9 @@ int main(int argc, char **argv)
     GraspTpCout = GraspTp;
 
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
-    
-    //addboxNum = 1;
 
+    //addboxNum = 1;
+    // boxNum = 5;
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
         updateOdomError();
@@ -1226,7 +1225,7 @@ int main(int argc, char **argv)
         //         finish_HeapBox = false;
         //     }
         // }
-	//boxNum = 2;
+        //boxNum = 2;
         switch (workState)
         {
         case 0:
@@ -1278,15 +1277,15 @@ int main(int argc, char **argv)
                 txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT); //切换到相对位置控制模式
 
                 //视觉引导小车前进, 直到小车与盒子之间的距离小于 TODO: 多少厘米 宏定义
-		if(addboxNum > 0)
-{
-txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
-}
-else
-{
-txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
-}
-                
+                if (addboxNum > 0)
+                {
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4 * addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                }
+                else
+                {
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4 * boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                }
+
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 //暂时无法修改成不需要标志位
@@ -1444,7 +1443,7 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                 detection_mode = 0; //关闭视觉
                 txKylinMsg.cbus.fs |= (1u << CONTROL_MODE_BIT);
                 txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-                if(addboxNum > 0)
+                if (addboxNum > 0)
                 {
                     txKylinMsg_ec_Fun(GraspBw - GRASP_BOX_POSITION, GRASP_UP_SPEED_HAVE_BOX * 1.5, 0, 0);
                 }
@@ -1452,10 +1451,10 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                 {
                     txKylinMsg_ec_Fun(GraspBw - GRASP_BOX_POSITION, GRASP_UP_SPEED_HAVE_BOX, 0, 0);
                 }
-                
+
                 //抓到盒子并抬高了滑台, 进入下一届阶段，回到原点
                 //TODO: 滑台上升位置宏定义
-                if (kylinMsg.cbus.gp.e <= GraspBw - GRASP_BOX_POSITION || ( addboxNum > 0 &&  kylinMsg.cbus.gp.e <= GraspBw - GRASP_BOX_POSITION_ADDBOX))
+                if (kylinMsg.cbus.gp.e <= GraspBw - GRASP_BOX_POSITION || (addboxNum > 0 && kylinMsg.cbus.gp.e <= GraspBw - GRASP_BOX_POSITION_ADDBOX))
                 {
                     txKylinMsg.cbus.gv.e = 0;
                     lastWs = workState;
@@ -1504,7 +1503,7 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
             detection_mode = 0;                           //关闭视觉
             txKylinMsg.cbus.fs |= 1u << CONTROL_MODE_BIT; //切换到绝对位置控制模式
 
-            if(firstInCalibPy == false && addboxNum == 3)
+            if (firstInCalibPy == false && addboxNum == 3)
             {
                 calibPyManuallyAgain();
                 firstInCalibPy = true;
@@ -1561,7 +1560,7 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                         putBoxState = 1;
                     }
                 }
-                else if (boxNum > 4 && addboxNum > 0)
+                else if (boxNum > MAX_BOXNUM && addboxNum > 0)
                 {
                     if (addboxNum == 3)
                     {
@@ -1601,19 +1600,19 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                 //堆叠模式选择:   1 -> 2+2+2+2=8, 2 -> 2+1+2+1+2=8, 3 -> 1+1+1+1+1+1+1+1=8
                 if (PUTBOX_MODE == 1)
                 {
-                    if (boxNum != 4)
+                    if (boxNum != MAX_BOXNUM)
                     {
-                        if(addboxNum == 1 || addboxNum == 3)
+                        if (addboxNum == 1 || addboxNum == 3)
                         {
-                            txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);                            
+                            txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                         }
-                        else if(addboxNum == 2 || addboxNum == 4)
+                        else if (addboxNum == 2 || addboxNum == 4)
                         {
                             txKylinMsg_ec_Fun((GraspBw - 10 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                         }
                         else
                         {
-                            txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);                            
+                            txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                         }
                     }
                     else
@@ -1662,6 +1661,11 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                     txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
                     // TODO: 绝对位置控制模式下, 抓子合拢的阈值
                     // 宏定义
+                    if (boxNum == MAX_BOXNUM - 1 && firstInCalibPyPutBox == false)
+                    {
+                        calibPyManually();
+                        firstInCalibPyPutBox = true;
+                    }
                     if (absuluteGraspOpCl < 250)
                     {
                         graspOpClState = 1;
@@ -1724,7 +1728,7 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                     }
                 }
                 //因为抓子当前处于最低点, 为了能够时候 fixed 超声波, 先将抓子抬高
-                if(addboxNum == 0)
+                if (addboxNum == 0)
                 {
                     if (firstBoxJudgeFun())
                     {
@@ -1746,7 +1750,7 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
                         txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
                     }
                 }
-                
+
                 break;
             case 1:
                 //回原点
@@ -1797,7 +1801,7 @@ txKylinMsg_xyz_Fun(tx - (DIFFCONST + (16 - 4*boxNum)), X_SPEED_1 * ramp, tz, Y_S
         //根据最大搬运盒子数量, 修改这里的值
         if (boxNum >= MAX_BOXNUM + 1)
         {
-            if (addboxNum >= MAX_BOXNUM + 1)
+            if (addboxNum >= MAX_BOXNUM - 1)
                 break;
         }
     }
@@ -1898,7 +1902,7 @@ void videoMove_PutBox()
         detection_mode = 0;
         txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
-        if (boxNum == 4)
+        if (boxNum == MAX_BOXNUM)
         {
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - 30 - 200)
@@ -1951,7 +1955,7 @@ void videoMove_PutBox()
             txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
             if (PUTBOX_MODE == 1)
             {
-                if (boxNum != 4)
+                if (boxNum != MAX_BOXNUM)
                 {
                     txKylinMsg_ec_Fun((GraspBw - 15 - 20) - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED_HAVE_BOX, 0, 0);
                     if (kylinMsg.cbus.gp.e <= GraspBw - 15)
@@ -2041,7 +2045,6 @@ void videoMove_PutBox()
         break;
     }
 }
-
 
 /*************************************************************************
 *  函数名称：videoMove_PutBox2toBox1
@@ -2144,7 +2147,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
         if (kylinMsg.cbus.gp.c == GraspCl)
         {
-            videoMove_PutBox2toBox1State = 6;
+            videoMove_PutBox2toBox1State = 7;
         }
         break;
     //左右超声波对准
@@ -2172,8 +2175,16 @@ void videoMove_PutBox2toBox1()
         //txKylinMsg.cbus.fs &= ~(1u << CONTROL_MODE_BIT);
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
-        txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-        if (kylinMsg.cbus.gp.e <= GraspBw - 480)
+        if(heapCount == 2 || heapCount == 1)
+        {
+            txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX / 2, GraspCl, 0);
+        }
+        else
+        {
+            txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
+        }
+        
+        if (kylinMsg.cbus.gp.e <= GraspBw - 480 || (((heapCount == 2 || heapCount == 1) && kylinMsg.cbus.gp.e <= GraspBw - 465)))
         {
             videoMove_PutBox2toBox1State = 8;
         }
@@ -2240,7 +2251,6 @@ void videoMove_PutBox2toBox1()
             {
                 finish_HeapBox = true;
                 //if (isPilingMissionDone == )
-                calibPyManually();
             }
         }
         break;
@@ -2248,7 +2258,6 @@ void videoMove_PutBox2toBox1()
         break;
     }
 }
-
 
 /*************************************************************************
 *  函数名称：videoMove_PutAddBox
@@ -2445,7 +2454,6 @@ void videoMove_PutAddBox()
         break;
     }
 }
-
 
 /* 整体工程
 * FIXME:
