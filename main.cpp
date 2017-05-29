@@ -576,7 +576,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         // cout << "Grasp_Ref: " << txKylinMsg.cbus.gp.c << "Grasp_Fdb: " << kylinMsg.cbus.gp.c << " SwitchFlag: " << kylinMsg.cbus.fs << " kylinMsg.cbus.fs & (1u << 2)): " << (kylinMsg.cbus.fs & (1u << 2)) << endl;
         // cout << "cl: " << GraspOp << " ch: " << GraspCl << endl;
 
-        // detection_mode = 1; //for testing
+         detection_mode = 2; //for testing
         switch (detection_mode)
 
         {
@@ -645,7 +645,22 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             break;
         case 2: //detect green area
             //cout << "detection_mode=" << (int)detection_mode << endl;
-
+             fflage = Color_detect(src, dif_x, dif_y);
+            if (fflage == 0)
+                CountVframe++;
+            tx = 2 * (dif_x - DIF_CEN);
+            // txKylinMsg.cbus.cp.x = 10 * dif_x;
+            cout << "tx=" << tx << endl;
+            if (abs(tx) < 30 && (CountVframe > 100 || fflage)) //number of pixels
+            {
+                CountVframe = 0;
+                finishDetectCentroidFlag = true;
+                if (coutLogicFlag == INT_MAX && finish_LR_UltrasonicFlag_PutBox2toBox1 == true)
+                {
+                    finishDetectCentroidFlag_PutBox2toBox1 = true;
+                }
+            }
+            /*
             fflage = CMT_temdetect(src, dif_x, dif_y);
             if (fflage == 0)
                 CountVframe++;
@@ -662,7 +677,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
                 {
                     finishDetectCentroidFlag_PutBox2toBox1 = true;
                 }
-            }
+            }*/
             else
             {
                 finishDetectCentroidFlag = false;
@@ -1124,7 +1139,7 @@ int main(int argc, char **argv)
     if (connect_serial(device, 115200) == -1)
     {
         printf("serial open error!\n");
-        return -1;
+        //return -1;
     }
 
     //set CMT
