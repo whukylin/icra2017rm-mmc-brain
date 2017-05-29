@@ -1229,7 +1229,7 @@ int main(int argc, char **argv)
         //         finish_HeapBox = false;
         //     }
         // }
-        // boxNum = 2;
+        boxNum = 2;
         switch (workState)
         {
         case 0:
@@ -1839,7 +1839,7 @@ void videoMove_PutBox()
         //到达目的地(基地区位置)
         //基地区坐标为(AXISX, AXISY)
 
-        txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+        txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX, kylinOdomCalib.cbus.cp.z, 0);
         txKylinMsg_ec_Fun(0, 0, 0, 0);
         //关闭直接移动
         if (absoluteDistance < 100)
