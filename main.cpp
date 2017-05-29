@@ -654,7 +654,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout << "tx=" << tx << endl;
 
-            if (abs(tx) < 40 && (CountVframe > 50 || fflage)) //number of pixels
+            if (abs(tx) < 40 && (CountVframe > 100 || fflage)) //number of pixels
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
@@ -2188,7 +2188,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
         txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-        if (kylinMsg.cbus.gp.e <= GraspBw - 480)
+        if (kylinMsg.cbus.gp.e <= GraspBw - 470)
         {
             videoMove_PutBox2toBox1State = 8;
         }
