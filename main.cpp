@@ -632,7 +632,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             {
                 finishDetectBoxFlag = false;
             }
-            if (coutLogicFlag == 9 && ((sr04maf[SR04_IDX_M].avg < 410 && sr04maf[SR04_IDX_F].avg < 500) || (abs(tz) < 500 && (lostFlag == false) && CountVframe > 10)))
+            if (coutLogicFlag == 9 && ((sr04maf[SR04_IDX_M].avg < 460 && sr04maf[SR04_IDX_F].avg < 550) || (abs(tz) < 550 && (lostFlag == false) && CountVframe > 10)))
             {
                 finishDetectBoxFlag_PutBox = true;
                 CountVframe = 0;
@@ -1279,11 +1279,11 @@ int main(int argc, char **argv)
                 //视觉引导小车前进, 直到小车与盒子之间的距离小于 TODO: 多少厘米 宏定义
                 if (addboxNum > 0)
                 {
-                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (8 - 2 * addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (12 - 3 * addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
                 }
                 else
                 {
-                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (8 - 2 * boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (12 - 3 * boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
                 }
 
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
@@ -2186,7 +2186,7 @@ void videoMove_PutBox2toBox1()
             txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
         }
         
-        if (kylinMsg.cbus.gp.e <= GraspBw - 480 || (((heapCount == 2 || heapCount == 1) && kylinMsg.cbus.gp.e <= GraspBw - 465)))
+        if (kylinMsg.cbus.gp.e <= GraspBw - 480 || (((heapCount == 2 || heapCount == 1) && kylinMsg.cbus.gp.e <= GraspBw - 455)))
         {
             videoMove_PutBox2toBox1State = 8;
         }
@@ -2475,7 +2475,7 @@ void videoMove_PutAddBox()
     }
 }
 
-/* 整体工程
+/* 整体工程finishDetectBoxFlag_PutBox
 * FIXME:
 * 3. fixed 超声波无法打到盒子时, 程序流程
 * 4. 抓盒子之后的抬高高度(宏定义)(一个盒子高度)
