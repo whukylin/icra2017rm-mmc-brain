@@ -1617,7 +1617,7 @@ int main(int argc, char **argv)
                         }
                         else if (addboxNum == 2 || addboxNum == 4)
                         {
-                            txKylinMsg_ec_Fun((GraspBw - 10 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                            txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                         }
                         else
                         {
@@ -1912,7 +1912,16 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - 30 - 200)
             {
-                videoMovePutBoxState = 4;
+                //videoMovePutBoxState = 4;
+                if (unFirstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 5;
+                    UnFirstBox_PutBoxState = 0;
+                }
+                if (firstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 6;
+                }
             }
         }
         else
@@ -1920,7 +1929,16 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - PUT_FIRST_BOX_HEIGHT - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
             {
-                videoMovePutBoxState = 4;
+                //videoMovePutBoxState = 4;
+                if (unFirstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 5;
+                    UnFirstBox_PutBoxState = 0;
+                }
+                if (firstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 6;
+                }
             }
         }
         break;
@@ -2361,8 +2379,8 @@ void videoMove_PutAddBox()
         // }
         // else
         {
-            txKylinMsg_ec_Fun(GraspBw - PUT_FIRST_BOX_HEIGHT - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
-            if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
+            txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, 2 * GRASP_DOWN_SPEED, GraspCl, 0);
+            if (kylinMsg.cbus.gp.e >= GraspBw - 40)
             {
                 videoMovePutAddBoxState = 6;
             }

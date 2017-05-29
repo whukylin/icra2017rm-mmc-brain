@@ -584,7 +584,7 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     //vector<Point> cand_1,cand_2,cand_3;
    // vector<vector<Point>> rect_2;
   //  vector<vector<Point>> rect_3;
-    vector<vector<Point>> out;
+    vector<vector<Point> > out;
     Mat gray;
 	//cout<<"find squares src.chan="<<src.channels()<<endl;
 	cvtColor( frame, gray, CV_BGR2GRAY);
