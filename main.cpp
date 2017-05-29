@@ -1225,7 +1225,7 @@ int main(int argc, char **argv)
         //         finish_HeapBox = false;
         //     }
         // }
-        //boxNum = 2;
+        boxNum = 2;
         switch (workState)
         {
         case 0:
