@@ -1,6 +1,6 @@
 //Image processing
 #include "opencv2/opencv.hpp"
-#define DIF_CEN 190
+#define DIF_CEN 131
 #define PROP 1.2
 #define DIF_AN - 4.3
 #define CX   343   //To change to calibration parameter.
