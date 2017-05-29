@@ -653,7 +653,8 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             tx = 3 * (dif_x - DIF_CEN);
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout << "tx=" << tx << endl;
-            if (abs(tx) < 60 && (CountVframe > 50 || fflage)) //number of pixels
+
+            if (abs(tx) < 40 && (CountVframe > 50 || fflage)) //number of pixels
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
@@ -830,9 +831,11 @@ uint8_t updateOdomCalib()
     uint32_t frame_id = kylinMsg.frame_id;
     while (frame_cnt < 50)
     {
-        cout << kylinMsg.frame_id << endl;
+//cout << 
+//cout << kylinMsg.frame_id<< endl;
         if (kylinMsg.frame_id != frame_id)
         {
+	cout << kylinMsg.frame_id<< endl;
             frame_id = kylinMsg.frame_id;
             frame_cnt++;
         }
@@ -840,8 +843,8 @@ uint8_t updateOdomCalib()
     }
     memcpy(&kylinOdomCalib, &kylinMsg, sizeof(KylinMsg_t));
     //cout << "kylinOdomCalib updated!" << endl;
-    enableSonars();
-    waitForSonarStateSynced();
+    //enableSonars();
+    //waitForSonarStateSynced();
     return 1;
 }
 
@@ -1152,8 +1155,7 @@ int main(int argc, char **argv)
 
     kylibotMsgPullerTread.create(KylinBotMsgPullerThreadFunc, NULL);
     kylibotMsgPusherTread.create(KylinBotMsgPusherThreadFunc, NULL);
-    //kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
-
+    kylibotMarkDetectionTread.create(KylinBotMarkDetecThreadFunc, NULL);
     updateOdomCalib();
     logicInit(); //逻辑控制初始化
 
@@ -1168,9 +1170,10 @@ int main(int argc, char **argv)
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
 
     //addboxNum = 1;
-
+	cout << "ok!"<<endl;
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
+	//cout << "ok1!"<<endl;
         updateOdomError();
         //如果当前处于绝对位置控制模式,进入判断条件
         //if (txKylinMsg.cbus.fs & (1u << CONTROL_MODE_BIT)) //0xFF == 1111 1111   0x80000000
