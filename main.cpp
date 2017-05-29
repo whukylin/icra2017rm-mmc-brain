@@ -75,7 +75,7 @@
 
 // 放下盒子之后, 先后推, 后退的距离, 速度以及抓子抬高的高度
 #define DIRECT_BACK_MOVE_DISTANCE 400
-#define DIRECT_BACK_MOVE_SPEED 500
+#define DIRECT_BACK_MOVE_SPEED 800
 #define DIRECT_BACK_MOVE_GRASP_UP_POSITION 100
 
 //
@@ -121,9 +121,9 @@
 
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
-#define X_SPEED_1 800
+#define X_SPEED_1 1000
 #define Y_SPEED_1 1200
-#define Z_SPEED_1 2000
+#define Z_SPEED_1 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
 // fixed 超声波引导小车前进的速度
@@ -142,21 +142,21 @@
 // 阶段 2 : 小车抓取到盒子之后, 回原点的速度
 #define X_SPEED_2 600
 #define Y_SPEED_2 1200
-#define Z_SPEED_2 2000
+#define Z_SPEED_2 2200
 
 // 阶段 3 : 小车拿着盒子, 到达基地区
 #define X_SPEED_3 800
-#define Y_SPEED_3 1200
+#define Y_SPEED_3 1400
 // First box is special, speed larger
 #define Y_SPEED_3_FIRSTBOX 1000
-#define Z_SPEED_3 2000
+#define Z_SPEED_3 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_3_VISION 400
 
 // 阶段 4 : 小车放下盒子, 回原点的速度
 #define X_SPEED_4 600
 #define Y_SPEED_4 1600
-#define Z_SPEED_4 2000
+#define Z_SPEED_4 2200
 
 #define ADDSPEED 200
 
