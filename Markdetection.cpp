@@ -494,6 +494,7 @@ void Sort_rect(vector<Point>& approx)
 /*********************Output: the center(x,y) ofthe blue area*********/
 int Color_detect(Mat frame, int &diff_x, int &diff_y)
 {
+/*
     vector<Mat> HSVSplit;
     //Returns a rectangular structuring element of the specified size and shape for morphological operations.
     Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
@@ -504,14 +505,19 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     Mat SGreen;
     Rect r;
     Rect max_tmp;
-    resize(frame,frame,Size(640,480));
+    //resize(frame,frame,Size(640,480));
     //imshow("src",frame);
     cvtColor(frame, HSVImage, CV_BGR2HSV);
     split(HSVImage,HSVSplit);
     //Hgreen=HSVSplit[0]>lower&&HSVSplit[0]<up , mask, threshold can be fine tuned.
-    inRange(HSVSplit[0], Scalar(80), Scalar(120), HGreen);
-	//inRange(HSVSplit[1], Scalar(80), Scalar(255), SGreen);
-    threshold(HSVSplit[1], SGreen, 80, 255, THRESH_BINARY);    //S channal intensity
+
+
+     //normalize(HSVSplit[0],HSVSplit[0],0,255, NORM_MINMAX,CV_8UC1);
+    normalize(HSVSplit[1],HSVSplit[1],0,255, NORM_MINMAX,CV_8UC1);
+
+    inRange(HSVSplit[0], HSV0_L,HSV0_U,HGreen);//Scalar(90), Scalar(120), HGreen);
+	inRange(HSVSplit[1], HSV1_L,HSV1_U,SGreen);// Scalar(255), SGreen);
+    //threshold(HSVSplit[1], SGreen, 110, 210, THRESH_BINARY);    //S channal intensity
     //bitwise conjunction
     cv::bitwise_and(HGreen, SGreen, out);
     morphologyEx(out, out, MORPH_OPEN, element);//open operator,remove isolated noise points.
@@ -548,9 +554,9 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     pro_after=pro.clone();
     rectangle(result, max_tmp, Scalar(255), 2);
     
-//#ifdef _SHOW_PHOTO
+#ifdef _SHOW_PHOTO
     imshow("result",result);
-//#endif
+#endif
    // if('q'==(char)waitKey(7)) exit(0);
     
     //caculate the center of green area
@@ -561,12 +567,87 @@ int Color_detect(Mat frame, int &diff_x, int &diff_y)
     center.x=mt.m10/mt.m00+max_tmp.tl().x;
     center.y=mt.m01/mt.m00+max_tmp.tl().y;
     cout<<"width="<<mt.m10/mt.m00<<"  height="<<mt.m01/mt.m00<<endl;
-    diff_x=center.x*800/640-CX;
-    diff_y=center.y*600/480-CY;
+    diff_x=center.x-cx;//;center.x*800/640-cx;
+    diff_y=center.y-cy;//*600/480-cy;
     cout<<"diff x: "<<diff_x<<endl;
     cout<<"diff y: "<<diff_y<<endl;
     return 1;
-}
+*/
 
+   // Mat pyr, timg, gray0(image.size(), CV_8U),Src_HSV(image.size(), CV_8U), gray;
+
+   // pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
+   // pyrUp(pyr, timg, image.size());
+    vector<vector<Point> > contours;
+
+   // int counts=0,counts_2=0,counts_3=0;
+    //vector<Point> cand_1,cand_2,cand_3;
+   // vector<vector<Point>> rect_2;
+  //  vector<vector<Point>> rect_3;
+    vector<vector<Point>> out;
+    Mat gray;
+	//cout<<"find squares src.chan="<<src.channels()<<endl;
+	cvtColor( frame, gray, CV_BGR2GRAY);
+    threshold(gray, gray, 110, 210, THRESH_BINARY); 
+    Canny(gray, gray, 100, 150, 5);
+	    
+#ifdef _SHOW_PHOTO
+	    imshow("Canny", gray);
+#endif
+
+	    //dilate(gray, gray, Mat(), Point(-1,-1));
+            findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+            
+	    vector<Point> approx;
+            
+     if( contours.size() == 0 )
+    {
+        diff_x=DIF_CEN;
+   	    diff_y=0;
+        cout<<"no contour..."<<endl;
+        return 0;
+    }
+	    for( size_t i = 0; i < contours.size(); i++ )
+            {
+                //if ( contours[i].size() > 100)
+                //{
+                  //  continue;
+                //}
+                //cout<<"rectangle detected 1111"<<endl;
+                
+		     approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.009, true);
+		
+		//cout<<approx.size()<<" "<< fabs(contourArea(Mat(approx))) << " " <<  isContourConvex(Mat(approx)) <<endl;
+                
+		    if( approx.size() == 7 && contourArea(Mat(approx)) > 3000  &&contourArea(Mat(approx))< 20000  )
+               {
+                   drawContours(frame,contours,i,Scalar(0,0,255),2);
+                   Rect r = boundingRect(Mat(approx));
+                  Mat pro;
+                 gray(r).copyTo(pro);
+                 Moments mt;
+             mt=moments(pro,true);
+              Point center;
+	
+              center.x=mt.m10/mt.m00+r.tl().x;
+              center.y=mt.m01/mt.m00+r.tl().y;
+              cout<<"width="<<mt.m10/mt.m00<<"  height="<<mt.m01/mt.m00<<endl;
+              diff_x=center.x-CX;//;center.x*800/640-cx;
+                diff_y=center.y-CY;//*600/480-cy;
+                    cout<<"diff x: "<<diff_x<<endl;
+                cout<<"diff y: "<<diff_y<<endl;
+                
+                  
+                  imshow("result",frame);
+                  return 1;
+                  
+               }
+             else{ diff_x=DIF_CEN;}
+   
+            }
+
+
+    
+}
 
 
