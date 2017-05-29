@@ -1334,7 +1334,7 @@ int main(int argc, char **argv)
 
                 //TODO: 开启这部分之后, 需要修改滑台上升位置
                 txKylinMsg_ec_Fun(GraspBw - DETECT_SQUARE_GRASP_POSITION - kylinMsg.cbus.gp.e, 0, 0, 0);
-                if (kylinMsg.cbus.gp.e <= GraspBw - DETECT_SQUARE_GRASP_POSITION)
+                //if (kylinMsg.cbus.gp.e <= GraspBw - DETECT_SQUARE_GRASP_POSITION)
                 {
                     grabBoxState = 3;
                 }
