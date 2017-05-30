@@ -122,7 +122,7 @@
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
 #define X_SPEED_1 800
-#define Y_SPEED_1 1200
+#define Y_SPEED_1 800
 #define Z_SPEED_1 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
@@ -130,7 +130,7 @@
 #define FIXED_ULTRASONIC_MOVE_SPEED 300
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
 #define LRDISTANCE 100 //100
-#define LRSPEED 130    //200
+#define LRSPEED 120    //200
 
 //fixed 超声波打不到的时候, 小车向左移动的速度和距离
 #define FIXED_DISTANCE 200
@@ -571,6 +571,8 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "3. State: " << workStageCout << workStateCout << endl;
         cout << "abs(tz): " << abs(tz) << " lostFlag: " << lostFlag << endl;
         cout << "deltaAngle: " << deltaAngle << " zgyroMsg.angle: " << zgyroMsg.angle << " lastZGyroMsg.angle: " << lastZGyroMsg.angle << endl;
+	cout << "txKylinMsg.cbus.cp.x: "<< txKylinMsg.cbus.cp.x << " txKylinMsg.cbus.cp.y: "<<txKylinMsg.cbus.cp.y << " txKylinMsg.cbus.cp.z: "<<txKylinMsg.cbus.cp.x<<endl;
+	cout << "KylinMsg.cbus.cp.x: "<<kylinMsg.cbus.cp.x<<" kylinMsg.cbus.cp.y: "<<kylinMsg.cbus.cp.y<<" kylinMsg.cbus.cp.z: "<<kylinMsg.cbus.cp.z<<endl;
         cout << "------------------------------------------------------------------------------" << endl;
         // cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         // cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
@@ -1517,6 +1519,7 @@ int main(int argc, char **argv)
             if (absoluteDistance < 10)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
+//txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, 0, kylinOdomCalib.cbus.cp.y, 0, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
                 zgyroFusedYawPositionCtrl(ZROTATION90DEG);
                 firstInBack = true;
             }
@@ -1911,16 +1914,16 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - 30 - 200)
             {
-                //videoMovePutBoxState = 4;
-                if (unFirstBoxJudgeFun())
-                {
-                    videoMovePutBoxState = 5;
-                    UnFirstBox_PutBoxState = 0;
-                }
-                if (firstBoxJudgeFun())
-                {
-                    videoMovePutBoxState = 6;
-                }
+                videoMovePutBoxState = 4;
+                //if (unFirstBoxJudgeFun())
+                //{
+                //    videoMovePutBoxState = 5;
+                //    UnFirstBox_PutBoxState = 0;
+                //}
+                //if (firstBoxJudgeFun())
+                //{
+                 //   videoMovePutBoxState = 6;
+                //}
             }
         }
         else
@@ -1928,16 +1931,16 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - PUT_FIRST_BOX_HEIGHT - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
             {
-                //videoMovePutBoxState = 4;
-                if (unFirstBoxJudgeFun())
-                {
-                    videoMovePutBoxState = 5;
-                    UnFirstBox_PutBoxState = 0;
-                }
-                if (firstBoxJudgeFun())
-                {
-                    videoMovePutBoxState = 6;
-                }
+                videoMovePutBoxState = 4;
+                //if (unFirstBoxJudgeFun())
+                //{
+                //    videoMovePutBoxState = 5;
+                //    UnFirstBox_PutBoxState = 0;
+                //}
+                //if (firstBoxJudgeFun())
+                //{
+                //    videoMovePutBoxState = 6;
+                //}
             }
         }
         break;

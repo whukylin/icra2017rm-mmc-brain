@@ -50,7 +50,7 @@
 #define AXISY 2500
 
 //基地区新加盒子的坐标 addaxisX addaxisY
-#define PY_MAN_CALIB_VAL 550
+#define PY_MAN_CALIB_VAL 400
 #define TWO_BOX_DIFF 400
 #define ADDAXISX 0
 #define ADDAXISY (AXISY - PY_MAN_CALIB_VAL)
@@ -122,7 +122,7 @@
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
 #define X_SPEED_1 800
-#define Y_SPEED_1 1200
+#define Y_SPEED_1 800
 #define Z_SPEED_1 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
@@ -130,7 +130,7 @@
 #define FIXED_ULTRASONIC_MOVE_SPEED 300
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
 #define LRDISTANCE 100 //100
-#define LRSPEED 200    //200
+#define LRSPEED 120    //200
 
 //fixed 超声波打不到的时候, 小车向左移动的速度和距离
 #define FIXED_DISTANCE 200
@@ -571,6 +571,8 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "3. State: " << workStageCout << workStateCout << endl;
         cout << "abs(tz): " << abs(tz) << " lostFlag: " << lostFlag << endl;
         cout << "deltaAngle: " << deltaAngle << " zgyroMsg.angle: " << zgyroMsg.angle << " lastZGyroMsg.angle: " << lastZGyroMsg.angle << endl;
+	cout << "txKylinMsg.cbus.cp.x: "<< txKylinMsg.cbus.cp.x << " txKylinMsg.cbus.cp.y: "<<txKylinMsg.cbus.cp.y << " txKylinMsg.cbus.cp.z: "<<txKylinMsg.cbus.cp.x<<endl;
+	cout << "KylinMsg.cbus.cp.x: "<<kylinMsg.cbus.cp.x<<" kylinMsg.cbus.cp.y: "<<kylinMsg.cbus.cp.y<<" kylinMsg.cbus.cp.z: "<<kylinMsg.cbus.cp.z<<endl;
         cout << "------------------------------------------------------------------------------" << endl;
         // cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         // cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
@@ -653,7 +655,8 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             tx = 3 * (dif_x - DIF_CEN);
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout << "tx=" << tx << endl;
-            if (abs(tx) < 60 && (CountVframe > 50 || fflage)) //number of pixels
+
+            if (abs(tx) < 40 && (CountVframe > 100 || fflage)) //number of pixels
             {
                 CountVframe = 0;
                 finishDetectCentroidFlag = true;
@@ -1169,7 +1172,6 @@ int main(int argc, char **argv)
     int workState0_Num = 0, workState1_Num = 0, workState2_Num = 0, workState3_Num = 0, workState4_Num = 0;
 
     //addboxNum = 1;
-	cout << "ok!"<<endl;
     while ((!exit_flag)) //&&(capture.read(frame)))
     {
 	//cout << "ok1!"<<endl;
@@ -1229,7 +1231,7 @@ int main(int argc, char **argv)
         //         finish_HeapBox = false;
         //     }
         // }
-        //boxNum = 2;
+        // boxNum = 2;
         switch (workState)
         {
         case 0:
@@ -1517,6 +1519,7 @@ int main(int argc, char **argv)
             if (absoluteDistance < 10)
             {
                 txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, X_SPEED_2 * ramp, kylinOdomCalib.cbus.cp.y, Y_SPEED_2 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
+//txKylinMsg_xyz_Fun(kylinOdomCalib.cbus.cp.x, 0, kylinOdomCalib.cbus.cp.y, 0, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_2 * ramp);
                 zgyroFusedYawPositionCtrl(ZROTATION90DEG);
                 firstInBack = true;
             }
@@ -1616,7 +1619,7 @@ int main(int argc, char **argv)
                         }
                         else if (addboxNum == 2 || addboxNum == 4)
                         {
-                            txKylinMsg_ec_Fun((GraspBw - 10 - 400), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
+                            txKylinMsg_ec_Fun((GraspBw - 3), GRASP_DOWN_SPEED_HAVE_MANY_BOX, 0, 0);
                         }
                         else
                         {
@@ -1750,7 +1753,7 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        txKylinMsg_ec_Fun(0, 0, GraspOp, GRASP_OPEN_SPEED);
+                        txKylinMsg_ec_Fun(GraspBw - DIRECT_BACK_MOVE_GRASP_UP_POSITION - kylinMsg.cbus.gp.e, GRASP_UP_SPEED, GraspOp, GRASP_OPEN_SPEED);
                     }
                 }
 
@@ -1839,7 +1842,7 @@ void videoMove_PutBox()
         //到达目的地(基地区位置)
         //基地区坐标为(AXISX, AXISY)
 
-        txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+        txKylinMsg_xyz_Fun(AXISX_DIRECT + kylinOdomCalib.cbus.cp.x, X_SPEED_3, AXISY_DIRECT + kylinOdomCalib.cbus.cp.y, Y_SPEED_3_FIRSTBOX, kylinOdomCalib.cbus.cp.z, 0);
         txKylinMsg_ec_Fun(0, 0, 0, 0);
         //关闭直接移动
         if (absoluteDistance < 100)
@@ -1911,7 +1914,16 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - 30 - 200 - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - 30 - 200)
             {
-                videoMovePutBoxState = 4;
+                //videoMovePutBoxState = 4;
+                if (unFirstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 5;
+                    UnFirstBox_PutBoxState = 0;
+                }
+                if (firstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 6;
+                }
             }
         }
         else
@@ -1919,7 +1931,16 @@ void videoMove_PutBox()
             txKylinMsg_ec_Fun(GraspBw - PUT_FIRST_BOX_HEIGHT - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
             if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
             {
-                videoMovePutBoxState = 4;
+                //videoMovePutBoxState = 4;
+                if (unFirstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 5;
+                    UnFirstBox_PutBoxState = 0;
+                }
+                if (firstBoxJudgeFun())
+                {
+                    videoMovePutBoxState = 6;
+                }
             }
         }
         break;
@@ -2151,7 +2172,14 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_ec_Fun(0, 0, GraspCl, GRASP_CLOSE_SPEED);
         if (kylinMsg.cbus.gp.c == GraspCl)
         {
-            videoMove_PutBox2toBox1State = 6;
+            if(heapCount != 1)
+            {
+                videoMove_PutBox2toBox1State = 6;
+            }
+            else
+            {
+                videoMove_PutBox2toBox1State = 7;
+            }
         }
         break;
     //左右超声波对准
@@ -2180,7 +2208,7 @@ void videoMove_PutBox2toBox1()
         txKylinMsg_xyz_Fun(0, 0, 0, 0, 0, 0);
         //txKylinMsg_ec_Fun(GraspBw - 15 - 410 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_BOX, GraspCl, 0);
         txKylinMsg_ec_Fun(GraspBw - 400 - 80 - kylinMsg.cbus.gp.e, GRASP_UP_SPEED_HAVE_MANY_BOX, GraspCl, 0);
-        if (kylinMsg.cbus.gp.e <= GraspBw - 480)
+        if (kylinMsg.cbus.gp.e <= GraspBw - 470)
         {
             videoMove_PutBox2toBox1State = 8;
         }
@@ -2353,8 +2381,8 @@ void videoMove_PutAddBox()
         // }
         // else
         {
-            txKylinMsg_ec_Fun(GraspBw - PUT_FIRST_BOX_HEIGHT - kylinMsg.cbus.gp.e, GRASP_DOWN_SPEED, GraspCl, 0);
-            if (kylinMsg.cbus.gp.e >= GraspBw - PUT_FIRST_BOX_HEIGHT)
+            txKylinMsg_ec_Fun(GraspBw - 30 - kylinMsg.cbus.gp.e, 2 * GRASP_DOWN_SPEED, GraspCl, 0);
+            if (kylinMsg.cbus.gp.e >= GraspBw - 40)
             {
                 videoMovePutAddBoxState = 6;
             }
