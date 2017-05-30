@@ -121,8 +121,8 @@
 
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
-#define X_SPEED_1 800
-#define Y_SPEED_1 1200
+#define X_SPEED_1 400//800
+#define Y_SPEED_1 800//1200
 #define Z_SPEED_1 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
@@ -130,7 +130,7 @@
 #define FIXED_ULTRASONIC_MOVE_SPEED 300
 // left right 超声波对准盒子时, 相对位置控制左右移动的距离量以及左右移动的速度
 #define LRDISTANCE 100 //100
-#define LRSPEED 130    //200
+#define LRSPEED 100//130    //200
 
 //fixed 超声波打不到的时候, 小车向左移动的速度和距离
 #define FIXED_DISTANCE 200
@@ -1322,7 +1322,7 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 if (sr04maf[SR04_IDX_F].avg < SQUARE_TO_FIXED_ULTRASONIC_DISTANCE)
                 {
-                    grabBoxState = 2;
+                    grabBoxState = 4;
                 }
                 break;
             
