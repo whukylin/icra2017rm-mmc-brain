@@ -654,7 +654,7 @@ void *KylinBotMarkDetecThreadFunc(void *param)
             fflage = Color_detect(src, dif_x, dif_y);
             if (fflage == 0)
                 CountVframe++;
-            tx = 3 * (dif_x - DIF_CEN);
+            tx = 2 * (dif_x - DIF_CEN);
             // txKylinMsg.cbus.cp.x = 10 * dif_x;
             cout << "tx=" << tx << endl;
 
