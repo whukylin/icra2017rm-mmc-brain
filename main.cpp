@@ -121,8 +121,10 @@
 
 // 小车运动速度宏定义(分阶段)
 // 阶段 1 : 从原点出发, 抓盒子, 直到切换到 fixed 超声波
+
 #define X_SPEED_1 800
 #define Y_SPEED_1 800
+
 #define Z_SPEED_1 2200
 // 矩形检测引导小车旋转的速度
 #define Z_SPEED_1_VISION 400
@@ -1324,7 +1326,7 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 if (sr04maf[SR04_IDX_F].avg < SQUARE_TO_FIXED_ULTRASONIC_DISTANCE)
                 {
-                    grabBoxState = 2;
+                    grabBoxState = 4;
                 }
                 break;
             
@@ -1769,7 +1771,15 @@ int main(int argc, char **argv)
                 // 回原点
                 if (addboxNum > 0)
                 {
-                    txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_4);
+                    if(addboxNum == 4)
+                    {
+                        txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, -200 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_4);
+                    }
+                    else
+                    {
+                        txKylinMsg_xyz_Fun(0 + kylinOdomCalib.cbus.cp.x, X_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.y, Y_SPEED_4 * ramp, 0 + kylinOdomCalib.cbus.cp.z, Z_SPEED_4);
+                    }
+                    
                 }
                 else
                 {
