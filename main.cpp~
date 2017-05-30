@@ -1233,7 +1233,7 @@ int main(int argc, char **argv)
         //         finish_HeapBox = false;
         //     }
         // }
-        // boxNum = 2;
+        boxNum = 2;
         switch (workState)
         {
         case 0:
@@ -1326,7 +1326,7 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 if (sr04maf[SR04_IDX_F].avg < SQUARE_TO_FIXED_ULTRASONIC_DISTANCE)
                 {
-                    grabBoxState = 4;
+                    grabBoxState = 2;
                 }
                 break;
             
