@@ -573,8 +573,14 @@ void *KylinBotMarkDetecThreadFunc(void *param)
         cout << "3. State: " << workStageCout << workStateCout << endl;
         cout << "abs(tz): " << abs(tz) << " lostFlag: " << lostFlag << endl;
         cout << "deltaAngle: " << deltaAngle << " zgyroMsg.angle: " << zgyroMsg.angle << " lastZGyroMsg.angle: " << lastZGyroMsg.angle << endl;
-	cout << "txKylinMsg.cbus.cp.x: "<< txKylinMsg.cbus.cp.x << " txKylinMsg.cbus.cp.y: "<<txKylinMsg.cbus.cp.y << " txKylinMsg.cbus.cp.z: "<<txKylinMsg.cbus.cp.x<<endl;
+	cout << "txKylinMsg.cbus.cp.x: "<< txKylinMsg.cbus.cp.x << " txKylinMsg.cbus.cp.y: "<<txKylinMsg.cbus.cp.y << " txKylinMsg.cbus.cp.z: "<<txKylinMsg.cbus.cp.z<<endl;
 	cout << "KylinMsg.cbus.cp.x: "<<kylinMsg.cbus.cp.x<<" kylinMsg.cbus.cp.y: "<<kylinMsg.cbus.cp.y<<" kylinMsg.cbus.cp.z: "<<kylinMsg.cbus.cp.z<<endl;
+	cout << "txKylinMsg.cbus.gp.e: "<< txKylinMsg.cbus.gp.e << " txKylinMsg.cbus.gp.c: "<<txKylinMsg.cbus.gp.c <<endl;
+cout << "kylinMsg.cbus.gp.e: "<< kylinMsg.cbus.gp.e << " kylinMsg.cbus.gp.c: "<<kylinMsg.cbus.gp.c <<endl;
+	cout << "txKylinMsg.cbus.gv.e: "<< txKylinMsg.cbus.gv.e << " txKylinMsg.cbus.gv.c: "<<txKylinMsg.cbus.gv.c <<endl;
+cout << "kylinMsg.cbus.gv.e: "<< kylinMsg.cbus.gv.e << " kylinMsg.cbus.gv.c: "<<kylinMsg.cbus.gv.c <<endl;
+	
+	
         cout << "------------------------------------------------------------------------------" << endl;
         // cout << "absoluteDistanceCout: " << absoluteDistanceCout << endl;
         // cout << "fflage: " << fflage << " tx:" << tx << " Vframe:" << CountVframe << endl;
@@ -1233,7 +1239,7 @@ int main(int argc, char **argv)
         //         finish_HeapBox = false;
         //     }
         // }
-        boxNum = 2;
+        //boxNum = 2;
         switch (workState)
         {
         case 0:
@@ -1287,11 +1293,11 @@ int main(int argc, char **argv)
                 //视觉引导小车前进, 直到小车与盒子之间的距离小于 TODO: 多少厘米 宏定义
                 if (addboxNum > 0)
                 {
-                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (8 - 2 * addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (4 - 1 * addboxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
                 }
                 else
                 {
-                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (8 - 2 * boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
+                    txKylinMsg_xyz_Fun(tx - (DIFFCONST + (4 - 1 * boxNum)), X_SPEED_1 * ramp, tz, Y_SPEED_1 * ramp, ry * 3141.592654f / 180.0, Z_SPEED_1_VISION); //
                 }
 
                 //抓子张开, 滑台上升到某个高度, 使摄像头能看到盒子
@@ -1326,7 +1332,7 @@ int main(int argc, char **argv)
                 txKylinMsg_ec_Fun(0, 0, 0, 0);
                 if (sr04maf[SR04_IDX_F].avg < SQUARE_TO_FIXED_ULTRASONIC_DISTANCE)
                 {
-                    grabBoxState = 2;
+                    grabBoxState = 4;
                 }
                 break;
             
@@ -1582,7 +1588,7 @@ int main(int argc, char **argv)
                         workStateCout = "boxNum > 4, 前往基地区固定位置, 只抓盒子";
                         //到达目的地(基地区位置)
                         //基地区坐标为(AXISX, AXISY)
-                        txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY + kylinOdomCalib.cbus.cp.y, (Y_SPEED_3_FIRSTBOX + ADDSPEED) * ramp, kylinOdomCalib.cbus.cp.z, Z_SPEED_3 * ramp);
+                        txKylinMsg_xyz_Fun(ADDAXISX + kylinOdomCalib.cbus.cp.x, X_SPEED_3 * ramp, ADDAXISY + kylinOdomCalib.cbus.cp.y, (Y_SPEED_3_FIRSTBOX + ADDSPEED) * ramp, kylinOdomCalib.cbus.cp.z, 0);//Z_SPEED_3 * ramp);
                         txKylinMsg_ec_Fun(0, 0, 0, 0);
                         if (absoluteDistance < 100)
                         {
