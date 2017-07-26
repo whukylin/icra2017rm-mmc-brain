@@ -1121,7 +1121,6 @@ int main(int argc, char **argv)
         cout << "Setup camera failure. Won't do anything." << endl;
         return -1;
     }
-
     init();
     rstRmp();
     //uint32_t cnt = 0;
